@@ -19,6 +19,7 @@
  */
 
 #include <algorithm>
+#include <boost/filesystem.hpp>
 #include <chrono>
 #include <fstream>
 #include <iomanip>
@@ -28,7 +29,8 @@
 
 #include <System.h>
 
-using namespace std;
+namespace fs = ::boost::filesystem;
+using namespace ::std;
 
 void LoadImages(const string &strPathLeft, const string &strPathRight,
                 const string &strPathTimes, vector<string> &vstrImageLeft,
@@ -61,7 +63,12 @@ int main(int argc, char **argv) {
   }
 
   // Read rectification parameters
-  cv::FileStorage fsSettings(argv[1], cv::FileStorage::READ);
+  
+  // Settings
+  string settingsFile =
+      string(DEFAULT_STEREO_SETTINGS_DIR) + string("/") + string(argv[1]);
+  
+  cv::FileStorage fsSettings(settingsFile, cv::FileStorage::READ);
   if (!fsSettings.isOpened()) {
     cerr << "ERROR: Wrong path to settings" << endl;
     return -1;
@@ -101,10 +108,6 @@ int main(int argc, char **argv) {
 
   const int nImages = vstrImageLeft.size();
 
-  // Settings
-  string settingsFile =
-      string(DEFAULT_SETTINGS_DIRECTORY) + string("/") + string(argv[1]);
-
   // Get the vocabulary, depending upon whether GCN is used or not
   string vocabularyFile;
   if (getenv("USE_ORB") == nullptr) {
@@ -127,6 +130,9 @@ int main(int argc, char **argv) {
   cout << "Images in the sequence: " << nImages << endl << endl;
 
   // Main loop
+    int main_error = 0;
+  std::thread runthread([&]() { // Start in new thread
+
   cv::Mat imLeft, imRight, imLeftRect, imRightRect;
   for (int ni = 0; ni < nImages; ni++) {
     // Read left and right images from file
@@ -136,15 +142,21 @@ int main(int argc, char **argv) {
     if (imLeft.empty()) {
       cerr << endl
            << "Failed to load image at: " << string(vstrImageLeft[ni]) << endl;
-      return 1;
+      main_error = 1;
+      break;
     }
 
     if (imRight.empty()) {
       cerr << endl
            << "Failed to load image at: " << string(vstrImageRight[ni]) << endl;
-      return 1;
+      main_error = 1;
+      break;
     }
 
+    if (SLAM.isFinished() == true) {
+        break;
+      }
+    
     cv::remap(imLeft, imLeftRect, M1l, M2l, cv::INTER_LINEAR);
     cv::remap(imRight, imRightRect, M1r, M2r, cv::INTER_LINEAR);
 
@@ -172,11 +184,22 @@ int main(int argc, char **argv) {
 
     if (ttrack < T)
       this_thread::sleep_for(chrono::duration<double>(T - ttrack));
-    //            usleep((T-ttrack)*1e6);
   }
+      SLAM.StopViewer();
+  });
+
+  // Start the visualization thread; this blocks until the SLAM system
+  // has finished.
+  SLAM.StartViewer();
+
+  runthread.join();
+
+  if (main_error != 0)
+    return main_error;
 
   // Stop all threads
   SLAM.Shutdown();
+  cout << "System Shutdown" << endl;
 
   // Tracking time statistics
   sort(vTimesTrack.begin(), vTimesTrack.end());
@@ -197,6 +220,14 @@ int main(int argc, char **argv) {
 void LoadImages(const string &strPathLeft, const string &strPathRight,
                 const string &strPathTimes, vector<string> &vstrImageLeft,
                 vector<string> &vstrImageRight, vector<double> &vTimeStamps) {
+
+
+  // Check the file exists
+  if (fs::exists(strPathTimes) == false) {
+    cerr << "FATAL: Could not find the timestamp file " << strPathTimes << endl;
+    exit(0);
+  }
+  
   ifstream fTimes;
   fTimes.open(strPathTimes.c_str());
   vTimeStamps.reserve(5000);

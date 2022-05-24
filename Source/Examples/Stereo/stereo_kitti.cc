@@ -19,6 +19,7 @@
  */
 
 #include <algorithm>
+#include <boost/filesystem.hpp>
 #include <chrono>
 #include <fstream>
 #include <iomanip>
@@ -28,7 +29,8 @@
 
 #include <System.h>
 
-using namespace std;
+namespace fs = ::boost::filesystem;
+using namespace ::std;
 
 void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
                 vector<string> &vstrImageRight, vector<double> &vTimestamps);
@@ -50,7 +52,7 @@ int main(int argc, char **argv) {
 
   // Settings
   string settingsFile =
-      string(DEFAULT_SETTINGS_DIRECTORY) + string("/") + string(argv[1]);
+      string(DEFAULT_STEREO_SETTINGS_DIR) + string("/") + string(argv[1]);
 
   // Get the vocabulary, depending upon whether GCN is used or not
   string vocabularyFile;
@@ -74,46 +76,64 @@ int main(int argc, char **argv) {
   cout << "Images in the sequence: " << nImages << endl << endl;
 
   // Main loop
-  cv::Mat imLeft, imRight;
-  for (int ni = 0; ni < nImages; ni++) {
-    // Read left and right images from file
-    imLeft = cv::imread(vstrImageLeft[ni], cv::IMREAD_UNCHANGED);
-    imRight = cv::imread(vstrImageRight[ni], cv::IMREAD_UNCHANGED);
-    double tframe = vTimestamps[ni];
+  int main_error = 0;
+  std::thread runthread([&]() { 
+    cv::Mat imLeft, imRight;
+    for (int ni = 0; ni < nImages; ni++) {
+      // Read left and right images from file
+      imLeft = cv::imread(vstrImageLeft[ni], cv::IMREAD_UNCHANGED);
+      imRight = cv::imread(vstrImageRight[ni], cv::IMREAD_UNCHANGED);
+      double tframe = vTimestamps[ni];
+      
+      if (imLeft.empty()) {
+	cerr << endl
+	     << "Failed to load image at: " << string(vstrImageLeft[ni]) << endl;
+	return 1;
+      }
+      
+      if (SLAM.isFinished() == true) {
+        break;
+      }
 
-    if (imLeft.empty()) {
-      cerr << endl
-           << "Failed to load image at: " << string(vstrImageLeft[ni]) << endl;
-      return 1;
-    }
+      std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
 
-    std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+      // Pass the images to the SLAM system
+      SLAM.TrackStereo(imLeft, imRight, tframe);
 
-    // Pass the images to the SLAM system
-    SLAM.TrackStereo(imLeft, imRight, tframe);
+      std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
 
-    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
-
-    double ttrack =
+      double ttrack =
         std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1)
-            .count();
+	.count();
 
-    vTimesTrack[ni] = ttrack;
+      vTimesTrack[ni] = ttrack;
 
-    // Wait to load the next frame
-    double T = 0;
-    if (ni < nImages - 1)
-      T = vTimestamps[ni + 1] - tframe;
-    else if (ni > 0)
-      T = tframe - vTimestamps[ni - 1];
+      // Wait to load the next frame
+      double T = 0;
+      if (ni < nImages - 1)
+	T = vTimestamps[ni + 1] - tframe;
+      else if (ni > 0)
+	T = tframe - vTimestamps[ni - 1];
+      
+      if (ttrack < T)
+	this_thread::sleep_for(chrono::duration<double>(T - ttrack));
+      //            usleep((T-ttrack)*1e6);
+    }
+    SLAM.StopViewer();
+  });
 
-    if (ttrack < T)
-      this_thread::sleep_for(chrono::duration<double>(T - ttrack));
-    //            usleep((T-ttrack)*1e6);
-  }
+  // Start the visualization thread; this blocks until the SLAM system
+  // has finished.
+  SLAM.StartViewer();
+
+  runthread.join();
+
+  if (main_error != 0)
+    return main_error;
 
   // Stop all threads
   SLAM.Shutdown();
+  cout << "System Shutdown" << endl;
 
   // Tracking time statistics
   sort(vTimesTrack.begin(), vTimesTrack.end());
@@ -135,6 +155,13 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
                 vector<string> &vstrImageRight, vector<double> &vTimestamps) {
   ifstream fTimes;
   string strPathTimeFile = strPathToSequence + "/times.txt";
+
+  // Check the file exists
+  if (fs::exists(strPathTimeFile) == false) {
+    cerr << "FATAL: Could not find the timestamp file " << strPathTimeFile << endl;
+    exit(0);
+  }
+
   fTimes.open(strPathTimeFile.c_str());
   while (!fTimes.eof()) {
     string s;
