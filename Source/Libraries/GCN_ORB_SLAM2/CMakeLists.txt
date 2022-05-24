@@ -52,15 +52,16 @@ src/Viewer.cc
 )
 
 target_link_libraries(${PROJECT_NAME}
-  pangolin
-  ${DBoW2_LIBS}
-  ${DLib_LIBS}
-  ${TORCH_LIBRARIES}
-  g2o::types_sba
-  g2o::types_sim3
-  g2o::core
-  ${OpenCV_LIBS}
-  Eigen3::Eigen
+${OpenCV_LIBS}
+${EIGEN3_EIGEN_LIBS}
+pangolin
+${DBoW2_LIBS}
+${DLib_LIBS}
+${TORCH_LIBRARIES}
+g2o::types_sba
+g2o::types_sim3
+g2o::core
+Boost::filesystem
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
