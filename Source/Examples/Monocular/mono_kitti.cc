@@ -18,12 +18,12 @@
 * along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-#include<iostream>
-#include<algorithm>
-#include<fstream>
-#include<chrono>
-#include<iomanip>
+#include <algorithm>
+#include <boost/filesystem.hpp>
+#include <chrono>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
 
 #include<opencv2/core/core.hpp>
 
@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
     int nImages = vstrImageFilenames.size();
 
     // Settings
-    string settingsFile = string(DEFAULT_SETTINGS_DIRECTORY) + string("/") + string(argv[1]);
+    string settingsFile = string(DEFAULT_MONO_SETTINGS_DIR) + string("/") + string(argv[1]);
 
     // Get the vocabulary, depending upon whether GCN is used or not
     string vocabularyFile;
@@ -87,6 +87,10 @@ int main(int argc, char **argv) {
                 return 1;
             }
 
+	    if (SLAM.isFinished() == true) {
+	      break;
+	    }
+	    
             chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
 
             // Pass the image to the SLAM system
@@ -107,8 +111,8 @@ int main(int argc, char **argv) {
 
             if (ttrack < T)
                 this_thread::sleep_for(chrono::duration<double>(T - ttrack));
-            //            usleep((T-ttrack)*1e6);
         }
+	SLAM.StopViewer();
     });
     SLAM.StartViewer();
 
