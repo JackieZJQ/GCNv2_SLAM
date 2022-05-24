@@ -478,4 +478,18 @@ namespace ORB_SLAM2 {
             mpViewer->Run();
     }
 
+void System::StopViewer() {
+  cout << "System::StopViewer()" << endl;
+  if (mpViewer)
+    mpViewer->RequestFinish();
+  cout << "System::StopViewer() done" << endl;
+}
+
+bool System::isFinished() {
+  if (mpViewer)
+    return mpViewer->isFinished();
+  return false;
+}    
+
+  
 } //namespace ORB_SLAM

@@ -125,7 +125,13 @@ public:
     std::vector<MapPoint*> GetTrackedMapPoints();
     std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
 
-    void StartViewer();
+    // Start the viewer
+  void StartViewer();
+
+  // Stop the viewer
+  void StopViewer();
+
+  bool isFinished();
     
 private:
 
