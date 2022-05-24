@@ -63,11 +63,11 @@ int main(int argc, char **argv) {
   }
 
   // Read rectification parameters
-  
+
   // Settings
   string settingsFile =
       string(DEFAULT_STEREO_SETTINGS_DIR) + string("/") + string(argv[1]);
-  
+
   cv::FileStorage fsSettings(settingsFile, cv::FileStorage::READ);
   if (!fsSettings.isOpened()) {
     cerr << "ERROR: Wrong path to settings" << endl;
@@ -130,62 +130,65 @@ int main(int argc, char **argv) {
   cout << "Images in the sequence: " << nImages << endl << endl;
 
   // Main loop
-    int main_error = 0;
+  int main_error = 0;
   std::thread runthread([&]() { // Start in new thread
+    cv::Mat imLeft, imRight, imLeftRect, imRightRect;
+    for (int ni = 0; ni < nImages; ni++) {
+      // Read left and right images from file
+      imLeft = cv::imread(vstrImageLeft[ni], cv::IMREAD_UNCHANGED);
+      imRight = cv::imread(vstrImageRight[ni], cv::IMREAD_UNCHANGED);
 
-  cv::Mat imLeft, imRight, imLeftRect, imRightRect;
-  for (int ni = 0; ni < nImages; ni++) {
-    // Read left and right images from file
-    imLeft = cv::imread(vstrImageLeft[ni], cv::IMREAD_UNCHANGED);
-    imRight = cv::imread(vstrImageRight[ni], cv::IMREAD_UNCHANGED);
-
-    if (imLeft.empty()) {
-      cerr << endl
-           << "Failed to load image at: " << string(vstrImageLeft[ni]) << endl;
-      main_error = 1;
-      break;
-    }
-
-    if (imRight.empty()) {
-      cerr << endl
-           << "Failed to load image at: " << string(vstrImageRight[ni]) << endl;
-      main_error = 1;
-      break;
-    }
-
-    if (SLAM.isFinished() == true) {
+      if (imLeft.empty()) {
+        cerr << endl
+             << "Failed to load image at: " << string(vstrImageLeft[ni])
+             << endl;
+        main_error = 1;
         break;
       }
-    
-    cv::remap(imLeft, imLeftRect, M1l, M2l, cv::INTER_LINEAR);
-    cv::remap(imRight, imRightRect, M1r, M2r, cv::INTER_LINEAR);
 
-    double tframe = vTimeStamp[ni];
+      if (imRight.empty()) {
+        cerr << endl
+             << "Failed to load image at: " << string(vstrImageRight[ni])
+             << endl;
+        main_error = 1;
+        break;
+      }
 
-    std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+      if (SLAM.isFinished() == true) {
+        break;
+      }
 
-    // Pass the images to the SLAM system
-    SLAM.TrackStereo(imLeftRect, imRightRect, tframe);
+      cv::remap(imLeft, imLeftRect, M1l, M2l, cv::INTER_LINEAR);
+      cv::remap(imRight, imRightRect, M1r, M2r, cv::INTER_LINEAR);
 
-    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+      double tframe = vTimeStamp[ni];
 
-    double ttrack =
-        std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1)
-            .count();
+      std::chrono::steady_clock::time_point t1 =
+          std::chrono::steady_clock::now();
 
-    vTimesTrack[ni] = ttrack;
+      // Pass the images to the SLAM system
+      SLAM.TrackStereo(imLeftRect, imRightRect, tframe);
 
-    // Wait to load the next frame
-    double T = 0;
-    if (ni < nImages - 1)
-      T = vTimeStamp[ni + 1] - tframe;
-    else if (ni > 0)
-      T = tframe - vTimeStamp[ni - 1];
+      std::chrono::steady_clock::time_point t2 =
+          std::chrono::steady_clock::now();
 
-    if (ttrack < T)
-      this_thread::sleep_for(chrono::duration<double>(T - ttrack));
-  }
-      SLAM.StopViewer();
+      double ttrack =
+          std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1)
+              .count();
+
+      vTimesTrack[ni] = ttrack;
+
+      // Wait to load the next frame
+      double T = 0;
+      if (ni < nImages - 1)
+        T = vTimeStamp[ni + 1] - tframe;
+      else if (ni > 0)
+        T = tframe - vTimeStamp[ni - 1];
+
+      if (ttrack < T)
+        this_thread::sleep_for(chrono::duration<double>(T - ttrack));
+    }
+    SLAM.StopViewer();
   });
 
   // Start the visualization thread; this blocks until the SLAM system
@@ -221,13 +224,12 @@ void LoadImages(const string &strPathLeft, const string &strPathRight,
                 const string &strPathTimes, vector<string> &vstrImageLeft,
                 vector<string> &vstrImageRight, vector<double> &vTimeStamps) {
 
-
   // Check the file exists
   if (fs::exists(strPathTimes) == false) {
     cerr << "FATAL: Could not find the timestamp file " << strPathTimes << endl;
     exit(0);
   }
-  
+
   ifstream fTimes;
   fTimes.open(strPathTimes.c_str());
   vTimeStamps.reserve(5000);
