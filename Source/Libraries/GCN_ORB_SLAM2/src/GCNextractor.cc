@@ -188,7 +188,7 @@ GCNextractor::GCNextractor(int _nfeatures, float _scaleFactor, int _nlevels,
 	      }
 	  }
       }
-    string networkName = string(DEFAULT_GCN_SCRIPT_DIR) + string("/") + string(net_fn);
+    string networkName = string(DEFAULT_GCN_NETWORK_DIR) + string("/") + string(net_fn);
     cout << "Loading " << networkName << endl;
     module = torch::jit::load(networkName);
     cout << "Loaded" << endl;
