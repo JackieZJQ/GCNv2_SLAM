@@ -36,7 +36,9 @@ void LoadImages(const string &strFile, vector<string> &vstrImageFilenames,
 
 int main(int argc, char **argv) {
   if (argc != 4) {
-    cerr << endl << "Usage: " << argv[0] << " settings_files path_to_sequence results_file" << endl;
+    cerr << endl
+         << "Usage: " << argv[0]
+         << " settings_files path_to_sequence results_file" << endl;
     return 1;
   }
 
@@ -53,20 +55,18 @@ int main(int argc, char **argv) {
   string settingsFile =
       string(DEFAULT_MONO_SETTINGS_DIR) + string("/") + string(argv[1]);
 
-    // Get the vocabulary, depending upon whether GCN is used or not
-    string vocabularyFile;
-    if (getenv("USE_ORB") == nullptr)
-      {
-	vocabularyFile = DEFAULT_BINARY_GCN_VOCABULARY;
-      }
-    else
-      {
-	vocabularyFile = DEFAULT_BINARY_ORB_VOCABULARY;
-      }
-      
-      
-    // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM2::System SLAM(vocabularyFile,settingsFile,ORB_SLAM2::System::MONOCULAR,true);
+  // Get the vocabulary, depending upon whether GCN is used or not
+  string vocabularyFile;
+  if (getenv("USE_ORB") == nullptr) {
+    vocabularyFile = DEFAULT_BINARY_GCN_VOCABULARY;
+  } else {
+    vocabularyFile = DEFAULT_BINARY_ORB_VOCABULARY;
+  }
+
+  // Create SLAM system. It initializes all system threads and gets ready to
+  // process frames.
+  ORB_SLAM2::System SLAM(vocabularyFile, settingsFile,
+                         ORB_SLAM2::System::MONOCULAR, true);
 
   // Vector for tracking time statistics
   vector<float> vTimesTrack;
@@ -79,7 +79,6 @@ int main(int argc, char **argv) {
   // Main loop
   int main_error = 0;
   std::thread runthread([&]() { // Start in new thread
-
     cv::Mat im;
     for (int ni = 0; ni < nImages; ni++) {
       // Read image from file
@@ -96,7 +95,7 @@ int main(int argc, char **argv) {
       }
 
       if (SLAM.isFinished() == true) {
-	  break;
+        break;
       }
 
       chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
@@ -129,7 +128,7 @@ int main(int argc, char **argv) {
   SLAM.StartViewer();
 
   runthread.join();
-  
+
   if (main_error != 0)
     return main_error;
 
@@ -152,7 +151,7 @@ int main(int argc, char **argv) {
   SLAM.SaveTrajectoryTUM(string(argv[3]));
 
   cout << "All done" << endl;
-  
+
   return 0;
 }
 

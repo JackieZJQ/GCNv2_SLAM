@@ -34,7 +34,10 @@ void LoadImages(const string &strImagePath, const string &strPathTimes,
 int main(int argc, char **argv) {
   if (argc != 4) {
     cerr << endl
-          << "Usage: " << argv[0] << " settings_files path_to_image_folder path_to_times_file results_file" << endl;
+         << "Usage: " << argv[0]
+         << " settings_files path_to_image_folder path_to_times_file "
+            "results_file"
+         << endl;
     return 1;
   }
 
@@ -53,21 +56,19 @@ int main(int argc, char **argv) {
   // Create SLAM system. It initializes all system threads and gets ready to
   // process frames.
   string settingsFile = string(DEFAULT_MONO_SETTINGS_DIR) + string(argv[1]);
-  
-    // Get the vocabulary, depending upon whether GCN is used or not
-    string vocabularyFile;
-    if (getenv("USE_ORB") == nullptr)
-      {
-	vocabularyFile = DEFAULT_BINARY_GCN_VOCABULARY;
-      }
-    else
-      {
-	vocabularyFile = DEFAULT_BINARY_ORB_VOCABULARY;
-      }
-      
-      
-    // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM2::System SLAM(vocabularyFile,settingsFile,ORB_SLAM2::System::MONOCULAR,true);
+
+  // Get the vocabulary, depending upon whether GCN is used or not
+  string vocabularyFile;
+  if (getenv("USE_ORB") == nullptr) {
+    vocabularyFile = DEFAULT_BINARY_GCN_VOCABULARY;
+  } else {
+    vocabularyFile = DEFAULT_BINARY_ORB_VOCABULARY;
+  }
+
+  // Create SLAM system. It initializes all system threads and gets ready to
+  // process frames.
+  ORB_SLAM2::System SLAM(vocabularyFile, settingsFile,
+                         ORB_SLAM2::System::MONOCULAR, true);
 
   // Vector for tracking time statistics
   vector<float> vTimesTrack;
@@ -94,7 +95,7 @@ int main(int argc, char **argv) {
       }
 
       if (SLAM.isFinished() == true) {
-	  break;
+        break;
       }
 
       chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
