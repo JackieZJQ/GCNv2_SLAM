@@ -1,2 +1,2 @@
-add_subdirectory(GNC)
+add_subdirectory(GCN)
 add_subdirectory(ORB)
