@@ -3,11 +3,11 @@
 
 #include "FeatureExtractor.h"
 
-namespace ORB_SLAM2
-{
+namespace ORB_SLAM2 {
 
-FeatureExtractor* createFeatureExtractor(int nfeatures, float scaleFactor, int nlevels,
-					 int iniThFAST, int minThFAST);
+FeatureExtractor *createFeatureExtractor(int nfeatures, float scaleFactor,
+                                         int nlevels, int iniThFAST,
+                                         int minThFAST);
 
 }
 #endif
