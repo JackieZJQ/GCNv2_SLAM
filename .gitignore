@@ -18,9 +18,16 @@ Thirdparty/g2o/build/
 Thirdparty/g2o/config.h
 Thirdparty/g2o/lib/
 Vocabulary/*.bin
-build/
+Build/
+Develop/
+Install/
 *~
 lib/
 
-
 GCN2/rgbd_gcn
+
+CameraTrajectory.txt
+
+debug.txt
+result.txt
+
