@@ -38,8 +38,10 @@ Frame::Frame() {}
 // Copy Constructor
 Frame::Frame(const Frame &frame)
     : mpORBvocabulary(frame.mpORBvocabulary),
-      mpFeatureExtractorLeft(frame.mpFeatureExtractorLeft),
-      mpFeatureExtractorRight(frame.mpFeatureExtractorRight),
+      mpGCNExtractorLeft(frame.mpGCNExtractorLeft),
+      mpGCNExtractorRight(frame.mpGCNExtractorRight),
+      mpORBExtractorLeft(frame.mpORBExtractorLeft),        // add orb extractor
+      mpORBExtractorRight(frame.mpORBExtractorRight),  
       mTimeStamp(frame.mTimeStamp), mK(frame.mK.clone()),
       mDistCoef(frame.mDistCoef.clone()), mbf(frame.mbf), mb(frame.mb),
       mThDepth(frame.mThDepth), N(frame.N), mvKeys(frame.mvKeys),
@@ -63,25 +65,29 @@ Frame::Frame(const Frame &frame)
     SetPose(frame.mTcw);
 }
 
-Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
-             const double &timeStamp, FeatureExtractor *extractorLeft,
-             FeatureExtractor *extractorRight, ORBVocabulary *voc, cv::Mat &K,
+// Stereo
+Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeStamp, 
+             FeatureExtractor *GCNextractorLeft, FeatureExtractor *GCNextractorRight, 
+             FeatureExtractor *ORBextractorLeft, FeatureExtractor *ORBextractorRight, 
+             ORBVocabulary *voc, cv::Mat &K,
              cv::Mat &distCoef, const float &bf, const float &thDepth)
-    : mpORBvocabulary(voc), mpFeatureExtractorLeft(extractorLeft),
-      mpFeatureExtractorRight(extractorRight), mTimeStamp(timeStamp),
+    : mpORBvocabulary(voc), 
+      mpGCNExtractorLeft(GCNextractorLeft), mpGCNExtractorRight(GCNextractorRight), 
+      mpORBExtractorLeft(ORBextractorLeft), mpORBExtractorRight(ORBextractorRight), 
+      mTimeStamp(timeStamp),
       mK(K.clone()), mDistCoef(distCoef.clone()), mbf(bf), mThDepth(thDepth),
       mpReferenceKF(static_cast<KeyFrame *>(NULL)) {
   // Frame ID
   mnId = nNextId++;
 
   // Scale Level Info
-  mnScaleLevels = mpFeatureExtractorLeft->GetLevels();
-  mfScaleFactor = mpFeatureExtractorLeft->GetScaleFactor();
+  mnScaleLevels = mpORBExtractorLeft->GetLevels();
+  mfScaleFactor = mpORBExtractorLeft->GetScaleFactor();
   mfLogScaleFactor = log(mfScaleFactor);
-  mvScaleFactors = mpFeatureExtractorLeft->GetScaleFactors();
-  mvInvScaleFactors = mpFeatureExtractorLeft->GetInverseScaleFactors();
-  mvLevelSigma2 = mpFeatureExtractorLeft->GetScaleSigmaSquares();
-  mvInvLevelSigma2 = mpFeatureExtractorLeft->GetInverseScaleSigmaSquares();
+  mvScaleFactors = mpORBExtractorLeft->GetScaleFactors();
+  mvInvScaleFactors = mpORBExtractorLeft->GetInverseScaleFactors();
+  mvLevelSigma2 = mpORBExtractorLeft->GetScaleSigmaSquares();
+  mvInvLevelSigma2 = mpORBExtractorLeft->GetInverseScaleSigmaSquares();
 
   // ORB extraction
   thread threadLeft(&Frame::ExtractFeatures, this, 0, imLeft);
@@ -126,25 +132,30 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
   AssignFeaturesToGrid();
 }
 
+// RGB-D
 Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
-             const double &timeStamp, FeatureExtractor *extractor,
+             const double &timeStamp, 
+             FeatureExtractor *GCNextractor, FeatureExtractor *ORBextractor,
              ORBVocabulary *voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
              const float &thDepth)
-    : mpORBvocabulary(voc), mpFeatureExtractorLeft(extractor),
-      mpFeatureExtractorRight(static_cast<FeatureExtractor *>(NULL)),
+    : mpORBvocabulary(voc), 
+      mpGCNExtractorLeft(GCNextractor),
+      mpGCNExtractorRight(static_cast<FeatureExtractor *>(NULL)),
+      mpORBExtractorLeft(ORBextractor),
+      mpORBExtractorRight(static_cast<FeatureExtractor *>(NULL)), 
       mTimeStamp(timeStamp), mK(K.clone()), mDistCoef(distCoef.clone()),
       mbf(bf), mThDepth(thDepth) {
   // Frame ID
   mnId = nNextId++;
 
   // Scale Level Info
-  mnScaleLevels = mpFeatureExtractorLeft->GetLevels();
-  mfScaleFactor = mpFeatureExtractorLeft->GetScaleFactor();
+  mnScaleLevels = mpORBExtractorLeft->GetLevels();
+  mfScaleFactor = mpORBExtractorLeft->GetScaleFactor();
   mfLogScaleFactor = log(mfScaleFactor);
-  mvScaleFactors = mpFeatureExtractorLeft->GetScaleFactors();
-  mvInvScaleFactors = mpFeatureExtractorLeft->GetInverseScaleFactors();
-  mvLevelSigma2 = mpFeatureExtractorLeft->GetScaleSigmaSquares();
-  mvInvLevelSigma2 = mpFeatureExtractorLeft->GetInverseScaleSigmaSquares();
+  mvScaleFactors = mpORBExtractorLeft->GetScaleFactors();
+  mvInvScaleFactors = mpORBExtractorLeft->GetInverseScaleFactors();
+  mvLevelSigma2 = mpORBExtractorLeft->GetScaleSigmaSquares();
+  mvInvLevelSigma2 = mpORBExtractorLeft->GetInverseScaleSigmaSquares();
 
   // ORB extraction
   ExtractFeatures(0, imGray);
@@ -186,24 +197,29 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   AssignFeaturesToGrid();
 }
 
+// Mono
 Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
-             FeatureExtractor *extractor, ORBVocabulary *voc, cv::Mat &K,
+             FeatureExtractor *GCNextractor, FeatureExtractor *ORBextractor, 
+             ORBVocabulary *voc, cv::Mat &K,
              cv::Mat &distCoef, const float &bf, const float &thDepth)
-    : mpORBvocabulary(voc), mpFeatureExtractorLeft(extractor),
-      mpFeatureExtractorRight(static_cast<FeatureExtractor *>(NULL)),
+    : mpORBvocabulary(voc), 
+      mpGCNExtractorLeft(GCNextractor),
+      mpGCNExtractorRight(static_cast<FeatureExtractor *>(NULL)),
+      mpORBExtractorLeft(ORBextractor),
+      mpORBExtractorRight(static_cast<FeatureExtractor *>(NULL)), 
       mTimeStamp(timeStamp), mK(K.clone()), mDistCoef(distCoef.clone()),
       mbf(bf), mThDepth(thDepth) {
   // Frame ID
   mnId = nNextId++;
 
   // Scale Level Info
-  mnScaleLevels = mpFeatureExtractorLeft->GetLevels();
-  mfScaleFactor = mpFeatureExtractorLeft->GetScaleFactor();
+  mnScaleLevels = mpORBExtractorLeft->GetLevels();
+  mfScaleFactor = mpORBExtractorLeft->GetScaleFactor();
   mfLogScaleFactor = log(mfScaleFactor);
-  mvScaleFactors = mpFeatureExtractorLeft->GetScaleFactors();
-  mvInvScaleFactors = mpFeatureExtractorLeft->GetInverseScaleFactors();
-  mvLevelSigma2 = mpFeatureExtractorLeft->GetScaleSigmaSquares();
-  mvInvLevelSigma2 = mpFeatureExtractorLeft->GetInverseScaleSigmaSquares();
+  mvScaleFactors = mpORBExtractorLeft->GetScaleFactors();
+  mvInvScaleFactors = mpORBExtractorLeft->GetInverseScaleFactors();
+  mvLevelSigma2 = mpORBExtractorLeft->GetScaleSigmaSquares();
+  mvInvLevelSigma2 = mpORBExtractorLeft->GetInverseScaleSigmaSquares();
 
   // ORB extraction
   ExtractFeatures(0, imGray);
@@ -263,10 +279,16 @@ void Frame::AssignFeaturesToGrid() {
 }
 
 void Frame::ExtractFeatures(int flag, const cv::Mat &im) {
-  if (flag == 0)
-    (*mpFeatureExtractorLeft)(im, cv::Mat(), mvKeys, mDescriptors);
-  else
-    (*mpFeatureExtractorRight)(im, cv::Mat(), mvKeysRight, mDescriptorsRight);
+  if (flag == 0){
+    (*mpGCNExtractorLeft)(im, cv::Mat(), mvKeys, mDescriptors);
+    (*mpORBExtractorLeft)(im, cv::Mat(), mvKeysORB, mDescriptorsORB);
+
+    //std::cout << mvKeysORB.back().octave << std::endl;
+  }
+  else {
+    (*mpGCNExtractorRight)(im, cv::Mat(), mvKeysRight, mDescriptorsRight);
+    (*mpORBExtractorRight)(im, cv::Mat(), mvKeysRightORB, mDescriptorsRightORB);
+  }
 }
 
 void Frame::SetPose(cv::Mat Tcw) {
@@ -480,7 +502,7 @@ void Frame::ComputeStereoMatches() {
 
   const int thOrbDist = (ORBmatcher::TH_HIGH + ORBmatcher::TH_LOW) / 2;
 
-  const int nRows = mpFeatureExtractorLeft->mvImagePyramid[0].rows;
+  const int nRows = mpORBExtractorLeft->mvImagePyramid[0].rows;
 
   // Assign keypoints to row table
   vector<vector<size_t>> vRowIndices(nRows, vector<size_t>());
@@ -564,7 +586,7 @@ void Frame::ComputeStereoMatches() {
 
       // sliding window search
       const int w = 5;
-      cv::Mat IL = mpFeatureExtractorLeft->mvImagePyramid[kpL.octave]
+      cv::Mat IL = mpORBExtractorLeft->mvImagePyramid[kpL.octave]
                        .rowRange(scaledvL - w, scaledvL + w + 1)
                        .colRange(scaleduL - w, scaleduL + w + 1);
       IL.convertTo(IL, CV_32F);
@@ -579,12 +601,12 @@ void Frame::ComputeStereoMatches() {
       const float iniu = scaleduR0 + L - w;
       const float endu = scaleduR0 + L + w + 1;
       if (iniu < 0 ||
-          endu >= mpFeatureExtractorRight->mvImagePyramid[kpL.octave].cols)
+          endu >= mpORBExtractorRight->mvImagePyramid[kpL.octave].cols)
         continue;
 
       for (int incR = -L; incR <= +L; incR++) {
         cv::Mat IR =
-            mpFeatureExtractorRight->mvImagePyramid[kpL.octave]
+            mpORBExtractorRight->mvImagePyramid[kpL.octave]
                 .rowRange(scaledvL - w, scaledvL + w + 1)
                 .colRange(scaleduR0 + incR - w, scaleduR0 + incR + w + 1);
         IR.convertTo(IR, CV_32F);
