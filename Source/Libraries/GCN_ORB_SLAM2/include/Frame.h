@@ -111,6 +111,8 @@ public:
   // coordinates.
   cv::Mat UnprojectStereo(const int &i);
 
+  std::vector<cv::KeyPoint> UndistortKeyPoints(const std::vector<cv::KeyPoint> &Keys, const int &refN);
+
 public:
   // Vocabulary used for relocalization.
   ORBVocabulary *mpORBvocabulary;
@@ -150,11 +152,11 @@ public:
   // Number of KeyPoints.
   int N;
 
-  // Number of GCN Keypoints
-  int GCNN; 
-
   // Number of ORB Keypoints
   int ORBN;
+
+  // Number of GCN Keypoints
+  int GCNN; 
 
   // std::vector of keypoints (original for visualization) and undistorted
   // (actually used by the system). In the stereo case, mvKeysUn is redundant as
@@ -179,9 +181,9 @@ public:
   DBoW2::BowVector mBowVec;
   DBoW2::FeatureVector mFeatVec;
 
-  // ORB descriptor, each row associated to a keypoint.
+  // Descriptor, each row associated to a keypoint.
   cv::Mat mDescriptors, mDescriptorsRight;
-
+  
   // ORB descriptors
   cv::Mat mORBDescriptors, mORBDescriptorsRight;
 
@@ -191,14 +193,30 @@ public:
   // MapPoints associated to keypoints, NULL pointer if no association.
   std::vector<MapPoint *> mvpMapPoints;
 
+  // ORB MapPoints
+  std::vector<MapPoint *> mvpORBMapPoints;
+  // GCN MapPoints
+  std::vector<MapPoint *> mvpGCNMapPoints;
+
+
   // Flag to identify outlier associations.
   std::vector<bool> mvbOutlier;
+
+  // ORB Flag to identify outlier associations.
+  std::vector<bool> mvORBbOutlier;
+  // GCN Flag to identify outlier associations.
+  std::vector<bool> mvGCNbOutlier;
 
   // Keypoints are assigned to cells in a grid to reduce matching complexity
   // when projecting MapPoints.
   static float mfGridElementWidthInv;
   static float mfGridElementHeightInv;
   std::vector<std::size_t> mGrid[FRAME_GRID_COLS][FRAME_GRID_ROWS];
+
+  // ORB Keypoints are assigned to ORB cells
+  std::vector<std::size_t> mORBGrid[FRAME_GRID_COLS][FRAME_GRID_ROWS];
+  // GCN Keypoints are assigned to GCN cells
+  std::vector<std::size_t> mGCNGrid[FRAME_GRID_COLS][FRAME_GRID_ROWS];
 
   // Camera pose.
   cv::Mat mTcw;
@@ -232,6 +250,8 @@ private:
   // Only for the RGB-D case. Stereo must be already rectified!
   // (called in the constructor).
   void UndistortKeyPoints();
+
+  
 
   // Computes image bounds for the undistorted image (called in the
   // constructor).

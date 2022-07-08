@@ -167,6 +167,8 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   ExtractFeatures(0, imGray);
 
   N = mvKeys.size();
+  ORBN = mvORBKeys.size();
+  GCNN = mvGCNKeys.size();
 
   if (mvKeys.empty())
     return;
@@ -474,6 +476,39 @@ void Frame::UndistortKeyPoints() {
     kp.pt.y = mat.at<float>(i, 1);
     mvKeysUn[i] = kp;
   }
+}
+
+std::vector<cv::KeyPoint> Frame::UndistortKeyPoints(const std::vector<cv::KeyPoint> &Keys, const int &refN) {
+  if (mDistCoef.at<float>(0) == 0.0) {
+    return Keys;
+  }
+
+  std::vector<cv::KeyPoint> KeysUn;
+  KeysUn.reserve(refN);
+
+  // Fill matrix with points
+  cv::Mat mat(refN, 2, CV_32F);
+  for (int i = 0; i < refN; i++) {
+    mat.at<float>(i, 0) = Keys[i].pt.x;
+    mat.at<float>(i, 1) = Keys[i].pt.y;
+  }
+
+  // Undistort points
+  mat = mat.reshape(2);
+  cv::undistortPoints(mat, mat, mK, mDistCoef, cv::Mat(), mK);
+  mat = mat.reshape(1);
+
+  // Fill undistorted keypoint vector
+  KeysUn.resize(refN);
+  for (int i = 0; i < refN; i++) {
+    cv::KeyPoint kp = Keys[i];
+    kp.pt.x = mat.at<float>(i, 0);
+    kp.pt.y = mat.at<float>(i, 1);
+    KeysUn[i] = kp;
+  }
+
+  return KeysUn;
+  
 }
 
 void Frame::ComputeImageBounds(const cv::Mat &imLeft) {
