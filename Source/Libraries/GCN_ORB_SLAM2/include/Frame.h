@@ -107,11 +107,14 @@ public:
   // depthmap.
   void ComputeStereoFromRGBD(const cv::Mat &imDepth);
 
+  void ComputeStereoFromRGBD(const cv::Mat &imDepth, std::vector<float> &uRight, 
+                              std::vector<float> &Depth, const int &refN, 
+                              const std::vector<cv::KeyPoint> &Keys, 
+                              const std::vector<cv::KeyPoint> &KeysUn);
+
   // Backprojects a keypoint (if stereo/depth info available) into 3D world
   // coordinates.
-  cv::Mat UnprojectStereo(const int &i);
-
-  std::vector<cv::KeyPoint> UndistortKeyPoints(const std::vector<cv::KeyPoint> &Keys, const int &refN);
+  cv::Mat UnprojectStereo(const int &i); 
 
 public:
   // Vocabulary used for relocalization.
@@ -176,6 +179,14 @@ public:
   // "Monocular" keypoints have a negative value.
   std::vector<float> mvuRight;
   std::vector<float> mvDepth;
+
+  // ORB corresponding stereo coordinate and depth for each keypoint
+  std::vector<float> mvuORBRight;
+  std::vector<float> mvORBDepth;
+
+  // GCN corresponding stereo coordinate and depth for each keypoint
+  std::vector<float> mvuGCNRight;
+  std::vector<float> mvGCNDepth;
 
   // Bag of Words std::vector structures.
   DBoW2::BowVector mBowVec;
@@ -251,7 +262,7 @@ private:
   // (called in the constructor).
   void UndistortKeyPoints();
 
-  
+  void UndistortKeyPoints(const std::vector<cv::KeyPoint> &Keys, std::vector<cv::KeyPoint> &KeysUn, const int &refN);
 
   // Computes image bounds for the undistorted image (called in the
   // constructor).

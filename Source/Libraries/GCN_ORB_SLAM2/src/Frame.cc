@@ -174,10 +174,16 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
     return;
 
   // mvKeysUn, Left image
-  UndistortKeyPoints();
+  //UndistortKeyPoints();
+  UndistortKeyPoints(mvKeys, mvKeysUn, N);
+  UndistortKeyPoints(mvORBKeys, mvORBKeysUn, ORBN);
+  UndistortKeyPoints(mvGCNKeys, mvGCNKeysUn, GCNN);
 
   // compute mvuRight and mvDepth
-  ComputeStereoFromRGBD(imDepth);
+  //ComputeStereoFromRGBD(imDepth);
+  ComputeStereoFromRGBD(imDepth, mvuRight, mvDepth, N, mvKeys, mvKeysUn); 
+  ComputeStereoFromRGBD(imDepth, mvuORBRight, mvORBDepth, ORBN, mvORBKeys, mvORBKeysUn);  
+  ComputeStereoFromRGBD(imDepth, mvuGCNRight, mvGCNDepth, GCNN, mvGCNKeys, mvGCNKeysUn);
 
   mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
   mvbOutlier = vector<bool>(N, false);
@@ -478,13 +484,11 @@ void Frame::UndistortKeyPoints() {
   }
 }
 
-std::vector<cv::KeyPoint> Frame::UndistortKeyPoints(const std::vector<cv::KeyPoint> &Keys, const int &refN) {
+// Rewrite UndistortKeyPoints
+void Frame::UndistortKeyPoints(const vector<cv::KeyPoint> &Keys, vector<cv::KeyPoint> &KeysUn, const int &refN) {
   if (mDistCoef.at<float>(0) == 0.0) {
-    return Keys;
+    KeysUn = Keys;
   }
-
-  std::vector<cv::KeyPoint> KeysUn;
-  KeysUn.reserve(refN);
 
   // Fill matrix with points
   cv::Mat mat(refN, 2, CV_32F);
@@ -506,9 +510,6 @@ std::vector<cv::KeyPoint> Frame::UndistortKeyPoints(const std::vector<cv::KeyPoi
     kp.pt.y = mat.at<float>(i, 1);
     KeysUn[i] = kp;
   }
-
-  return KeysUn;
-  
 }
 
 void Frame::ComputeImageBounds(const cv::Mat &imLeft) {
@@ -729,6 +730,31 @@ void Frame::ComputeStereoFromRGBD(const cv::Mat &imDepth) {
     if (d > 0.1f && d < 20.f) {
       mvDepth[i] = d;
       mvuRight[i] = kpU.pt.x - mbf / d;
+    }
+  }
+}
+
+// Rewrite ComputeStereoFromRGBD
+void Frame::ComputeStereoFromRGBD(const cv::Mat &imDepth, vector<float> &uRight, 
+                                  vector<float> &Depth, const int &refN, 
+                                  const vector<cv::KeyPoint> &Keys, 
+                                  const vector<cv::KeyPoint> &KeysUn) {
+  uRight = vector<float>(refN, -1);
+  Depth = vector<float>(refN, -1);
+
+  for (int i = 0; i < refN; i++) {
+
+    const cv::KeyPoint &kp = Keys[i];
+    const cv::KeyPoint &kpU = KeysUn[i];
+
+    const float &v = kp.pt.y;
+    const float &u = kp.pt.x;
+
+    const float d = imDepth.at<float>(v, u);
+
+    if (d > 0.1f && d < 20.f) {
+      Depth[i] = d;
+      uRight[i] = kpU.pt.x - mbf / d;
     }
   }
 }
