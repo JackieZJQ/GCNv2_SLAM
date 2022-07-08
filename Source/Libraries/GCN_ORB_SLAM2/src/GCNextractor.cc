@@ -263,6 +263,9 @@ void GCNextractor::operator()(InputArray _image, InputArray _mask,
   // std::cout << pts.size(0) << std::endl;
   // std::cout << keypoints.size() << std::endl;
   // cv::waitKey();
+
+  // std::cout << "Using GCNextractor......" << std::endl;
+
 }
 
 } // namespace ORB_SLAM2

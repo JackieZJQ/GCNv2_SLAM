@@ -150,15 +150,25 @@ public:
   // Number of KeyPoints.
   int N;
 
+  // Number of GCN Keypoints
+  int GCNN; 
+
+  // Number of ORB Keypoints
+  int ORBN;
+
   // std::vector of keypoints (original for visualization) and undistorted
   // (actually used by the system). In the stereo case, mvKeysUn is redundant as
   // images must be rectified. In the RGB-D case, RGB images can be distorted.
   std::vector<cv::KeyPoint> mvKeys, mvKeysRight;
   std::vector<cv::KeyPoint> mvKeysUn;
 
-  // ketpoints
-  std::vector<cv::KeyPoint> mvKeysORB, mvKeysRightORB;
-  std::vector<cv::KeyPoint> mvKeysUnORB;
+  // ORB keypoints
+  std::vector<cv::KeyPoint> mvORBKeys, mvORBKeysRight;
+  std::vector<cv::KeyPoint> mvORBKeysUn;
+
+  // GCN keypoints
+  std::vector<cv::KeyPoint> mvGCNKeys, mvGCNKeysRight;
+  std::vector<cv::KeyPoint> mvGCNKeysUn;
 
   // Corresponding stereo coordinate and depth for each keypoint.
   // "Monocular" keypoints have a negative value.
@@ -172,8 +182,11 @@ public:
   // ORB descriptor, each row associated to a keypoint.
   cv::Mat mDescriptors, mDescriptorsRight;
 
-  // descriptors
-  cv::Mat mDescriptorsORB, mDescriptorsRightORB;
+  // ORB descriptors
+  cv::Mat mORBDescriptors, mORBDescriptorsRight;
+
+  // GCN descriptors
+  cv::Mat mGCNDescriptors, mGCNDescriptorsRight;
 
   // MapPoints associated to keypoints, NULL pointer if no association.
   std::vector<MapPoint *> mvpMapPoints;

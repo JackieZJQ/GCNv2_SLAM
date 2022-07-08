@@ -95,8 +95,14 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
   threadLeft.join();
   threadRight.join();
 
+  // Size of features
   N = mvKeys.size();
+  ORBN = mvORBKeys.size();
+  GCNN = mvGCNKeys.size();
 
+  //if(mvORBKeys.empty() && mvGCNKeys.empty())
+  //  return
+    
   if (mvKeys.empty())
     return;
 
@@ -165,8 +171,10 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   if (mvKeys.empty())
     return;
 
+  // mvKeysUn, Left image
   UndistortKeyPoints();
 
+  // compute mvuRight and mvDepth
   ComputeStereoFromRGBD(imDepth);
 
   mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
@@ -281,13 +289,15 @@ void Frame::AssignFeaturesToGrid() {
 void Frame::ExtractFeatures(int flag, const cv::Mat &im) {
   if (flag == 0){
     (*mpGCNExtractorLeft)(im, cv::Mat(), mvKeys, mDescriptors);
-    (*mpORBExtractorLeft)(im, cv::Mat(), mvKeysORB, mDescriptorsORB);
+    (*mpGCNExtractorLeft)(im, cv::Mat(), mvGCNKeys, mGCNDescriptors);
+    (*mpORBExtractorLeft)(im, cv::Mat(), mvORBKeys, mORBDescriptors);
 
     //std::cout << mvKeysORB.back().octave << std::endl;
   }
   else {
     (*mpGCNExtractorRight)(im, cv::Mat(), mvKeysRight, mDescriptorsRight);
-    (*mpORBExtractorRight)(im, cv::Mat(), mvKeysRightORB, mDescriptorsRightORB);
+    (*mpGCNExtractorRight)(im, cv::Mat(), mvGCNKeysRight, mGCNDescriptorsRight);
+    (*mpORBExtractorRight)(im, cv::Mat(), mvORBKeysRight, mORBDescriptorsRight);
   }
 }
 

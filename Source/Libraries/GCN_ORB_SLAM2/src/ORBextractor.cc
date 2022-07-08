@@ -988,7 +988,7 @@ void ORBextractor::operator()(InputArray _image, InputArray _mask,
     _keypoints.insert(_keypoints.end(), keypoints.begin(), keypoints.end());
   }
 
-  std::cout << "Using ORBextractor......" << std::endl;
+  // std::cout << "Using ORBextractor......" << std::endl;
   
 }
 
