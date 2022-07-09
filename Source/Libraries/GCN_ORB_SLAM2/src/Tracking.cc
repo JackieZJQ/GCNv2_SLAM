@@ -573,7 +573,7 @@ void Tracking::StereoInitialization() {
 }
 
 // Rewrite StereoInitialization()
-void Tracking::StereoInitialization(const cv::Mat &temp) {
+void Tracking::StereoInitialization(const int &flag) {
   if (mCurrentFrame.N > 50) {
     // Set Frame pose to the origin
     mCurrentFrame.SetPose(mLastPose);

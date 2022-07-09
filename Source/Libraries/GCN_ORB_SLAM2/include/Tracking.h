@@ -124,7 +124,7 @@ protected:
 
   // Map initialization for stereo and RGB-D
   void StereoInitialization();
-  void StereoInitialization(const cv::Mat &temp);
+  void StereoInitialization(const int &flag);
 
   // Map initialization for monocular
   void MonocularInitialization();
