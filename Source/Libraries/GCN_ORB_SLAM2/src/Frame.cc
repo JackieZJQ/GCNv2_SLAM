@@ -40,16 +40,25 @@ Frame::Frame(const Frame &frame)
     : mpORBvocabulary(frame.mpORBvocabulary),
       mpGCNExtractorLeft(frame.mpGCNExtractorLeft),
       mpGCNExtractorRight(frame.mpGCNExtractorRight),
-      mpORBExtractorLeft(frame.mpORBExtractorLeft),        // add orb extractor
+      mpORBExtractorLeft(frame.mpORBExtractorLeft),         
       mpORBExtractorRight(frame.mpORBExtractorRight),  
       mTimeStamp(frame.mTimeStamp), mK(frame.mK.clone()),
       mDistCoef(frame.mDistCoef.clone()), mbf(frame.mbf), mb(frame.mb),
-      mThDepth(frame.mThDepth), N(frame.N), mvKeys(frame.mvKeys),
-      mvKeysRight(frame.mvKeysRight), mvKeysUn(frame.mvKeysUn),
-      mvuRight(frame.mvuRight), mvDepth(frame.mvDepth), mBowVec(frame.mBowVec),
-      mFeatVec(frame.mFeatVec), mDescriptors(frame.mDescriptors.clone()),
+      mThDepth(frame.mThDepth), mBowVec(frame.mBowVec), mFeatVec(frame.mFeatVec), 
+      N(frame.N), ORBN(frame.ORBN), GCNN(frame.GCNN),                                                                // N
+      mvKeys(frame.mvKeys), mvORBKeys(frame.mvORBKeys), mvGCNKeys(frame.mvGCNKeys),                                  // mvKeys
+      mvKeysRight(frame.mvKeysRight), mvORBKeysRight(frame.mvORBKeysRight), mvGCNKeysRight(frame.mvGCNKeysRight),    // mvKeysRight
+      mvKeysUn(frame.mvKeysUn), mvORBKeysUn(frame.mvORBKeysUn), mvGCNKeysUn(frame.mvGCNKeysUn),                      // mvKeysUn
+      mvuRight(frame.mvuRight), mvuORBRight(frame.mvuORBRight), mvuGCNRight(frame.mvuGCNRight),                      // mvuRight
+      mvDepth(frame.mvDepth), mvORBDepth(frame.mvORBDepth), mvGCNDepth(frame.mvGCNDepth),                            // mvDepth            
+      mDescriptors(frame.mDescriptors.clone()),
+      mORBDescriptors(frame.mORBDescriptors.clone()),
+      mGCNDescriptors(frame.mGCNDescriptors.clone()),
       mDescriptorsRight(frame.mDescriptorsRight.clone()),
-      mvpMapPoints(frame.mvpMapPoints), mvbOutlier(frame.mvbOutlier),
+      mORBDescriptorsRight(frame.mORBDescriptorsRight.clone()),
+      mGCNDescriptorsRight(frame.mGCNDescriptorsRight.clone()),
+      mvpMapPoints(frame.mvpMapPoints), mvpORBMapPoints(frame.mvpORBMapPoints), mvpGCNMapPoints(frame.mvpGCNMapPoints), 
+      mvbOutlier(frame.mvbOutlier), mvbORBOutlier(frame.mvbORBOutlier), mvbGCNOutlier(frame.mvbGCNOutlier),
       mnId(frame.mnId), mpReferenceKF(frame.mpReferenceKF),
       mnScaleLevels(frame.mnScaleLevels), mfScaleFactor(frame.mfScaleFactor),
       mfLogScaleFactor(frame.mfLogScaleFactor),
