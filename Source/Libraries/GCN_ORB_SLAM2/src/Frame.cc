@@ -803,4 +803,19 @@ cv::Mat Frame::UnprojectStereo(const int &i) {
     return cv::Mat();
 }
 
+// Rewrite UnprojectStereo()
+cv::Mat Frame::UnprojectStereo(const int &i, const vector<float> &Depth, 
+                                const vector<cv::KeyPoint> &KeysUn) {
+  const float z = Depth[i];
+  if (z > 0) {
+    const float u = KeysUn[i].pt.x;
+    const float v = KeysUn[i].pt.y;
+    const float x = (u - cx) * z * invfx;
+    const float y = (v - cy) * z * invfy;
+    cv::Mat x3Dc = (cv::Mat_<float>(3, 1) << x, y, z);
+    return mRwc * x3Dc + mOw;
+  } else
+    return cv::Mat();
+}
+
 } // namespace ORB_SLAM2

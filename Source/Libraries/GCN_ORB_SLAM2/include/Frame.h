@@ -114,7 +114,10 @@ public:
 
   // Backprojects a keypoint (if stereo/depth info available) into 3D world
   // coordinates.
-  cv::Mat UnprojectStereo(const int &i); 
+  cv::Mat UnprojectStereo(const int &i);
+
+  cv::Mat UnprojectStereo(const int &i, const std::vector<float> &Depth, 
+                                const std::vector<cv::KeyPoint> &KeysUn);
 
 public:
   // Vocabulary used for relocalization.

@@ -210,9 +210,10 @@ cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft,
     }
   }
 
-  mCurrentFrame = Frame(mImGray, imGrayRight, timestamp, mpGCNExtractorLeft,
-                        mpGCNExtractorRight, mpORBExtractorLeft, mpORBExtractorRight, mpORBVocabulary, mK, mDistCoef,
-                        mbf, mThDepth);
+  mCurrentFrame = Frame(mImGray, imGrayRight, timestamp, 
+                        mpGCNExtractorLeft, mpGCNExtractorRight, 
+                        mpORBExtractorLeft, mpORBExtractorRight, 
+                        mpORBVocabulary, mK, mDistCoef, mbf, mThDepth);
 
   Track();
 
@@ -534,7 +535,8 @@ void Tracking::StereoInitialization() {
     for (int i = 0; i < mCurrentFrame.N; i++) {
       float z = mCurrentFrame.mvDepth[i];
       if (z > 0) {
-        cv::Mat x3D = mCurrentFrame.UnprojectStereo(i);
+        //cv::Mat x3D = mCurrentFrame.UnprojectStereo(i);
+        cv::Mat x3D = mCurrentFrame.UnprojectStereo(i, mCurrentFrame.mvDepth, mCurrentFrame.mvKeysUn);
         MapPoint *pNewMP = new MapPoint(x3D, pKFini, mpMap);
         pNewMP->AddObservation(pKFini, i);
         pKFini->AddMapPoint(pNewMP, i);
