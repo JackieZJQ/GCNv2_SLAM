@@ -188,6 +188,14 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
   mvbOutlier = vector<bool>(N, false);
 
+  // Initlization ORB Map points
+  mvpORBMapPoints = vector<MapPoint *>(ORBN, static_cast<MapPoint *>(NULL));
+  mvbORBOutlier = vector<bool>(ORBN, false);
+
+  // Initlization GCN Map points
+  mvpGCNMapPoints = vector<MapPoint *>(GCNN, static_cast<MapPoint *>(NULL));
+  mvbGCNOutlier = vector<bool>(GCNN, false);
+
   // This is done only for the first Frame (or after a change in the
   // calibration)
   if (mbInitialComputations) {
@@ -210,7 +218,11 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
   mb = mbf / fx;
 
-  AssignFeaturesToGrid();
+  //AssignFeaturesToGrid();
+  AssignFeaturesToGrid(N, mvKeysUn, mGrid);
+  AssignFeaturesToGrid(ORBN, mvORBKeysUn, mORBGrid);
+  AssignFeaturesToGrid(GCNN, mvGCNKeysUn, mGCNGrid);
+
 }
 
 // Mono
@@ -293,6 +305,24 @@ void Frame::AssignFeaturesToGrid() {
       mGrid[nGridPosX][nGridPosY].push_back(i);
   }
 }
+
+// rewrite AssignFeaturesToGrid()
+void Frame::AssignFeaturesToGrid(const int &refN, const vector<cv::KeyPoint> &KeysUn, 
+                                  vector<size_t> (&Grid)[FRAME_GRID_COLS][FRAME_GRID_ROWS]) {
+  int nReserve = 0.5f * refN / (FRAME_GRID_COLS * FRAME_GRID_ROWS);
+  for (unsigned int i = 0; i < FRAME_GRID_COLS; i++)
+    for (unsigned int j = 0; j < FRAME_GRID_ROWS; j++)
+      Grid[i][j].reserve(nReserve);
+  
+  for (int i = 0; i < refN; i++) {
+    const cv::KeyPoint &kp = KeysUn[i];
+
+    int nGridPosX, nGridPosY;
+    if (PosInGrid(kp, nGridPosX, nGridPosY))
+      Grid[nGridPosX][nGridPosY].push_back(i);
+  }
+}
+
 
 void Frame::ExtractFeatures(int flag, const cv::Mat &im) {
   if (flag == 0){
@@ -485,7 +515,8 @@ void Frame::UndistortKeyPoints() {
 }
 
 // Rewrite UndistortKeyPoints
-void Frame::UndistortKeyPoints(const vector<cv::KeyPoint> &Keys, vector<cv::KeyPoint> &KeysUn, const int &refN) {
+void Frame::UndistortKeyPoints(const vector<cv::KeyPoint> &Keys, 
+                                vector<cv::KeyPoint> &KeysUn, const int &refN) {
   if (mDistCoef.at<float>(0) == 0.0) {
     KeysUn = Keys;
   }

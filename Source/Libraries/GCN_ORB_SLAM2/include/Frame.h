@@ -206,17 +206,18 @@ public:
 
   // ORB MapPoints
   std::vector<MapPoint *> mvpORBMapPoints;
+
   // GCN MapPoints
   std::vector<MapPoint *> mvpGCNMapPoints;
-
 
   // Flag to identify outlier associations.
   std::vector<bool> mvbOutlier;
 
   // ORB Flag to identify outlier associations.
-  std::vector<bool> mvORBbOutlier;
+  std::vector<bool> mvbORBOutlier;
+
   // GCN Flag to identify outlier associations.
-  std::vector<bool> mvGCNbOutlier;
+  std::vector<bool> mvbGCNOutlier;
 
   // Keypoints are assigned to cells in a grid to reduce matching complexity
   // when projecting MapPoints.
@@ -226,6 +227,7 @@ public:
 
   // ORB Keypoints are assigned to ORB cells
   std::vector<std::size_t> mORBGrid[FRAME_GRID_COLS][FRAME_GRID_ROWS];
+
   // GCN Keypoints are assigned to GCN cells
   std::vector<std::size_t> mGCNGrid[FRAME_GRID_COLS][FRAME_GRID_ROWS];
 
@@ -262,7 +264,8 @@ private:
   // (called in the constructor).
   void UndistortKeyPoints();
 
-  void UndistortKeyPoints(const std::vector<cv::KeyPoint> &Keys, std::vector<cv::KeyPoint> &KeysUn, const int &refN);
+  void UndistortKeyPoints(const std::vector<cv::KeyPoint> &Keys, 
+                            std::vector<cv::KeyPoint> &KeysUn, const int &refN);
 
   // Computes image bounds for the undistorted image (called in the
   // constructor).
@@ -271,6 +274,9 @@ private:
   // Assign keypoints to the grid for speed up feature matching (called in the
   // constructor).
   void AssignFeaturesToGrid();
+
+  void AssignFeaturesToGrid(const int &refN, const std::vector<cv::KeyPoint> &KeysUn, 
+                              std::vector<std::size_t> (&Grid)[FRAME_GRID_COLS][FRAME_GRID_ROWS]);
 
   // Rotation, translation and camera center
   cv::Mat mRcw;
