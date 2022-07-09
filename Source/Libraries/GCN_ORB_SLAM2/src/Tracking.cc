@@ -572,6 +572,125 @@ void Tracking::StereoInitialization() {
   }
 }
 
+// Rewrite StereoInitialization()
+void Tracking::StereoInitialization(const cv::Mat &temp) {
+  if (mCurrentFrame.N > 50) {
+    // Set Frame pose to the origin
+    mCurrentFrame.SetPose(mLastPose);
+
+    int nGood = 0;
+    int nORBGood = 0;
+    int nGCNGood = 0;
+
+    // count good points of default feature points
+    for (int i = 0; i < mCurrentFrame.N; i++) {
+      float z = mCurrentFrame.mvDepth[i];
+      if (z > 0) {
+        nGood++;
+      }
+    }
+
+    // count good points of ORB feature points
+    for (int i = 0; i < mCurrentFrame.ORBN; i++) {
+      float z = mCurrentFrame.mvORBDepth[i];
+      if (z > 0) {
+        nORBGood++;
+      }
+    }
+
+    // count good points of GCN feature points
+    for (int i = 0; i < mCurrentFrame.GCNN; i++) {
+      float z = mCurrentFrame.mvGCNDepth[i];
+      if (z > 0) {
+        nGCNGood++;
+      }
+    }
+
+    if (nGood < 50) {
+      cout << "Cannot create new map with only " << nGood << " points" << endl;
+      return;
+    }
+
+    // Create KeyFrame
+    KeyFrame *pKFini = new KeyFrame(mCurrentFrame, mpMap, mpKeyFrameDB);
+
+    // Insert KeyFrame in the map
+    mpMap->AddKeyFrame(pKFini);
+
+    // Create MapPoints and asscoiate to KeyFrame
+    for (int i = 0; i < mCurrentFrame.N; i++) {
+      float z = mCurrentFrame.mvDepth[i];
+      if (z > 0) {
+        //cv::Mat x3D = mCurrentFrame.UnprojectStereo(i);
+        cv::Mat x3D = mCurrentFrame.UnprojectStereo(i, mCurrentFrame.mvDepth, mCurrentFrame.mvKeysUn);
+        MapPoint *pNewMP = new MapPoint(x3D, pKFini, mpMap);
+        pNewMP->AddObservation(pKFini, i);
+        pKFini->AddMapPoint(pNewMP, i);
+        pNewMP->ComputeDistinctiveDescriptors();
+        pNewMP->UpdateNormalAndDepth();
+        mpMap->AddMapPoint(pNewMP);
+
+        mCurrentFrame.mvpMapPoints[i] = pNewMP;
+      }
+    }
+
+    // Create ORB MapPoints and asscoiate to KeyFrame
+    for (int i = 0; i < mCurrentFrame.ORBN; i++) {
+      float z = mCurrentFrame.mvORBDepth[i];
+      if (z > 0) {
+        cv::Mat x3D = mCurrentFrame.UnprojectStereo(i, mCurrentFrame.mvORBDepth, mCurrentFrame.mvORBKeysUn);
+        MapPoint *pNewMP = new MapPoint(x3D, pKFini, mpMap);
+        pNewMP->AddObservation(pKFini, i);
+        pKFini->AddMapPoint(pNewMP, i);
+        pNewMP->ComputeDistinctiveDescriptors();
+        pNewMP->UpdateNormalAndDepth();
+        mpMap->AddMapPoint(pNewMP);
+
+        mCurrentFrame.mvpORBMapPoints[i] = pNewMP;
+      }
+    }
+
+    // Create GCN MapPoints and asscoiate to KeyFrame
+    for (int i = 0; i < mCurrentFrame.GCNN; i++) {
+      float z = mCurrentFrame.mvGCNDepth[i];
+      if (z > 0) {
+        cv::Mat x3D = mCurrentFrame.UnprojectStereo(i, mCurrentFrame.mvGCNDepth, mCurrentFrame.mvGCNKeysUn);
+        MapPoint *pNewMP = new MapPoint(x3D, pKFini, mpMap);
+        pNewMP->AddObservation(pKFini, i);
+        pKFini->AddMapPoint(pNewMP, i);
+        pNewMP->ComputeDistinctiveDescriptors();
+        pNewMP->UpdateNormalAndDepth();
+        mpMap->AddMapPoint(pNewMP);
+
+        mCurrentFrame.mvpGCNMapPoints[i] = pNewMP;
+      }
+    }
+
+    cout << "New map created with " << mpMap->MapPointsInMap() << " points"
+         << endl;
+
+    mpLocalMapper->InsertKeyFrame(pKFini);
+
+    mLastFrame = Frame(mCurrentFrame);
+    mnLastKeyFrameId = mCurrentFrame.mnId;
+    mpLastKeyFrame = pKFini;
+
+    mvpLocalKeyFrames.push_back(pKFini);
+    mvpLocalMapPoints = mpMap->GetAllMapPoints();
+    mpReferenceKF = pKFini;
+    mCurrentFrame.mpReferenceKF = pKFini;
+
+    mpMap->SetReferenceMapPoints(mvpLocalMapPoints);
+
+    mpMap->mvpKeyFrameOrigins.push_back(pKFini);
+
+    mpMapDrawer->SetCurrentCameraPose(mCurrentFrame.mTcw);
+
+    mState = OK;
+  }
+}
+
+
 void Tracking::MonocularInitialization() {
 
   if (!mpInitializer) {
