@@ -537,7 +537,7 @@ void Tracking::StereoInitialization() {
       if (z > 0) {
         //cv::Mat x3D = mCurrentFrame.UnprojectStereo(i);
         cv::Mat x3D = mCurrentFrame.UnprojectStereo(i, mCurrentFrame.mvDepth, mCurrentFrame.mvKeysUn);
-        MapPoint *pNewMP = new MapPoint(x3D, pKFini, mpMap);
+        MapPoint *pNewMP = new MapPoint(x3D, pKFini, mpMap, 1);
         pNewMP->AddObservation(pKFini, i);
         pKFini->AddMapPoint(pNewMP, i);
         pNewMP->ComputeDistinctiveDescriptors();
@@ -623,7 +623,7 @@ void Tracking::StereoInitialization(const int &flag) {
       if (z > 0) {
         //cv::Mat x3D = mCurrentFrame.UnprojectStereo(i);
         cv::Mat x3D = mCurrentFrame.UnprojectStereo(i, mCurrentFrame.mvDepth, mCurrentFrame.mvKeysUn);
-        MapPoint *pNewMP = new MapPoint(x3D, pKFini, mpMap);
+        MapPoint *pNewMP = new MapPoint(x3D, pKFini, mpMap, 1);
         pNewMP->AddObservation(pKFini, i);
         pKFini->AddMapPoint(pNewMP, i);
         pNewMP->ComputeDistinctiveDescriptors();
@@ -639,7 +639,7 @@ void Tracking::StereoInitialization(const int &flag) {
       float z = mCurrentFrame.mvORBDepth[i];
       if (z > 0) {
         cv::Mat x3D = mCurrentFrame.UnprojectStereo(i, mCurrentFrame.mvORBDepth, mCurrentFrame.mvORBKeysUn);
-        MapPoint *pNewMP = new MapPoint(x3D, pKFini, mpMap);
+        MapPoint *pNewMP = new MapPoint(x3D, pKFini, mpMap, 0);
         pNewMP->AddObservation(pKFini, i);
         pKFini->AddMapPoint(pNewMP, i);
         pNewMP->ComputeDistinctiveDescriptors();
@@ -655,7 +655,7 @@ void Tracking::StereoInitialization(const int &flag) {
       float z = mCurrentFrame.mvGCNDepth[i];
       if (z > 0) {
         cv::Mat x3D = mCurrentFrame.UnprojectStereo(i, mCurrentFrame.mvGCNDepth, mCurrentFrame.mvGCNKeysUn);
-        MapPoint *pNewMP = new MapPoint(x3D, pKFini, mpMap);
+        MapPoint *pNewMP = new MapPoint(x3D, pKFini, mpMap, 1);
         pNewMP->AddObservation(pKFini, i);
         pKFini->AddMapPoint(pNewMP, i);
         pNewMP->ComputeDistinctiveDescriptors();
@@ -777,7 +777,7 @@ void Tracking::CreateInitialMapMonocular() {
     // Create MapPoint.
     cv::Mat worldPos(mvIniP3D[i]);
 
-    MapPoint *pMP = new MapPoint(worldPos, pKFcur, mpMap);
+    MapPoint *pMP = new MapPoint(worldPos, pKFcur, mpMap, 1);
 
     pKFini->AddMapPoint(pMP, i);
     pKFcur->AddMapPoint(pMP, mvIniMatches[i]);
@@ -957,7 +957,7 @@ void Tracking::UpdateLastFrame() {
 
     if (bCreateNew) {
       cv::Mat x3D = mLastFrame.UnprojectStereo(i);
-      MapPoint *pNewMP = new MapPoint(x3D, mpMap, &mLastFrame, i);
+      MapPoint *pNewMP = new MapPoint(x3D, mpMap, &mLastFrame, i, 1);
 
       mLastFrame.mvpMapPoints[i] = pNewMP;
 
@@ -1202,7 +1202,7 @@ void Tracking::CreateNewKeyFrame() {
 
         if (bCreateNew) {
           cv::Mat x3D = mCurrentFrame.UnprojectStereo(i);
-          MapPoint *pNewMP = new MapPoint(x3D, pKF, mpMap);
+          MapPoint *pNewMP = new MapPoint(x3D, pKF, mpMap, 1);
           pNewMP->AddObservation(pKF, i);
           pKF->AddMapPoint(pNewMP, i);
           pNewMP->ComputeDistinctiveDescriptors();

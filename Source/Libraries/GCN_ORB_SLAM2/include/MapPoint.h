@@ -36,8 +36,8 @@ class Frame;
 
 class MapPoint {
 public:
-  MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap);
-  MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame, const int &idxF);
+  MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap, int FeatureType);
+  MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame, const int &idxF, int FeatureType);
 
   void SetWorldPos(const cv::Mat &Pos);
   cv::Mat GetWorldPos();
@@ -82,6 +82,9 @@ public:
   long int mnFirstKFid;
   long int mnFirstFrame;
   int nObs;
+
+  // Define Flag, ORB:0, GCN:1
+  int mFeatureType;
 
   // Variables used by the tracking
   float mTrackProjX;
