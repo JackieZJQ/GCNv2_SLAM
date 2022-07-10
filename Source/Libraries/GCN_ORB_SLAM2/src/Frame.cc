@@ -45,20 +45,17 @@ Frame::Frame(const Frame &frame)
       mTimeStamp(frame.mTimeStamp), mK(frame.mK.clone()),
       mDistCoef(frame.mDistCoef.clone()), mbf(frame.mbf), mb(frame.mb),
       mThDepth(frame.mThDepth), mBowVec(frame.mBowVec), mFeatVec(frame.mFeatVec), 
-      N(frame.N), ORBN(frame.ORBN), GCNN(frame.GCNN),                                                                // N
-      mvKeys(frame.mvKeys), mvORBKeys(frame.mvORBKeys), mvGCNKeys(frame.mvGCNKeys),                                  // mvKeys
-      mvKeysRight(frame.mvKeysRight), mvORBKeysRight(frame.mvORBKeysRight), mvGCNKeysRight(frame.mvGCNKeysRight),    // mvKeysRight
-      mvKeysUn(frame.mvKeysUn), mvORBKeysUn(frame.mvORBKeysUn), mvGCNKeysUn(frame.mvGCNKeysUn),                      // mvKeysUn
-      mvuRight(frame.mvuRight), mvuORBRight(frame.mvuORBRight), mvuGCNRight(frame.mvuGCNRight),                      // mvuRight
-      mvDepth(frame.mvDepth), mvORBDepth(frame.mvORBDepth), mvGCNDepth(frame.mvGCNDepth),                            // mvDepth            
-      mDescriptors(frame.mDescriptors.clone()),
-      mORBDescriptors(frame.mORBDescriptors.clone()),
-      mGCNDescriptors(frame.mGCNDescriptors.clone()),
-      mDescriptorsRight(frame.mDescriptorsRight.clone()),
-      mORBDescriptorsRight(frame.mORBDescriptorsRight.clone()),
-      mGCNDescriptorsRight(frame.mGCNDescriptorsRight.clone()),
-      mvpMapPoints(frame.mvpMapPoints), mvpORBMapPoints(frame.mvpORBMapPoints), mvpGCNMapPoints(frame.mvpGCNMapPoints), 
-      mvbOutlier(frame.mvbOutlier), mvbORBOutlier(frame.mvbORBOutlier), mvbGCNOutlier(frame.mvbGCNOutlier),
+      N(frame.N), NDict(frame.NDict),                                                 // N
+      mvKeys(frame.mvKeys), mvKeysDict(frame.mvKeysDict),                             // mvKeys
+      mvKeysRight(frame.mvKeysRight), mvKeysRightDict(frame.mvKeysRightDict),             // mvKeysRight
+      mvKeysUn(frame.mvKeysUn), mvKeysUnDict(frame.mvKeysUnDict),                     // mvKeysUn
+      mvuRight(frame.mvuRight), mvuRightDict(frame.mvuRightDict),                     // mvuRight
+      mvDepth(frame.mvDepth), mvDepthDict(frame.mvDepthDict),                         // mvDepth            
+      mDescriptors(frame.mDescriptors.clone()), mDescriptorsDict(frame.mDescriptorsDict),
+      mDescriptorsRight(frame.mDescriptorsRight.clone()), mDescriptorsRightDict(frame.mDescriptorsRightDict),
+      mvpMapPoints(frame.mvpMapPoints), mvpMapPointsDict(frame.mvpMapPointsDict),
+      mvbOutlier(frame.mvbOutlier), mvbOutlierDict(frame.mvbOutlierDict),
+      mGridDict(frame.mGridDict),
       mnId(frame.mnId), mpReferenceKF(frame.mpReferenceKF),
       mnScaleLevels(frame.mnScaleLevels), mfScaleFactor(frame.mfScaleFactor),
       mfLogScaleFactor(frame.mfLogScaleFactor),
@@ -67,16 +64,10 @@ Frame::Frame(const Frame &frame)
       mvLevelSigma2(frame.mvLevelSigma2),
       mvInvLevelSigma2(frame.mvInvLevelSigma2) {
   mGrid.resize(FRAME_GRID_COLS);
-  mORBGrid.resize(FRAME_GRID_COLS);
-  mGCNGrid.resize(FRAME_GRID_COLS);
   for (unsigned int i = 0; i < FRAME_GRID_COLS; i++) {
     mGrid[i].resize(FRAME_GRID_ROWS);
-    mORBGrid[i].resize(FRAME_GRID_ROWS);
-    mGCNGrid[i].resize(FRAME_GRID_ROWS);
     for (unsigned int j = 0; j < FRAME_GRID_ROWS; j++) {
       mGrid[i][j] = frame.mGrid[i][j];
-      mORBGrid[i][j] = frame.mORBGrid[i][j];
-      mGCNGrid[i][j] = frame.mGCNGrid[i][j];
     }
   }
 
@@ -116,11 +107,6 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
 
   // Size of features
   N = mvKeys.size();
-  ORBN = mvORBKeys.size();
-  GCNN = mvGCNKeys.size();
-
-  //if(mvORBKeys.empty() && mvGCNKeys.empty())
-  //  return
     
   if (mvKeys.empty())
     return;
@@ -186,8 +172,6 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   ExtractFeatures(0, imGray);
 
   N = mvKeys.size();
-  ORBN = mvORBKeys.size();
-  GCNN = mvGCNKeys.size();
 
   //
   NDict[0] = mvKeysDict[0].size();
@@ -199,8 +183,6 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   // mvKeysUn, Left image
   //UndistortKeyPoints();
   UndistortKeyPoints(mvKeys, mvKeysUn, N);
-  UndistortKeyPoints(mvORBKeys, mvORBKeysUn, ORBN);
-  UndistortKeyPoints(mvGCNKeys, mvGCNKeysUn, GCNN);
 
   //
   UndistortKeyPoints(mvKeysDict[0], mvKeysUnDict[0], NDict[0]);
@@ -209,8 +191,6 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   // compute mvuRight and mvDepth
   //ComputeStereoFromRGBD(imDepth);
   ComputeStereoFromRGBD(imDepth, mvuRight, mvDepth, N, mvKeys, mvKeysUn); 
-  ComputeStereoFromRGBD(imDepth, mvuORBRight, mvORBDepth, ORBN, mvORBKeys, mvORBKeysUn);  
-  ComputeStereoFromRGBD(imDepth, mvuGCNRight, mvGCNDepth, GCNN, mvGCNKeys, mvGCNKeysUn);
 
   //
   ComputeStereoFromRGBD(imDepth, mvuRightDict[0], mvDepthDict[0], NDict[0], mvKeysDict[0], mvKeysUnDict[0]); 
@@ -218,14 +198,6 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
   mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
   mvbOutlier = vector<bool>(N, false);
-
-  // Initlization ORB Map points
-  mvpORBMapPoints = vector<MapPoint *>(ORBN, static_cast<MapPoint *>(NULL));
-  mvbORBOutlier = vector<bool>(ORBN, false);
-
-  // Initlization GCN Map points
-  mvpGCNMapPoints = vector<MapPoint *>(GCNN, static_cast<MapPoint *>(NULL));
-  mvbGCNOutlier = vector<bool>(GCNN, false);
 
   //
   mvpMapPointsDict[0] = vector<MapPoint *>(NDict[0], static_cast<MapPoint *>(NULL));
@@ -260,13 +232,9 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
   //AssignFeaturesToGrid();
   AssignFeaturesToGrid(N, mvKeysUn, mGrid);
-  AssignFeaturesToGrid(ORBN, mvORBKeysUn, mORBGrid);
-  AssignFeaturesToGrid(GCNN, mvGCNKeysUn, mGCNGrid);
-
   AssignFeaturesToGrid(NDict[0], mvKeysUnDict[0], mGridDict[0]);
   AssignFeaturesToGrid(NDict[1], mvKeysUnDict[1], mGridDict[1]);
   
-
 }
 
 // Mono
@@ -375,16 +343,12 @@ void Frame::AssignFeaturesToGrid(const int &refN, const vector<cv::KeyPoint> &Ke
 void Frame::ExtractFeatures(int flag, const cv::Mat &im) {
   if (flag == 0){
     (*mpGCNExtractorLeft)(im, cv::Mat(), mvKeys, mDescriptors);
-    (*mpORBExtractorLeft)(im, cv::Mat(), mvORBKeys, mORBDescriptors);
-    (*mpGCNExtractorLeft)(im, cv::Mat(), mvGCNKeys, mGCNDescriptors);
     (*mpORBExtractorLeft)(im, cv::Mat(), mvKeysDict[0], mDescriptorsDict[0]);
     (*mpGCNExtractorLeft)(im, cv::Mat(), mvKeysDict[1], mDescriptorsDict[1]);
     //std::cout << mvKeysORB.back().octave << std::endl;
   }
   else {
     (*mpGCNExtractorRight)(im, cv::Mat(), mvKeysRight, mDescriptorsRight);
-    (*mpORBExtractorRight)(im, cv::Mat(), mvORBKeysRight, mORBDescriptorsRight);
-    (*mpGCNExtractorRight)(im, cv::Mat(), mvGCNKeysRight, mGCNDescriptorsRight);
     (*mpORBExtractorRight)(im, cv::Mat(), mvKeysRightDict[0], mDescriptorsRightDict[0]);
     (*mpGCNExtractorRight)(im, cv::Mat(), mvKeysRightDict[1], mDescriptorsRightDict[1]);
   }
@@ -459,6 +423,7 @@ bool Frame::isInFrustum(MapPoint *pMP, float viewingCosLimit) {
   return true;
 }
 
+// TO-DO rewrite
 vector<size_t> Frame::GetFeaturesInArea(const float &x, const float &y,
                                         const float &r, const int minLevel,
                                         const int maxLevel) const {
@@ -530,6 +495,7 @@ bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY) {
   return true;
 }
 
+// TO-DO rewrite
 void Frame::ComputeBoW() {
   if (mBowVec.empty()) {
     vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);

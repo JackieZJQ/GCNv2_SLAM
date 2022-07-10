@@ -153,29 +153,17 @@ public:
 
   // Number of KeyPoints
   const int N;
-  const int ORBN;
-  const int GCNN;
 
   // KeyPoints, stereo coordinate and descriptors (all associated by an index)
   const std::vector<cv::KeyPoint> mvKeys;
-  const std::vector<cv::KeyPoint> mvORBKeys;
-  const std::vector<cv::KeyPoint> mvGCNKeys;
 
   const std::vector<cv::KeyPoint> mvKeysUn;
-  const std::vector<cv::KeyPoint> mvORBKeysUn;
-  const std::vector<cv::KeyPoint> mvGCNKeysUn;
 
   const std::vector<float> mvuRight; // negative value for monocular points
-  const std::vector<float> mvuORBRight;
-  const std::vector<float> mvuGCNRight;
 
   const std::vector<float> mvDepth;  // negative value for monocular points
-  const std::vector<float> mvORBDepth;
-  const std::vector<float> mvGCNDepth;
 
   const cv::Mat mDescriptors;
-  const cv::Mat mORBDescriptors;
-  const cv::Mat mGCNDescriptors;
 
   // BoW
   DBoW2::BowVector mBowVec;
@@ -211,8 +199,6 @@ protected:
 
   // MapPoints associated to keypoints
   std::vector<MapPoint *> mvpMapPoints;
-  std::vector<MapPoint *> mvpORBMapPoints;
-  std::vector<MapPoint *> mvpGCNMapPoints;
 
   // BoW
   KeyFrameDatabase *mpKeyFrameDB;
@@ -220,8 +206,6 @@ protected:
 
   // Grid over the image to speed up feature matching
   std::vector<std::vector<std::vector<std::size_t>>> mGrid;
-  std::vector<std::vector<std::vector<std::size_t>>> mORBGrid;
-  std::vector<std::vector<std::vector<std::size_t>>> mGCNGrid;
 
   std::map<KeyFrame *, int> mConnectedKeyFrameWeights;
   std::vector<KeyFrame *> mvpOrderedConnectedKeyFrames;

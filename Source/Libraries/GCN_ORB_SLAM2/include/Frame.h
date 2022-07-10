@@ -157,8 +157,6 @@ public:
 
   // Number of KeyPoints.
   int N;
-  int ORBN;
-  int GCNN;
 
   // Number of KeyPoints, dictionary, ORB:0, GCN:1
   std::map<int, int> NDict;
@@ -169,32 +167,15 @@ public:
   std::vector<cv::KeyPoint> mvKeys, mvKeysRight;
   std::vector<cv::KeyPoint> mvKeysUn;
 
-  // ORB keypoints
-  std::vector<cv::KeyPoint> mvORBKeys, mvORBKeysRight;
-  std::vector<cv::KeyPoint> mvORBKeysUn;
-
-  // GCN keypoints
-  std::vector<cv::KeyPoint> mvGCNKeys, mvGCNKeysRight;
-  std::vector<cv::KeyPoint> mvGCNKeysUn;
-
   // keypoints dictionary, ORB:0, GCN:1
   std::map<int, std::vector<cv::KeyPoint>> mvKeysDict;
   std::map<int, std::vector<cv::KeyPoint>> mvKeysRightDict;
   std::map<int, std::vector<cv::KeyPoint>> mvKeysUnDict;
 
-
   // Corresponding stereo coordinate and depth for each keypoint.
   // "Monocular" keypoints have a negative value.
   std::vector<float> mvuRight;
   std::vector<float> mvDepth;
-
-  // ORB corresponding stereo coordinate and depth for each keypoint
-  std::vector<float> mvuORBRight;
-  std::vector<float> mvORBDepth;
-
-  // GCN corresponding stereo coordinate and depth for each keypoint
-  std::vector<float> mvuGCNRight;
-  std::vector<float> mvGCNDepth;
 
   // Depth and coordinate dictionary, ORB:0, GCN:1
   std::map<int, std::vector<float>> mvuRightDict;
@@ -206,8 +187,6 @@ public:
 
   // Descriptor, each row associated to a keypoint.
   cv::Mat mDescriptors, mDescriptorsRight;
-  cv::Mat mORBDescriptors, mORBDescriptorsRight;
-  cv::Mat mGCNDescriptors, mGCNDescriptorsRight;
 
   // Descriptor dictionary, ORB:0, GCN:1
   std::map<int, cv::Mat> mDescriptorsDict;
@@ -215,16 +194,12 @@ public:
   
   // MapPoints associated to keypoints, NULL pointer if no association.
   std::vector<MapPoint *> mvpMapPoints;
-  std::vector<MapPoint *> mvpORBMapPoints;
-  std::vector<MapPoint *> mvpGCNMapPoints;
 
   // mappoints dictionary, ORB:0, GCN:1
   std::map<int, std::vector<MapPoint *>> mvpMapPointsDict;
 
   // Flag to identify outlier associations.
   std::vector<bool> mvbOutlier;
-  std::vector<bool> mvbORBOutlier;
-  std::vector<bool> mvbGCNOutlier;
 
   // outlier dictionary, ORB:0, GCN:1
   std::map<int, std::vector<bool>> mvbOutlierDict;
@@ -236,8 +211,6 @@ public:
 
   // mGrid
   std::vector<std::vector<std::vector<std::size_t>>> mGrid;
-  std::vector<std::vector<std::vector<std::size_t>>> mORBGrid;
-  std::vector<std::vector<std::vector<std::size_t>>> mGCNGrid;
 
   // mGrid dictionary
   std::map<int, std::vector<std::vector<std::vector<std::size_t>>>> mGridDict;
