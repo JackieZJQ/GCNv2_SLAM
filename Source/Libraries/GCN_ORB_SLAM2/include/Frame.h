@@ -226,13 +226,11 @@ public:
   // when projecting MapPoints.
   static float mfGridElementWidthInv;
   static float mfGridElementHeightInv;
-  std::vector<std::size_t> mGrid[FRAME_GRID_COLS][FRAME_GRID_ROWS];
 
-  // ORB Keypoints are assigned to ORB cells
-  std::vector<std::size_t> mORBGrid[FRAME_GRID_COLS][FRAME_GRID_ROWS];
-
-  // GCN Keypoints are assigned to GCN cells
-  std::vector<std::size_t> mGCNGrid[FRAME_GRID_COLS][FRAME_GRID_ROWS];
+  // mGrid
+  std::vector<std::vector<std::vector<std::size_t>>> mGrid;
+  std::vector<std::vector<std::vector<std::size_t>>> mORBGrid;
+  std::vector<std::vector<std::vector<std::size_t>>> mGCNGrid;
 
   // Camera pose.
   cv::Mat mTcw;
@@ -279,7 +277,7 @@ private:
   void AssignFeaturesToGrid();
 
   void AssignFeaturesToGrid(const int &refN, const std::vector<cv::KeyPoint> &KeysUn, 
-                              std::vector<std::size_t> (&Grid)[FRAME_GRID_COLS][FRAME_GRID_ROWS]);
+                              std::vector<std::vector<std::vector<std::size_t>>> &Grid);
 
   // Rotation, translation and camera center
   cv::Mat mRcw;

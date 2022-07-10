@@ -66,8 +66,14 @@ Frame::Frame(const Frame &frame)
       mvInvScaleFactors(frame.mvInvScaleFactors),
       mvLevelSigma2(frame.mvLevelSigma2),
       mvInvLevelSigma2(frame.mvInvLevelSigma2) {
-  for (int i = 0; i < FRAME_GRID_COLS; i++) {
-    for (int j = 0; j < FRAME_GRID_ROWS; j++) {
+  mGrid.resize(FRAME_GRID_COLS);
+  mORBGrid.resize(FRAME_GRID_COLS);
+  mGCNGrid.resize(FRAME_GRID_COLS);
+  for (unsigned int i = 0; i < FRAME_GRID_COLS; i++) {
+    mGrid[i].resize(FRAME_GRID_ROWS);
+    mORBGrid[i].resize(FRAME_GRID_ROWS);
+    mGCNGrid[i].resize(FRAME_GRID_ROWS);
+    for (unsigned int j = 0; j < FRAME_GRID_ROWS; j++) {
       mGrid[i][j] = frame.mGrid[i][j];
       mORBGrid[i][j] = frame.mORBGrid[i][j];
       mGCNGrid[i][j] = frame.mGCNGrid[i][j];
@@ -319,14 +325,18 @@ void Frame::AssignFeaturesToGrid() {
   }
 }
 
-// rewrite AssignFeaturesToGrid()
+//rewrite AssignFeaturesToGrid()
 void Frame::AssignFeaturesToGrid(const int &refN, const vector<cv::KeyPoint> &KeysUn, 
-                                  vector<size_t> (&Grid)[FRAME_GRID_COLS][FRAME_GRID_ROWS]) {
+                                  vector<vector<vector<size_t>>> &Grid) {
   int nReserve = 0.5f * refN / (FRAME_GRID_COLS * FRAME_GRID_ROWS);
-  for (unsigned int i = 0; i < FRAME_GRID_COLS; i++)
-    for (unsigned int j = 0; j < FRAME_GRID_ROWS; j++)
+  Grid.resize(FRAME_GRID_COLS);
+  for (unsigned int i = 0; i < FRAME_GRID_COLS; i++) {
+    Grid[i].resize(FRAME_GRID_ROWS);
+    for (unsigned int j = 0; j < FRAME_GRID_ROWS; j++) {
       Grid[i][j].reserve(nReserve);
-  
+    }
+  }
+
   for (int i = 0; i < refN; i++) {
     const cv::KeyPoint &kp = KeysUn[i];
 
