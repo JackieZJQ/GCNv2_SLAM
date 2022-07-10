@@ -177,7 +177,7 @@ public:
   std::vector<cv::KeyPoint> mvGCNKeys, mvGCNKeysRight;
   std::vector<cv::KeyPoint> mvGCNKeysUn;
 
-  // keypoints dictionary   
+  // keypoints dictionary, ORB:0, GCN:1
   std::map<int, std::vector<cv::KeyPoint>> mvKeysDict;
   std::map<int, std::vector<cv::KeyPoint>> mvKeysRightDict;
   std::map<int, std::vector<cv::KeyPoint>> mvKeysUnDict;
@@ -196,7 +196,7 @@ public:
   std::vector<float> mvuGCNRight;
   std::vector<float> mvGCNDepth;
 
-  // Depth and coordinate dictionary
+  // Depth and coordinate dictionary, ORB:0, GCN:1
   std::map<int, std::vector<float>> mvuRightDict;
   std::map<int, std::vector<float>> mvDepthDict;
 
@@ -209,7 +209,7 @@ public:
   cv::Mat mORBDescriptors, mORBDescriptorsRight;
   cv::Mat mGCNDescriptors, mGCNDescriptorsRight;
 
-  // Descriptor dictionary
+  // Descriptor dictionary, ORB:0, GCN:1
   std::map<int, cv::Mat> mDescriptorsDict;
   std::map<int, cv::Mat> mDescriptorsRightDict;
   
@@ -218,7 +218,7 @@ public:
   std::vector<MapPoint *> mvpORBMapPoints;
   std::vector<MapPoint *> mvpGCNMapPoints;
 
-  // mappoints dictionary
+  // mappoints dictionary, ORB:0, GCN:1
   std::map<int, std::vector<MapPoint *>> mvpMapPointsDict;
 
   // Flag to identify outlier associations.
@@ -226,7 +226,7 @@ public:
   std::vector<bool> mvbORBOutlier;
   std::vector<bool> mvbGCNOutlier;
 
-  // outlier dictionary
+  // outlier dictionary, ORB:0, GCN:1
   std::map<int, std::vector<bool>> mvbOutlierDict;
 
   // Keypoints are assigned to cells in a grid to reduce matching complexity
@@ -241,7 +241,7 @@ public:
 
   // mGrid dictionary
   std::map<int, std::vector<std::vector<std::vector<std::size_t>>>> mGridDict;
-  
+
   // Camera pose.
   cv::Mat mTcw;
 

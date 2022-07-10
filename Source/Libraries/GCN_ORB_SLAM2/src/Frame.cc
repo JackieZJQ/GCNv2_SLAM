@@ -189,6 +189,10 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   ORBN = mvORBKeys.size();
   GCNN = mvGCNKeys.size();
 
+  //
+  NDict[0] = mvKeysDict[0].size();
+  NDict[1] = mvKeysDict[1].size();
+  
   if (mvKeys.empty())
     return;
 
@@ -198,11 +202,19 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   UndistortKeyPoints(mvORBKeys, mvORBKeysUn, ORBN);
   UndistortKeyPoints(mvGCNKeys, mvGCNKeysUn, GCNN);
 
+  //
+  UndistortKeyPoints(mvKeysDict[0], mvKeysUnDict[0], NDict[0]);
+  UndistortKeyPoints(mvKeysDict[1], mvKeysUnDict[1], NDict[1]);
+
   // compute mvuRight and mvDepth
   //ComputeStereoFromRGBD(imDepth);
   ComputeStereoFromRGBD(imDepth, mvuRight, mvDepth, N, mvKeys, mvKeysUn); 
   ComputeStereoFromRGBD(imDepth, mvuORBRight, mvORBDepth, ORBN, mvORBKeys, mvORBKeysUn);  
   ComputeStereoFromRGBD(imDepth, mvuGCNRight, mvGCNDepth, GCNN, mvGCNKeys, mvGCNKeysUn);
+
+  //
+  ComputeStereoFromRGBD(imDepth, mvuRightDict[0], mvDepthDict[0], NDict[0], mvKeysDict[0], mvKeysUnDict[0]); 
+  ComputeStereoFromRGBD(imDepth, mvuRightDict[1], mvDepthDict[1], NDict[1], mvKeysDict[1], mvKeysUnDict[1]); 
 
   mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
   mvbOutlier = vector<bool>(N, false);
@@ -214,6 +226,15 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   // Initlization GCN Map points
   mvpGCNMapPoints = vector<MapPoint *>(GCNN, static_cast<MapPoint *>(NULL));
   mvbGCNOutlier = vector<bool>(GCNN, false);
+
+  //
+  mvpMapPointsDict[0] = vector<MapPoint *>(NDict[0], static_cast<MapPoint *>(NULL));
+  mvbOutlierDict[0] = vector<bool>(NDict[0], false);
+
+  //
+  mvpMapPointsDict[1] = vector<MapPoint *>(NDict[1], static_cast<MapPoint *>(NULL));
+  mvbOutlierDict[1] = vector<bool>(NDict[1], false);
+
 
   // This is done only for the first Frame (or after a change in the
   // calibration)
@@ -241,6 +262,10 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   AssignFeaturesToGrid(N, mvKeysUn, mGrid);
   AssignFeaturesToGrid(ORBN, mvORBKeysUn, mORBGrid);
   AssignFeaturesToGrid(GCNN, mvGCNKeysUn, mGCNGrid);
+
+  AssignFeaturesToGrid(NDict[0], mvKeysUnDict[0], mGridDict[0]);
+  AssignFeaturesToGrid(NDict[1], mvKeysUnDict[1], mGridDict[1]);
+  
 
 }
 
@@ -350,15 +375,18 @@ void Frame::AssignFeaturesToGrid(const int &refN, const vector<cv::KeyPoint> &Ke
 void Frame::ExtractFeatures(int flag, const cv::Mat &im) {
   if (flag == 0){
     (*mpGCNExtractorLeft)(im, cv::Mat(), mvKeys, mDescriptors);
-    (*mpGCNExtractorLeft)(im, cv::Mat(), mvGCNKeys, mGCNDescriptors);
     (*mpORBExtractorLeft)(im, cv::Mat(), mvORBKeys, mORBDescriptors);
-
+    (*mpGCNExtractorLeft)(im, cv::Mat(), mvGCNKeys, mGCNDescriptors);
+    (*mpORBExtractorLeft)(im, cv::Mat(), mvKeysDict[0], mDescriptorsDict[0]);
+    (*mpGCNExtractorLeft)(im, cv::Mat(), mvKeysDict[1], mDescriptorsDict[1]);
     //std::cout << mvKeysORB.back().octave << std::endl;
   }
   else {
     (*mpGCNExtractorRight)(im, cv::Mat(), mvKeysRight, mDescriptorsRight);
-    (*mpGCNExtractorRight)(im, cv::Mat(), mvGCNKeysRight, mGCNDescriptorsRight);
     (*mpORBExtractorRight)(im, cv::Mat(), mvORBKeysRight, mORBDescriptorsRight);
+    (*mpGCNExtractorRight)(im, cv::Mat(), mvGCNKeysRight, mGCNDescriptorsRight);
+    (*mpORBExtractorRight)(im, cv::Mat(), mvKeysRightDict[0], mDescriptorsRightDict[0]);
+    (*mpGCNExtractorRight)(im, cv::Mat(), mvKeysRightDict[1], mDescriptorsRightDict[1]);
   }
 }
 
