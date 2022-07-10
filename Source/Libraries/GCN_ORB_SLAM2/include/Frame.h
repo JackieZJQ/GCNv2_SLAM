@@ -157,12 +157,11 @@ public:
 
   // Number of KeyPoints.
   int N;
-
-  // Number of ORB Keypoints
   int ORBN;
+  int GCNN;
 
-  // Number of GCN Keypoints
-  int GCNN; 
+  // Number of KeyPoints, dictionary, ORB:0, GCN:1
+  std::map<int, int> NDict;
 
   // std::vector of keypoints (original for visualization) and undistorted
   // (actually used by the system). In the stereo case, mvKeysUn is redundant as
@@ -178,6 +177,12 @@ public:
   std::vector<cv::KeyPoint> mvGCNKeys, mvGCNKeysRight;
   std::vector<cv::KeyPoint> mvGCNKeysUn;
 
+  // keypoints dictionary   
+  std::map<int, std::vector<cv::KeyPoint>> mvKeysDict;
+  std::map<int, std::vector<cv::KeyPoint>> mvKeysRightDict;
+  std::map<int, std::vector<cv::KeyPoint>> mvKeysUnDict;
+
+
   // Corresponding stereo coordinate and depth for each keypoint.
   // "Monocular" keypoints have a negative value.
   std::vector<float> mvuRight;
@@ -191,36 +196,38 @@ public:
   std::vector<float> mvuGCNRight;
   std::vector<float> mvGCNDepth;
 
+  // Depth and coordinate dictionary
+  std::map<int, std::vector<float>> mvuRightDict;
+  std::map<int, std::vector<float>> mvDepthDict;
+
   // Bag of Words std::vector structures.
   DBoW2::BowVector mBowVec;
   DBoW2::FeatureVector mFeatVec;
 
   // Descriptor, each row associated to a keypoint.
   cv::Mat mDescriptors, mDescriptorsRight;
-  
-  // ORB descriptors
   cv::Mat mORBDescriptors, mORBDescriptorsRight;
-
-  // GCN descriptors
   cv::Mat mGCNDescriptors, mGCNDescriptorsRight;
 
+  // Descriptor dictionary
+  std::map<int, cv::Mat> mDescriptorsDict;
+  std::map<int, cv::Mat> mDescriptorsRightDict;
+  
   // MapPoints associated to keypoints, NULL pointer if no association.
   std::vector<MapPoint *> mvpMapPoints;
-
-  // ORB MapPoints
   std::vector<MapPoint *> mvpORBMapPoints;
-
-  // GCN MapPoints
   std::vector<MapPoint *> mvpGCNMapPoints;
+
+  // mappoints dictionary
+  std::map<int, std::vector<MapPoint *>> mvpMapPointsDict;
 
   // Flag to identify outlier associations.
   std::vector<bool> mvbOutlier;
-
-  // ORB Flag to identify outlier associations.
   std::vector<bool> mvbORBOutlier;
-
-  // GCN Flag to identify outlier associations.
   std::vector<bool> mvbGCNOutlier;
+
+  // outlier dictionary
+  std::map<int, std::vector<bool>> mvbOutlierDict;
 
   // Keypoints are assigned to cells in a grid to reduce matching complexity
   // when projecting MapPoints.
@@ -232,6 +239,9 @@ public:
   std::vector<std::vector<std::vector<std::size_t>>> mORBGrid;
   std::vector<std::vector<std::vector<std::size_t>>> mGCNGrid;
 
+  // mGrid dictionary
+  std::map<int, std::vector<std::vector<std::vector<std::size_t>>>> mGridDict;
+  
   // Camera pose.
   cv::Mat mTcw;
 
