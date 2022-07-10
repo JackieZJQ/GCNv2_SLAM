@@ -47,7 +47,7 @@ Frame::Frame(const Frame &frame)
       mThDepth(frame.mThDepth), mBowVec(frame.mBowVec), mFeatVec(frame.mFeatVec), 
       N(frame.N), NDict(frame.NDict),                                                 // N
       mvKeys(frame.mvKeys), mvKeysDict(frame.mvKeysDict),                             // mvKeys
-      mvKeysRight(frame.mvKeysRight), mvKeysRightDict(frame.mvKeysRightDict),             // mvKeysRight
+      mvKeysRight(frame.mvKeysRight), mvKeysRightDict(frame.mvKeysRightDict),         // mvKeysRight
       mvKeysUn(frame.mvKeysUn), mvKeysUnDict(frame.mvKeysUnDict),                     // mvKeysUn
       mvuRight(frame.mvuRight), mvuRightDict(frame.mvuRightDict),                     // mvuRight
       mvDepth(frame.mvDepth), mvDepthDict(frame.mvDepthDict),                         // mvDepth            
@@ -172,8 +172,6 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   ExtractFeatures(0, imGray);
 
   N = mvKeys.size();
-
-  //
   NDict[0] = mvKeysDict[0].size();
   NDict[1] = mvKeysDict[1].size();
   
@@ -183,28 +181,23 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   // mvKeysUn, Left image
   //UndistortKeyPoints();
   UndistortKeyPoints(mvKeys, mvKeysUn, N);
-
-  //
   UndistortKeyPoints(mvKeysDict[0], mvKeysUnDict[0], NDict[0]);
   UndistortKeyPoints(mvKeysDict[1], mvKeysUnDict[1], NDict[1]);
 
   // compute mvuRight and mvDepth
   //ComputeStereoFromRGBD(imDepth);
   ComputeStereoFromRGBD(imDepth, mvuRight, mvDepth, N, mvKeys, mvKeysUn); 
-
-  //
   ComputeStereoFromRGBD(imDepth, mvuRightDict[0], mvDepthDict[0], NDict[0], mvKeysDict[0], mvKeysUnDict[0]); 
   ComputeStereoFromRGBD(imDepth, mvuRightDict[1], mvDepthDict[1], NDict[1], mvKeysDict[1], mvKeysUnDict[1]); 
 
+  // map points
   mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
-  mvbOutlier = vector<bool>(N, false);
-
-  //
   mvpMapPointsDict[0] = vector<MapPoint *>(NDict[0], static_cast<MapPoint *>(NULL));
-  mvbOutlierDict[0] = vector<bool>(NDict[0], false);
-
-  //
   mvpMapPointsDict[1] = vector<MapPoint *>(NDict[1], static_cast<MapPoint *>(NULL));
+
+  // outliers
+  mvbOutlier = vector<bool>(N, false);
+  mvbOutlierDict[0] = vector<bool>(NDict[0], false); 
   mvbOutlierDict[1] = vector<bool>(NDict[1], false);
 
 
@@ -495,7 +488,7 @@ bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY) {
   return true;
 }
 
-// TO-DO rewrite
+// TO-DO add gcn and orb parms
 void Frame::ComputeBoW() {
   if (mBowVec.empty()) {
     vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);

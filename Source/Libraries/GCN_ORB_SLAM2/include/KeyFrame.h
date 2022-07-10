@@ -154,6 +154,9 @@ public:
   // Number of KeyPoints
   const int N;
 
+  // Number of KeyPoints, dictionary, ORB:0, GCN:1
+  const std::map<int, int> NDict;
+
   // KeyPoints, stereo coordinate and descriptors (all associated by an index)
   const std::vector<cv::KeyPoint> mvKeys;
 
@@ -164,6 +167,17 @@ public:
   const std::vector<float> mvDepth;  // negative value for monocular points
 
   const cv::Mat mDescriptors;
+
+  // dictionary value
+  std::map<int, std::vector<cv::KeyPoint>> mvKeysDict;
+
+  std::map<int, std::vector<cv::KeyPoint>> mvKeysUnDict;
+
+  std::map<int, std::vector<float>> mvuRightDict;
+
+  std::map<int, std::vector<float>> mvDepthDict;
+
+  std::map<int, cv::Mat> mDescriptorsDict;
 
   // BoW
   DBoW2::BowVector mBowVec;
@@ -200,12 +214,18 @@ protected:
   // MapPoints associated to keypoints
   std::vector<MapPoint *> mvpMapPoints;
 
+  // MapPoints associated to keypoints (Dictionary ORB:0, GCN:1)
+  std::map<int, std::vector<MapPoint *>> mvpMapPointsDict;
+
   // BoW
   KeyFrameDatabase *mpKeyFrameDB;
   ORBVocabulary *mpORBvocabulary;
 
   // Grid over the image to speed up feature matching
   std::vector<std::vector<std::vector<std::size_t>>> mGrid;
+
+  // Grid over the image to speed up feature matching (Dictionary ORB:0, GCN:1)
+  std::map<int, std::vector<std::vector<std::vector<std::size_t>>>> mGridDict;
 
   std::map<KeyFrame *, int> mConnectedKeyFrameWeights;
   std::vector<KeyFrame *> mvpOrderedConnectedKeyFrames;

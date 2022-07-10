@@ -167,7 +167,7 @@ public:
   std::vector<cv::KeyPoint> mvKeys, mvKeysRight;
   std::vector<cv::KeyPoint> mvKeysUn;
 
-  // keypoints dictionary, ORB:0, GCN:1
+  // Keypoints dictionary, ORB:0, GCN:1
   std::map<int, std::vector<cv::KeyPoint>> mvKeysDict;
   std::map<int, std::vector<cv::KeyPoint>> mvKeysRightDict;
   std::map<int, std::vector<cv::KeyPoint>> mvKeysUnDict;
