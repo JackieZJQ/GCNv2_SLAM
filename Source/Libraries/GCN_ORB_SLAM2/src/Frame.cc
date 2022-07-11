@@ -190,8 +190,6 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
   mb = mbf / fx;
 
- 
-
   // thread threadORB(&Frame::ComputeFeature, this, 0, imGray, imDepth);
   // thread threadGCN(&Frame::ComputeFeature, this, 1, imGray, imDepth);
   // threadORB.join();

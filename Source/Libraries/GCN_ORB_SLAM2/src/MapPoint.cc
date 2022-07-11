@@ -62,14 +62,14 @@ MapPoint::MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame,
 
   cv::Mat PC = Pos - Ow;
   const float dist = cv::norm(PC);
-  const int level = pFrame->mvKeysUn[idxF].octave;
+  const int level = pFrame->mvKeysUnDict[mFeatureType][idxF].octave;
   const float levelScaleFactor = pFrame->mvScaleFactors[level];
   const int nLevels = pFrame->mnScaleLevels;
 
   mfMaxDistance = dist * levelScaleFactor;
   mfMinDistance = mfMaxDistance / pFrame->mvScaleFactors[nLevels - 1];
 
-  pFrame->mDescriptors.row(idxF).copyTo(mDescriptor);
+  pFrame->mDescriptorsDict[mFeatureType].row(idxF).copyTo(mDescriptor);
 
   // MapPoints can be created from Tracking and Local Mapping. This mutex avoid
   // conflicts with id.
@@ -98,13 +98,14 @@ KeyFrame *MapPoint::GetReferenceKeyFrame() {
   return mpRefKF;
 }
 
+//TO-DO, will it have problems if I do not sepicfy the feature type on mObservations ?
 void MapPoint::AddObservation(KeyFrame *pKF, std::size_t idx) {
   unique_lock<mutex> lock(mMutexFeatures);
   if (mObservations.count(pKF))
     return;
   mObservations[pKF] = idx;
 
-  if (pKF->mvuRight[idx] >= 0)
+  if (pKF->mvuRightDict[mFeatureType][idx] >= 0)
     nObs += 2;
   else
     nObs++;
@@ -116,7 +117,7 @@ void MapPoint::EraseObservation(KeyFrame *pKF) {
     unique_lock<mutex> lock(mMutexFeatures);
     if (mObservations.count(pKF)) {
       int idx = mObservations[pKF];
-      if (pKF->mvuRight[idx] >= 0)
+      if (pKF->mvuRightDict[mFeatureType][idx] >= 0)
         nObs -= 2;
       else
         nObs--;
@@ -253,7 +254,7 @@ void MapPoint::ComputeDistinctiveDescriptors() {
     KeyFrame *pKF = mit->first;
 
     if (!pKF->isBad())
-      vDescriptors.push_back(pKF->mDescriptors.row(mit->second));
+      vDescriptors.push_back(pKF->mDescriptorsDict[mFeatureType].row(mit->second));
   }
 
   if (vDescriptors.empty())
@@ -342,7 +343,7 @@ void MapPoint::UpdateNormalAndDepth() {
 
   cv::Mat PC = Pos - pRefKF->GetCameraCenter();
   const float dist = cv::norm(PC);
-  const int level = pRefKF->mvKeysUn[observations[pRefKF]].octave;
+  const int level = pRefKF->mvKeysUnDict[mFeatureType][observations[pRefKF]].octave;
   const float levelScaleFactor = pRefKF->mvScaleFactors[level];
   const int nLevels = pRefKF->mnScaleLevels;
 

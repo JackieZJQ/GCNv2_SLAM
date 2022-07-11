@@ -151,6 +151,9 @@ public:
   // Calibration parameters
   const float fx, fy, cx, cy, invfx, invfy, mbf, mb, mThDepth;
 
+  // Number of feature types
+  const static int Ntype = 2;
+
   // Number of KeyPoints
   const int N;
 

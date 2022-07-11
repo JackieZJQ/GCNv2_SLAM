@@ -84,7 +84,10 @@ public:
   int nObs;
 
   // Define Flag, ORB:0, GCN:1
-  int mFeatureType;
+  const int mFeatureType;
+
+  // Number of feature types
+  const static int Ntype = 2;
 
   // Variables used by the tracking
   float mTrackProjX;
