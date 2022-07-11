@@ -168,6 +168,28 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   mvLevelSigma2 = mpORBExtractorLeft->GetScaleSigmaSquares();
   mvInvLevelSigma2 = mpORBExtractorLeft->GetInverseScaleSigmaSquares();
 
+  // This is done only for the first Frame (or after a change in the
+  // calibration)
+  if (mbInitialComputations) {
+    ComputeImageBounds(imGray);
+
+    mfGridElementWidthInv = static_cast<float>(FRAME_GRID_COLS) /
+                            static_cast<float>(mnMaxX - mnMinX);
+    mfGridElementHeightInv = static_cast<float>(FRAME_GRID_ROWS) /
+                             static_cast<float>(mnMaxY - mnMinY);
+
+    fx = K.at<float>(0, 0);
+    fy = K.at<float>(1, 1);
+    cx = K.at<float>(0, 2);
+    cy = K.at<float>(1, 2);
+    invfx = 1.0f / fx;
+    invfy = 1.0f / fy;
+
+    mbInitialComputations = false;
+  }
+
+  mb = mbf / fx;
+
   // ORB extraction
   ExtractFeatures(0, imGray);
 
@@ -175,7 +197,7 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   NDict[0] = mvKeysDict[0].size();
   NDict[1] = mvKeysDict[1].size();
   
-  // TO-DO 
+  // TO-DO, should judge orb and gcn in paralel
   if (mvKeysDict[0].empty())
     return;
 
@@ -201,48 +223,23 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   mvbOutlierDict[0] = vector<bool>(NDict[0], false); 
   mvbOutlierDict[1] = vector<bool>(NDict[1], false);
 
-
-  // This is done only for the first Frame (or after a change in the
-  // calibration)
-  if (mbInitialComputations) {
-    ComputeImageBounds(imGray);
-
-    mfGridElementWidthInv = static_cast<float>(FRAME_GRID_COLS) /
-                            static_cast<float>(mnMaxX - mnMinX);
-    mfGridElementHeightInv = static_cast<float>(FRAME_GRID_ROWS) /
-                             static_cast<float>(mnMaxY - mnMinY);
-
-    fx = K.at<float>(0, 0);
-    fy = K.at<float>(1, 1);
-    cx = K.at<float>(0, 2);
-    cy = K.at<float>(1, 2);
-    invfx = 1.0f / fx;
-    invfy = 1.0f / fy;
-
-    mbInitialComputations = false;
-  }
-
-  mb = mbf / fx;
-
   //AssignFeaturesToGrid();
   // AssignFeaturesToGrid(N, mvKeysUn, mGrid);
   AssignFeaturesToGrid(NDict[0], mvKeysUnDict[0], mGridDict[0]);
   AssignFeaturesToGrid(NDict[1], mvKeysUnDict[1], mGridDict[1]);
 
-  // Use dictionary to store orb and gcn parms in parallel, then copy data to default variables, choose orbfeatures
-  // need deep copy ?
-  N = NDict[0];
-  mvKeys = mvKeysDict[0];
-  mvKeysUn = mvKeysUnDict[0];
-  mDescriptors = mDescriptorsDict[0];
-  mvKeysRight = mvKeysRightDict[0];
-  mDescriptorsRight = mDescriptorsRightDict[0];
-  mvuRight = mvuRightDict[0];
-  mvDepth = mvDepthDict[0];
-  mvpMapPoints = mvpMapPointsDict[0];
-  mvbOutlier = mvbOutlierDict[0];
-  mGrid = mGridDict[0];
+  // Use dictionary to store orb and gcn parms in parallel, then copy data to default variables
+  // Choose orbfeatures
+  if (getenv("USE_ORB") == nullptr) {
+    int FeatureType = 1;
+    ChooseFeature(FeatureType);
+  }
+  else {
+    int FeatureType = 0;
+    ChooseFeature(FeatureType);
+  }
 
+  
 }
 
 // Mono
@@ -839,6 +836,22 @@ cv::Mat Frame::UnprojectStereo(const int &i, const vector<float> &Depth,
     return mRwc * x3Dc + mOw;
   } else
     return cv::Mat();
+}
+
+void Frame::ChooseFeature(const int Ftype) {
+
+  N = NDict[Ftype];
+  mvKeys = mvKeysDict[Ftype];
+  mvKeysUn = mvKeysUnDict[Ftype];
+  mDescriptors = mDescriptorsDict[Ftype];
+  mvKeysRight = mvKeysRightDict[Ftype];
+  mDescriptorsRight = mDescriptorsRightDict[Ftype];
+  mvuRight = mvuRightDict[Ftype];
+  mvDepth = mvDepthDict[Ftype];
+  mvpMapPoints = mvpMapPointsDict[Ftype];
+  mvbOutlier = mvbOutlierDict[Ftype];
+  mGrid = mGridDict[Ftype];
+
 }
 
 } // namespace ORB_SLAM2

@@ -262,6 +262,8 @@ private:
   void AssignFeaturesToGrid(const int &refN, const std::vector<cv::KeyPoint> &KeysUn, 
                               std::vector<std::vector<std::vector<std::size_t>>> &Grid);
 
+  void ChooseFeature(const int Ftype);
+
   // Rotation, translation and camera center
   cv::Mat mRcw;
   cv::Mat mtcw;
