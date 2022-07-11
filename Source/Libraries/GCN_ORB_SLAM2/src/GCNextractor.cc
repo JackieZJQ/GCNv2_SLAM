@@ -180,7 +180,7 @@ GCNextractor::GCNextractor(int _nfeatures, float _scaleFactor, int _nlevels,
   module = torch::jit::load(networkName);
   cout << "Loaded" << endl;
 
-  std::cout << "GCNextractor Initlization" << std::endl;
+  // std::cout << "GCNextractor Initlization" << std::endl;
   
 }
 

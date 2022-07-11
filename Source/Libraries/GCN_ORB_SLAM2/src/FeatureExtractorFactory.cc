@@ -10,9 +10,9 @@ namespace ORB_SLAM2 {
 
 FeatureExtractor *createFeatureExtractor(int nfeatures, float scaleFactor,
                                          int nlevels, int iniThFAST,
-                                         int minThFAST) {
+                                         int minThFAST, int flag) {
 #ifdef USE_GCN
-  if (getenv("USE_ORB") == nullptr) {
+  if (flag == 1) {
     return new GCNextractor(nfeatures, scaleFactor, nlevels, iniThFAST,
                             minThFAST);
   }

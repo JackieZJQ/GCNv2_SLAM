@@ -409,7 +409,7 @@ ORBextractor::ORBextractor(int _nfeatures, float _scaleFactor, int _nlevels,
   const Point *pattern0 = (const Point *)bit_pattern_31_;
   std::copy(pattern0, pattern0 + npoints, std::back_inserter(pattern));
   
-  std:cout << "ORBextractor Initlization" << std::endl;
+  // std:cout << "ORBextractor Initlization" << std::endl;
 
 }
 

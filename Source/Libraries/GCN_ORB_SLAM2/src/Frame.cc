@@ -171,32 +171,33 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   // ORB extraction
   ExtractFeatures(0, imGray);
 
-  N = mvKeys.size();
+  // N = mvKeys.size();
   NDict[0] = mvKeysDict[0].size();
   NDict[1] = mvKeysDict[1].size();
   
-  if (mvKeys.empty())
+  // TO-DO 
+  if (mvKeysDict[0].empty())
     return;
 
   // mvKeysUn, Left image
   //UndistortKeyPoints();
-  UndistortKeyPoints(mvKeys, mvKeysUn, N);
+  // UndistortKeyPoints(mvKeys, mvKeysUn, N);
   UndistortKeyPoints(mvKeysDict[0], mvKeysUnDict[0], NDict[0]);
   UndistortKeyPoints(mvKeysDict[1], mvKeysUnDict[1], NDict[1]);
 
   // compute mvuRight and mvDepth
   //ComputeStereoFromRGBD(imDepth);
-  ComputeStereoFromRGBD(imDepth, mvuRight, mvDepth, N, mvKeys, mvKeysUn); 
+  // ComputeStereoFromRGBD(imDepth, mvuRight, mvDepth, N, mvKeys, mvKeysUn); 
   ComputeStereoFromRGBD(imDepth, mvuRightDict[0], mvDepthDict[0], NDict[0], mvKeysDict[0], mvKeysUnDict[0]); 
   ComputeStereoFromRGBD(imDepth, mvuRightDict[1], mvDepthDict[1], NDict[1], mvKeysDict[1], mvKeysUnDict[1]); 
 
   // map points
-  mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
+  // mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
   mvpMapPointsDict[0] = vector<MapPoint *>(NDict[0], static_cast<MapPoint *>(NULL));
   mvpMapPointsDict[1] = vector<MapPoint *>(NDict[1], static_cast<MapPoint *>(NULL));
 
   // outliers
-  mvbOutlier = vector<bool>(N, false);
+  // mvbOutlier = vector<bool>(N, false);
   mvbOutlierDict[0] = vector<bool>(NDict[0], false); 
   mvbOutlierDict[1] = vector<bool>(NDict[1], false);
 
@@ -224,10 +225,24 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   mb = mbf / fx;
 
   //AssignFeaturesToGrid();
-  AssignFeaturesToGrid(N, mvKeysUn, mGrid);
+  // AssignFeaturesToGrid(N, mvKeysUn, mGrid);
   AssignFeaturesToGrid(NDict[0], mvKeysUnDict[0], mGridDict[0]);
   AssignFeaturesToGrid(NDict[1], mvKeysUnDict[1], mGridDict[1]);
-  
+
+  // Use dictionary to store orb and gcn parms in parallel, then copy data to default variables, choose orbfeatures
+  // need deep copy ?
+  N = NDict[0];
+  mvKeys = mvKeysDict[0];
+  mvKeysUn = mvKeysUnDict[0];
+  mDescriptors = mDescriptorsDict[0];
+  mvKeysRight = mvKeysRightDict[0];
+  mDescriptorsRight = mDescriptorsRightDict[0];
+  mvuRight = mvuRightDict[0];
+  mvDepth = mvDepthDict[0];
+  mvpMapPoints = mvpMapPointsDict[0];
+  mvbOutlier = mvbOutlierDict[0];
+  mGrid = mGridDict[0];
+
 }
 
 // Mono
@@ -335,13 +350,11 @@ void Frame::AssignFeaturesToGrid(const int &refN, const vector<cv::KeyPoint> &Ke
 
 void Frame::ExtractFeatures(int flag, const cv::Mat &im) {
   if (flag == 0){
-    (*mpGCNExtractorLeft)(im, cv::Mat(), mvKeys, mDescriptors);
     (*mpORBExtractorLeft)(im, cv::Mat(), mvKeysDict[0], mDescriptorsDict[0]);
     (*mpGCNExtractorLeft)(im, cv::Mat(), mvKeysDict[1], mDescriptorsDict[1]);
     //std::cout << mvKeysORB.back().octave << std::endl;
   }
   else {
-    (*mpGCNExtractorRight)(im, cv::Mat(), mvKeysRight, mDescriptorsRight);
     (*mpORBExtractorRight)(im, cv::Mat(), mvKeysRightDict[0], mDescriptorsRightDict[0]);
     (*mpGCNExtractorRight)(im, cv::Mat(), mvKeysRightDict[1], mDescriptorsRightDict[1]);
   }

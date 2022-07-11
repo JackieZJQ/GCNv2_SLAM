@@ -5,9 +5,10 @@
 
 namespace ORB_SLAM2 {
 
+// ORB:0, GCN:1
 FeatureExtractor *createFeatureExtractor(int nfeatures, float scaleFactor,
                                          int nlevels, int iniThFAST,
-                                         int minThFAST);
+                                         int minThFAST, int flag);
 
 }
 #endif

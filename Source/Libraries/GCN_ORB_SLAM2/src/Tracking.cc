@@ -119,40 +119,34 @@ Tracking::Tracking(System *pSys, ORBVocabulary *pVoc, FrameDrawer *pFrameDrawer,
   int fIniThFAST = fSettings["ORBextractor.iniThFAST"];
   int fMinThFAST = fSettings["ORBextractor.minThFAST"];
 
-  // create GCN extractor
-  unsetenv("USE_ORB");
-  mpGCNExtractorLeft = createFeatureExtractor(
-    nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);
-
   // create ORB extractor
-  setenv("USE_ORB", "YES", 1);
   mpORBExtractorLeft = createFeatureExtractor(
-      nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);
+    nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST, 0);
+  
+  // create GCN extractor
+  mpGCNExtractorLeft = createFeatureExtractor(
+    nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST, 1);
 
   if (sensor == System::STEREO){
 
-    // create GCN extractor
-    unsetenv("USE_ORB");
-    mpGCNExtractorRight = createFeatureExtractor(
-      nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);
-
     // create ORB extractor
-    setenv("USE_ORB", "YES", 1);
     mpORBExtractorRight = createFeatureExtractor(
-      nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);
+      nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST, 0);
+
+    // create GCN extractor
+    mpGCNExtractorRight = createFeatureExtractor(
+      nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST, 1);
   }
 
   if (sensor == System::MONOCULAR){
 
-    // create GCN extractor
-    unsetenv("USE_ORB");
-    mpIniGCNExtractor = createFeatureExtractor(
-        2 * nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);
-
     // create ORB extractor
-    setenv("USE_ORB", "YES", 1);
     mpIniORBExtractor = createFeatureExtractor(
-        2 * nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);
+        2 * nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST, 0);
+
+    // create GCN extractor
+    mpIniGCNExtractor = createFeatureExtractor(
+        2 * nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST, 1);
   }
 
   cout << endl << "ORB Extractor Parameters: " << endl;
