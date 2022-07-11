@@ -190,57 +190,17 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
   mb = mbf / fx;
 
-  // ORB extraction
-  // ExtractFeatures(0, imGray);
-
-  ExtractFeatures(0, 0, imGray);
-  ExtractFeatures(1, 0, imGray);
-  
-
-  // N = mvKeys.size();
-  NDict[0] = mvKeysDict[0].size();
-  NDict[1] = mvKeysDict[1].size();
-  
-  // TO-DO, should judge orb and gcn in paralel
-  if (mvKeysDict[0].empty())
-    return;
-
-  // mvKeysUn, Left image
-  //UndistortKeyPoints();
-  // UndistortKeyPoints(mvKeys, mvKeysUn, N);
-  UndistortKeyPoints(mvKeysDict[0], mvKeysUnDict[0], NDict[0]);
-  UndistortKeyPoints(mvKeysDict[1], mvKeysUnDict[1], NDict[1]);
-
-  // compute mvuRight and mvDepth
-  //ComputeStereoFromRGBD(imDepth);
-  // ComputeStereoFromRGBD(imDepth, mvuRight, mvDepth, N, mvKeys, mvKeysUn); 
-  ComputeStereoFromRGBD(imDepth, mvuRightDict[0], mvDepthDict[0], NDict[0], mvKeysDict[0], mvKeysUnDict[0]); 
-  ComputeStereoFromRGBD(imDepth, mvuRightDict[1], mvDepthDict[1], NDict[1], mvKeysDict[1], mvKeysUnDict[1]); 
-
-  // map points
-  // mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
-  mvpMapPointsDict[0] = vector<MapPoint *>(NDict[0], static_cast<MapPoint *>(NULL));
-  mvpMapPointsDict[1] = vector<MapPoint *>(NDict[1], static_cast<MapPoint *>(NULL));
-
-  // outliers
-  // mvbOutlier = vector<bool>(N, false);
-  mvbOutlierDict[0] = vector<bool>(NDict[0], false); 
-  mvbOutlierDict[1] = vector<bool>(NDict[1], false);
-
-  //AssignFeaturesToGrid();
-  // AssignFeaturesToGrid(N, mvKeysUn, mGrid);
-  AssignFeaturesToGrid(NDict[0], mvKeysUnDict[0], mGridDict[0]);
-  AssignFeaturesToGrid(NDict[1], mvKeysUnDict[1], mGridDict[1]);
+  // ORB：0， GCN：1
+  ComputeFeature(0, imGray, imDepth);
+  ComputeFeature(1, imGray, imDepth);
 
   // Use dictionary to store orb and gcn parms in parallel, then copy data to default variables
   // Choose orbfeatures
   if (getenv("USE_ORB") == nullptr) {
-    int FeatureType = 1;
-    ChooseFeature(FeatureType);
+    ChooseFeature(1);
   }
   else {
-    int FeatureType = 0;
-    ChooseFeature(FeatureType);
+    ChooseFeature(0);
   }  
 }
 
@@ -863,8 +823,38 @@ void Frame::ChooseFeature(const int Ftype) {
 
 }
 
-void Frame::ComputeFeature(const int Ftype) {
-  return;
+void Frame::ComputeFeature(const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth) {
+  // Feature extraction
+  ExtractFeatures(Ftype, 0, imGray);  
+
+  // N = mvKeys.size();
+  NDict[Ftype] = mvKeysDict[Ftype].size();
+  
+  // TO-DO, should judge orb and gcn in paralel
+  if (mvKeysDict[Ftype].empty())
+    return;
+
+  // mvKeysUn, Left image
+  //UndistortKeyPoints();
+  // UndistortKeyPoints(mvKeys, mvKeysUn, N);
+  UndistortKeyPoints(mvKeysDict[Ftype], mvKeysUnDict[Ftype], NDict[Ftype]);
+
+  // compute mvuRight and mvDepth
+  //ComputeStereoFromRGBD(imDepth);
+  // ComputeStereoFromRGBD(imDepth, mvuRight, mvDepth, N, mvKeys, mvKeysUn); 
+  ComputeStereoFromRGBD(imDepth, mvuRightDict[Ftype], mvDepthDict[Ftype], NDict[Ftype], mvKeysDict[Ftype], mvKeysUnDict[Ftype]); 
+
+  // map points
+  // mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
+  mvpMapPointsDict[Ftype] = vector<MapPoint *>(NDict[Ftype], static_cast<MapPoint *>(NULL));
+
+  // outliers
+  // mvbOutlier = vector<bool>(N, false);
+  mvbOutlierDict[Ftype] = vector<bool>(NDict[Ftype], false); 
+
+  //AssignFeaturesToGrid();
+  // AssignFeaturesToGrid(N, mvKeysUn, mGrid);
+  AssignFeaturesToGrid(NDict[Ftype], mvKeysUnDict[Ftype], mGridDict[Ftype]);
 } 
 
 } // namespace ORB_SLAM2
