@@ -310,7 +310,7 @@ void Tracking::Track() {
         CheckReplacedInLastFrame();
 
         // NN only keyframe tracking
-        bOK = TrackReferenceKeyFrame();
+        // bOK = TrackReferenceKeyFrame();
 
         // Set NN_ONLY for neglecting other tracking heuristics of original
         // ORB_SLAM2, used for farily compare with ORB feature

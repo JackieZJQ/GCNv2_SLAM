@@ -265,7 +265,7 @@ private:
   void ChooseFeature(const int Ftype);
 
   // compute features and assign to grids
-  void ComputeFeature(const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth);
+  void ComputeFeatures(const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth);
 
   // Rotation, translation and camera center
   cv::Mat mRcw;

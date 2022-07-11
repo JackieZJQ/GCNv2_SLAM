@@ -190,9 +190,22 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
   mb = mbf / fx;
 
+ 
+
+  // thread threadORB(&Frame::ComputeFeature, this, 0, imGray, imDepth);
+  // thread threadGCN(&Frame::ComputeFeature, this, 1, imGray, imDepth);
+  // threadORB.join();
+  // threadGCN.join();
+
+  // thread threadORB(&Frame::ExtractFeatures, this, 0, 0, imGray);
+  // thread threadGCN(&Frame::ExtractFeatures, this, 1, 0, imGray);
+  // threadORB.join();
+  // threadGCN.join();
   // ORB：0， GCN：1
-  ComputeFeature(0, imGray, imDepth);
-  ComputeFeature(1, imGray, imDepth);
+  ExtractFeatures(0, 0, imGray);
+  ExtractFeatures(1, 0, imGray);
+  ComputeFeatures(0, imGray, imDepth);
+  ComputeFeatures(1, imGray, imDepth);
 
   // Use dictionary to store orb and gcn parms in parallel, then copy data to default variables
   // Choose orbfeatures
@@ -201,7 +214,7 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   }
   else {
     ChooseFeature(0);
-  }  
+  }
 }
 
 // Mono
@@ -820,27 +833,25 @@ void Frame::ChooseFeature(const int Ftype) {
   mvpMapPoints = mvpMapPointsDict[Ftype];
   mvbOutlier = mvbOutlierDict[Ftype];
   mGrid = mGridDict[Ftype];
-
 }
 
-void Frame::ComputeFeature(const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth) {
+void Frame::ComputeFeatures(const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth) {
   // Feature extraction
-  ExtractFeatures(Ftype, 0, imGray);  
+  // ExtractFeatures(Ftype, 0, imGray);  
 
   // N = mvKeys.size();
   NDict[Ftype] = mvKeysDict[Ftype].size();
   
-  // TO-DO, should judge orb and gcn in paralel
   if (mvKeysDict[Ftype].empty())
     return;
 
   // mvKeysUn, Left image
-  //UndistortKeyPoints();
+  // UndistortKeyPoints();
   // UndistortKeyPoints(mvKeys, mvKeysUn, N);
   UndistortKeyPoints(mvKeysDict[Ftype], mvKeysUnDict[Ftype], NDict[Ftype]);
 
   // compute mvuRight and mvDepth
-  //ComputeStereoFromRGBD(imDepth);
+  // ComputeStereoFromRGBD(imDepth);
   // ComputeStereoFromRGBD(imDepth, mvuRight, mvDepth, N, mvKeys, mvKeysUn); 
   ComputeStereoFromRGBD(imDepth, mvuRightDict[Ftype], mvDepthDict[Ftype], NDict[Ftype], mvKeysDict[Ftype], mvKeysUnDict[Ftype]); 
 
@@ -852,7 +863,7 @@ void Frame::ComputeFeature(const int Ftype, const cv::Mat &imGray, const cv::Mat
   // mvbOutlier = vector<bool>(N, false);
   mvbOutlierDict[Ftype] = vector<bool>(NDict[Ftype], false); 
 
-  //AssignFeaturesToGrid();
+  // AssignFeaturesToGrid();
   // AssignFeaturesToGrid(N, mvKeysUn, mGrid);
   AssignFeaturesToGrid(NDict[Ftype], mvKeysUnDict[Ftype], mGridDict[Ftype]);
 } 
