@@ -68,8 +68,8 @@ public:
         ORBVocabulary *voc, cv::Mat &K,
         cv::Mat &distCoef, const float &bf, const float &thDepth);
 
-  // Extract ORB on the image. 0 for left image and 1 for right image.
-  void ExtractFeatures(int flag, const cv::Mat &im);
+  // Extract features, Ftype: ORB(0), GCN(1), imageFlag: left image (0), right image (1).
+  void ExtractFeatures(int Ftype, int imageFlag, const cv::Mat &im);
 
   // Compute Bag of Words representation.
   void ComputeBoW();
@@ -263,6 +263,9 @@ private:
                               std::vector<std::vector<std::vector<std::size_t>>> &Grid);
 
   void ChooseFeature(const int Ftype);
+
+  // compute features and assign to grids
+  void ComputeFeature(const int Ftype);
 
   // Rotation, translation and camera center
   cv::Mat mRcw;

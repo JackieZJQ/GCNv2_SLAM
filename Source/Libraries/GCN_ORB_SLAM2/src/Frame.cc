@@ -100,8 +100,8 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
   mvInvLevelSigma2 = mpORBExtractorLeft->GetInverseScaleSigmaSquares();
 
   // ORB extraction
-  thread threadLeft(&Frame::ExtractFeatures, this, 0, imLeft);
-  thread threadRight(&Frame::ExtractFeatures, this, 1, imRight);
+  thread threadLeft(&Frame::ExtractFeatures, this, 0, 0, imLeft);
+  thread threadRight(&Frame::ExtractFeatures, this, 0, 1, imRight);
   threadLeft.join();
   threadRight.join();
 
@@ -191,7 +191,11 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   mb = mbf / fx;
 
   // ORB extraction
-  ExtractFeatures(0, imGray);
+  // ExtractFeatures(0, imGray);
+
+  ExtractFeatures(0, 0, imGray);
+  ExtractFeatures(1, 0, imGray);
+  
 
   // N = mvKeys.size();
   NDict[0] = mvKeysDict[0].size();
@@ -237,9 +241,7 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   else {
     int FeatureType = 0;
     ChooseFeature(FeatureType);
-  }
-
-  
+  }  
 }
 
 // Mono
@@ -267,7 +269,7 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
   mvInvLevelSigma2 = mpORBExtractorLeft->GetInverseScaleSigmaSquares();
 
   // ORB extraction
-  ExtractFeatures(0, imGray);
+  ExtractFeatures(0, 0, imGray);
 
   N = mvKeys.size();
 
@@ -344,16 +346,23 @@ void Frame::AssignFeaturesToGrid(const int &refN, const vector<cv::KeyPoint> &Ke
   }
 }
 
-
-void Frame::ExtractFeatures(int flag, const cv::Mat &im) {
-  if (flag == 0){
-    (*mpORBExtractorLeft)(im, cv::Mat(), mvKeysDict[0], mDescriptorsDict[0]);
-    (*mpGCNExtractorLeft)(im, cv::Mat(), mvKeysDict[1], mDescriptorsDict[1]);
-    //std::cout << mvKeysORB.back().octave << std::endl;
+// Rewrite ExtractFeatures, Ftype: Feature type, imgaeFlag: left image or right image
+void Frame::ExtractFeatures(int Ftype, int imageFlag, const cv::Mat &im) {
+  if (Ftype == 0) {
+    if (imageFlag == 0) {
+      (*mpORBExtractorLeft)(im, cv::Mat(), mvKeysDict[0], mDescriptorsDict[0]);
+    }
+    else {
+      (*mpORBExtractorRight)(im, cv::Mat(), mvKeysRightDict[0], mDescriptorsRightDict[0]);
+    }
   }
   else {
-    (*mpORBExtractorRight)(im, cv::Mat(), mvKeysRightDict[0], mDescriptorsRightDict[0]);
-    (*mpGCNExtractorRight)(im, cv::Mat(), mvKeysRightDict[1], mDescriptorsRightDict[1]);
+    if (imageFlag == 0) {
+      (*mpGCNExtractorLeft)(im, cv::Mat(), mvKeysDict[1], mDescriptorsDict[1]);
+    }
+    else {
+      (*mpGCNExtractorRight)(im, cv::Mat(), mvKeysRightDict[1], mDescriptorsRightDict[1]);
+    }
   }
 }
 
@@ -853,5 +862,9 @@ void Frame::ChooseFeature(const int Ftype) {
   mGrid = mGridDict[Ftype];
 
 }
+
+void Frame::ComputeFeature(const int Ftype) {
+  return;
+} 
 
 } // namespace ORB_SLAM2
