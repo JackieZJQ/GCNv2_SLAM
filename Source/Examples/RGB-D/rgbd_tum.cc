@@ -70,15 +70,14 @@ int main(int argc, char **argv) {
   // Create SLAM system. It initializes all system threads and gets ready to
   // process frames.
 
-  // Get the vocabulary, depending upon whether GCN is used or not
-  string vocabularyFile;
-  if (getenv("USE_ORB") == nullptr) {
-    vocabularyFile = DEFAULT_BINARY_GCN_VOCABULARY;
-  } else {
-    vocabularyFile = DEFAULT_BINARY_ORB_VOCABULARY;
-  }
+  // Load both ORB and GCN vocabulary file whether or not "USE_ORB" is detected
+  string ORBvocabularyFile;
+  string GCNvocabularyFile;
 
-  ORB_SLAM2::System SLAM(vocabularyFile, settingsFile, ORB_SLAM2::System::RGBD,
+  ORBvocabularyFile = DEFAULT_BINARY_ORB_VOCABULARY;
+  GCNvocabularyFile = DEFAULT_BINARY_GCN_VOCABULARY;
+  
+  ORB_SLAM2::System SLAM(ORBvocabularyFile, GCNvocabularyFile, settingsFile, ORB_SLAM2::System::RGBD,
                          true);
 
   // Vector for tracking time statistics

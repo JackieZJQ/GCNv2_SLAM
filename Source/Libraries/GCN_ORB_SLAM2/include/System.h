@@ -52,7 +52,7 @@ public:
 public:
   // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and
   // Viewer threads.
-  System(const std::string &strVocFile, const std::string &strSettingsFile,
+  System(const std::string &ORBstrVocFile, const std::string &GCNstrVocFile, const std::string &strSettingsFile,
          const eSensor sensor, const bool bUseViewer = true);
 
   // Proccess the given stereo frame. Images must be synchronized and rectified.
@@ -136,8 +136,9 @@ private:
   // Input sensor
   eSensor mSensor;
 
-  // ORB vocabulary used for place recognition and feature matching.
-  ORBVocabulary *mpVocabulary;
+  // ORB and GCN vocabulary used for place recognition and feature matching.
+  ORBVocabulary *mpORBVocabulary;
+  ORBVocabulary *mpGCNVocabulary;
 
   // KeyFrame database for place recognition (relocalization and loop
   // detection).
