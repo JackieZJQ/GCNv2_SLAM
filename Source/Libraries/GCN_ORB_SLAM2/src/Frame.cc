@@ -190,29 +190,10 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
   mb = mbf / fx;
 
-  // thread threadORB(&Frame::ComputeFeature, this, 0, imGray, imDepth);
-  // thread threadGCN(&Frame::ComputeFeature, this, 1, imGray, imDepth);
-  // threadORB.join();
-  // threadGCN.join();
-
-  // thread threadORB(&Frame::ExtractFeatures, this, 0, 0, imGray);
-  // thread threadGCN(&Frame::ExtractFeatures, this, 1, 0, imGray);
-  // threadORB.join();
-  // threadGCN.join();
-  // ORB：0， GCN：1
-
-  // thread threadORB(&FRame::ComputeFeatures, this, 0, imGray, imDepth);
-  // thread threadORB(&FRame::ComputeFeatures, this, 1, imGray, imDepth);
-  // threadORB.join();
-  // threadGCN.join();
-
-  FeaturePoint ORBfeature;
-  FeaturePoint GCNfeature;
+  FeaturePoint featureData[Ntype];
 
   ExtractFeatures(0, 0, imGray);
   ExtractFeatures(1, 0, imGray);
-
-
 
   ComputeFeatures(0, imGray, imDepth);
   ComputeFeatures(1, imGray, imDepth);
@@ -329,7 +310,6 @@ void Frame::AssignFeaturesToGrid(const int &refN, const vector<cv::KeyPoint> &Ke
   }
 }
 
-// Rewrite ExtractFeatures, Ftype: Feature type, imgaeFlag: left image or right image
 void Frame::ExtractFeatures(int Ftype, int imageFlag, const cv::Mat &im) {
   if (Ftype == 0) {
     if (imageFlag == 0) {

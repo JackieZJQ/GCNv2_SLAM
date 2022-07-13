@@ -42,6 +42,7 @@ namespace ORB_SLAM2 {
 
 class MapPoint;
 class KeyFrame;
+// class FeaturePoint;
 
 class Frame {
 public:
@@ -158,6 +159,8 @@ public:
 
   // Numbers of feature types
   const static int Ntype = 2;
+
+  //FeaturePoint *featureData[Ntype];
 
   // Number of KeyPoints.
   int N;
