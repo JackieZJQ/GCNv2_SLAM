@@ -3,8 +3,6 @@
 
 #include <vector>
 
-#include "MapPoint.h"
-
 #include <opencv2/opencv.hpp>
 
 namespace ORB_SLAM2 {
@@ -15,28 +13,28 @@ class FeaturePoint
 {
 public:
   
-  //Feature type
+  // Feature type
   int type;
 
   // Number of Keypoints
   int N;
 
-  std::vector<cv::KeyPoint> Keys;
-  std::vector<cv::KeyPoint> KeysRight;
-  std::vector<cv::KeyPoint> KeysUn;
+  // Parms
+  std::vector<cv::KeyPoint> mvKeys;
+  std::vector<cv::KeyPoint> mvKeysRight;
+  std::vector<cv::KeyPoint> mvKeysUn;
 
-  std::vector<float> uRight;
-  std::vector<float> Depth;
+  std::vector<float> mvuRight;
+  std::vector<float> mvDepth;
   
-  cv::Mat Descriptors; 
-  cv::Mat DescriptorsRight;
+  cv::Mat mDescriptors; 
+  cv::Mat mDescriptorsRight;
 
-  std::vector<MapPoint *> MapPoints;
-  std::vector<bool> Outlier;
+  std::vector<MapPoint *> mvpMapPoints;
+  std::vector<bool> mvbOutlier;
 
-  std::vector<std::vector<std::vector<std::size_t>>> Grid;
+  std::vector<std::vector<std::vector<std::size_t>>> mGrid;
 };
     
 }
-
 #endif

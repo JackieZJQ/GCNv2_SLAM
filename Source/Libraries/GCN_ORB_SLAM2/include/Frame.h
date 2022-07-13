@@ -42,7 +42,6 @@ namespace ORB_SLAM2 {
 
 class MapPoint;
 class KeyFrame;
-class FeaturePoint;
 
 class Frame {
 public:
@@ -160,13 +159,11 @@ public:
   // Numbers of feature types
   const static int Ntype = 2;
 
-  //FeaturePoint *featureData[Ntype];
+  // Feature data used to store feature points
+  FeaturePoint mFeatData[Ntype];
 
   // Number of KeyPoints.
   int N;
-
-  // Number of KeyPoints, dictionary, ORB:0, GCN:1
-  std::map<int, int> NDict;
 
   // std::vector of keypoints (original for visualization) and undistorted
   // (actually used by the system). In the stereo case, mvKeysUn is redundant as
@@ -174,19 +171,10 @@ public:
   std::vector<cv::KeyPoint> mvKeys, mvKeysRight;
   std::vector<cv::KeyPoint> mvKeysUn;
 
-  // Keypoints dictionary, ORB:0, GCN:1
-  std::map<int, std::vector<cv::KeyPoint>> mvKeysDict;
-  std::map<int, std::vector<cv::KeyPoint>> mvKeysRightDict;
-  std::map<int, std::vector<cv::KeyPoint>> mvKeysUnDict;
-
   // Corresponding stereo coordinate and depth for each keypoint.
   // "Monocular" keypoints have a negative value.
   std::vector<float> mvuRight;
   std::vector<float> mvDepth;
-
-  // Depth and coordinate dictionary, ORB:0, GCN:1
-  std::map<int, std::vector<float>> mvuRightDict;
-  std::map<int, std::vector<float>> mvDepthDict;
 
   // Bag of Words std::vector structures.
   DBoW2::BowVector mBowVec;
@@ -194,22 +182,12 @@ public:
 
   // Descriptor, each row associated to a keypoint.
   cv::Mat mDescriptors, mDescriptorsRight;
-
-  // Descriptor dictionary, ORB:0, GCN:1
-  std::map<int, cv::Mat> mDescriptorsDict;
-  std::map<int, cv::Mat> mDescriptorsRightDict;
   
   // MapPoints associated to keypoints, NULL pointer if no association.
   std::vector<MapPoint *> mvpMapPoints;
 
-  // mappoints dictionary, ORB:0, GCN:1
-  std::map<int, std::vector<MapPoint *>> mvpMapPointsDict;
-
   // Flag to identify outlier associations.
   std::vector<bool> mvbOutlier;
-
-  // outlier dictionary, ORB:0, GCN:1
-  std::map<int, std::vector<bool>> mvbOutlierDict;
 
   // Keypoints are assigned to cells in a grid to reduce matching complexity
   // when projecting MapPoints.
@@ -218,9 +196,6 @@ public:
 
   // mGrid
   std::vector<std::vector<std::vector<std::size_t>>> mGrid;
-
-  // mGrid dictionary
-  std::map<int, std::vector<std::vector<std::vector<std::size_t>>>> mGridDict;
 
   // Camera pose.
   cv::Mat mTcw;
@@ -269,7 +244,7 @@ private:
   void AssignFeaturesToGrid(const int &refN, const std::vector<cv::KeyPoint> &KeysUn, 
                               std::vector<std::vector<std::vector<std::size_t>>> &Grid);
 
-  void ChooseFeature(const int Ftype, const FeaturePoint &Featurepoint);
+  void ChooseFeature(const FeaturePoint &Featurepoint, const int Ftype);
 
   // compute features and assign to grids
   void ComputeFeatures(FeaturePoint &Featurepoint, const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth);

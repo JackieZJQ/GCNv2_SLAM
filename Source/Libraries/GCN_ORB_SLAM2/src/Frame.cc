@@ -44,18 +44,18 @@ Frame::Frame(const Frame &frame)
       mpORBExtractorRight(frame.mpORBExtractorRight),  
       mTimeStamp(frame.mTimeStamp), mK(frame.mK.clone()),
       mDistCoef(frame.mDistCoef.clone()), mbf(frame.mbf), mb(frame.mb),
-      mThDepth(frame.mThDepth), mBowVec(frame.mBowVec), mFeatVec(frame.mFeatVec), 
-      N(frame.N), NDict(frame.NDict),                                                 // N
-      mvKeys(frame.mvKeys), mvKeysDict(frame.mvKeysDict),                             // mvKeys
-      mvKeysRight(frame.mvKeysRight), mvKeysRightDict(frame.mvKeysRightDict),         // mvKeysRight
-      mvKeysUn(frame.mvKeysUn), mvKeysUnDict(frame.mvKeysUnDict),                     // mvKeysUn
-      mvuRight(frame.mvuRight), mvuRightDict(frame.mvuRightDict),                     // mvuRight
-      mvDepth(frame.mvDepth), mvDepthDict(frame.mvDepthDict),                         // mvDepth            
-      mDescriptors(frame.mDescriptors.clone()), mDescriptorsDict(frame.mDescriptorsDict),
-      mDescriptorsRight(frame.mDescriptorsRight.clone()), mDescriptorsRightDict(frame.mDescriptorsRightDict),
-      mvpMapPoints(frame.mvpMapPoints), mvpMapPointsDict(frame.mvpMapPointsDict),
-      mvbOutlier(frame.mvbOutlier), mvbOutlierDict(frame.mvbOutlierDict),
-      mGridDict(frame.mGridDict),
+      mThDepth(frame.mThDepth), mBowVec(frame.mBowVec), mFeatVec(frame.mFeatVec),
+      mFeatData(frame.mFeatData), 
+      N(frame.N),                                                // N
+      mvKeys(frame.mvKeys),                                      // mvKeys
+      mvKeysRight(frame.mvKeysRight),                            // mvKeysRight
+      mvKeysUn(frame.mvKeysUn),                                  // mvKeysUn
+      mvuRight(frame.mvuRight),                                  // mvuRight
+      mvDepth(frame.mvDepth),                                    // mvDepth            
+      mDescriptors(frame.mDescriptors.clone()), 
+      mDescriptorsRight(frame.mDescriptorsRight.clone()), 
+      mvpMapPoints(frame.mvpMapPoints), 
+      mvbOutlier(frame.mvbOutlier), 
       mnId(frame.mnId), mpReferenceKF(frame.mpReferenceKF),
       mnScaleLevels(frame.mnScaleLevels), mfScaleFactor(frame.mfScaleFactor),
       mfLogScaleFactor(frame.mfLogScaleFactor),
@@ -99,18 +99,14 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
   mvLevelSigma2 = mpORBExtractorLeft->GetScaleSigmaSquares();
   mvInvLevelSigma2 = mpORBExtractorLeft->GetInverseScaleSigmaSquares();
 
-  FeaturePoint featureData[Ntype];
-
   // ORB extraction
   // thread threadLeft(&Frame::ExtractFeatures, this, featureData[0], 0, 0, imLeft);
   // thread threadRight(&Frame::ExtractFeatures, this, featureData[0], 0, 1, imRight);
   // threadLeft.join();
   // threadRight.join();
 
-  ExtractFeatures(featureData[0], 0, 0, imLeft);
-  ExtractFeatures(featureData[0], 0, 0, imRight);
-
-
+  ExtractFeatures(mFeatData[0], 0, 0, imLeft);
+  ExtractFeatures(mFeatData[0], 0, 0, imRight);
 
   // Size of features
   N = mvKeys.size();
@@ -197,18 +193,23 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
   mb = mbf / fx;
 
-  FeaturePoint featureData[Ntype];
+  ComputeFeatures(mFeatData[0], 0, imGray, imDepth);
+  ComputeFeatures(mFeatData[1], 1, imGray, imDepth);
 
-  ComputeFeatures(featureData[0], 0, imGray, imDepth);
-  ComputeFeatures(featureData[1], 1, imGray, imDepth);
+  // thread threadORB(&Frame::ComputeFeatures, featData[0], 0, imGray, imDepth);
+  // thread threadGCN(&Frame::ComputeFeatures, featData[1], 1, imGray, imDepth);
+
+  // threadORB.join();
+  // threadGCN.join();
+
 
   // Use dictionary to store orb and gcn parms in parallel, then copy data to default variables
   // Choose orbfeatures
   if (getenv("USE_ORB") == nullptr) {
-    ChooseFeature(1, featureData[1]);
+    ChooseFeature(mFeatData[1], 1);
   }
   else {
-    ChooseFeature(0, featureData[0]);
+    ChooseFeature(mFeatData[0], 0);
   }
 }
 
@@ -236,9 +237,8 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
   mvLevelSigma2 = mpORBExtractorLeft->GetScaleSigmaSquares();
   mvInvLevelSigma2 = mpORBExtractorLeft->GetInverseScaleSigmaSquares();
 
-  FeaturePoint featureData[Ntype];
   // ORB extraction
-  ExtractFeatures(featureData[0], 0, 0, imGray);
+  ExtractFeatures(mFeatData[0], 0, 0, imGray);
 
   N = mvKeys.size();
 
@@ -318,18 +318,18 @@ void Frame::AssignFeaturesToGrid(const int &refN, const vector<cv::KeyPoint> &Ke
 void Frame::ExtractFeatures(FeaturePoint &Featurepoint, const int Ftype, int imageFlag, const cv::Mat &im) {
   if (Ftype == 0) {
     if (imageFlag == 0) {
-      (*mpORBExtractorLeft)(im, cv::Mat(), Featurepoint.Keys, Featurepoint.Descriptors);
+      (*mpORBExtractorLeft)(im, cv::Mat(), Featurepoint.mvKeys, Featurepoint.mDescriptors);
     }
     else {
-      (*mpORBExtractorRight)(im, cv::Mat(), Featurepoint.KeysRight, Featurepoint.DescriptorsRight);
+      (*mpORBExtractorRight)(im, cv::Mat(), Featurepoint.mvKeysRight, Featurepoint.mDescriptorsRight);
     }
   }
   else {
     if (imageFlag == 0) {
-      (*mpGCNExtractorLeft)(im, cv::Mat(), Featurepoint.Keys, Featurepoint.Descriptors);
+      (*mpGCNExtractorLeft)(im, cv::Mat(), Featurepoint.mvKeys, Featurepoint.mDescriptors);
     }
     else {
-      (*mpGCNExtractorRight)(im, cv::Mat(), Featurepoint.KeysRight, Featurepoint.DescriptorsRight);
+      (*mpGCNExtractorRight)(im, cv::Mat(), Featurepoint.mvKeysRight, Featurepoint.mDescriptorsRight);
     }
   }
 }
@@ -815,63 +815,51 @@ cv::Mat Frame::UnprojectStereo(const int &i, const vector<float> &Depth,
     return cv::Mat();
 }
 
-void Frame::ChooseFeature(const int Ftype, const FeaturePoint &Featurepoint) {
+void Frame::ChooseFeature(const FeaturePoint &Featurepoint, const int Ftype) {
 
-  NDict[Ftype] = Featurepoint.N;
-  mvKeysDict[Ftype] = Featurepoint.Keys;
-  mvKeysUnDict[Ftype] = Featurepoint.KeysUn; 
-  mDescriptorsDict[Ftype] = Featurepoint.Descriptors;
-  mvKeysRightDict[Ftype] = Featurepoint.KeysRight;
-  mDescriptorsRightDict[Ftype] = Featurepoint.DescriptorsRight;
-  mvuRightDict[Ftype] = Featurepoint.uRight;
-  mvDepthDict[Ftype] = Featurepoint.Depth;
-  mvpMapPointsDict[Ftype] = Featurepoint.MapPoints;
-  mvbOutlierDict[Ftype] = Featurepoint.Outlier;
-  mGridDict[Ftype] = Featurepoint.Grid;
-
-  N = NDict[Ftype];
-  mvKeys = mvKeysDict[Ftype];
-  mvKeysUn = mvKeysUnDict[Ftype];
-  mDescriptors = mDescriptorsDict[Ftype];
-  mvKeysRight = mvKeysRightDict[Ftype];
-  mDescriptorsRight = mDescriptorsRightDict[Ftype];
-  mvuRight = mvuRightDict[Ftype];
-  mvDepth = mvDepthDict[Ftype];
-  mvpMapPoints = mvpMapPointsDict[Ftype];
-  mvbOutlier = mvbOutlierDict[Ftype];
-  mGrid = mGridDict[Ftype];
+  N = Featurepoint.N;
+  mvKeys = Featurepoint.mvKeys;
+  mvKeysUn = Featurepoint.mvKeysUn;
+  mDescriptors = Featurepoint.mDescriptors;
+  mvKeysRight = Featurepoint.mvKeysRight;
+  mDescriptorsRight = Featurepoint.mDescriptorsRight;
+  mvuRight = Featurepoint.mvuRight;
+  mvDepth = Featurepoint.mvDepth;
+  mvpMapPoints = Featurepoint.mvpMapPoints;
+  mvbOutlier = Featurepoint.mvbOutlier;
+  mGrid = Featurepoint.mGrid;
 }
 
 void Frame::ComputeFeatures(FeaturePoint &Featurepoint, const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth) {
   // Feature extraction
   ExtractFeatures(Featurepoint, Ftype, 0, imGray);
 
-  Featurepoint.N = Featurepoint.Keys.size();
+  Featurepoint.N = Featurepoint.mvKeys.size();
   
-  if (Featurepoint.Keys.empty())
+  if (Featurepoint.mvKeys.empty())
     return;
 
   // mvKeysUn, Left image
   // UndistortKeyPoints();
   // UndistortKeyPoints(mvKeys, mvKeysUn, N);
-  UndistortKeyPoints(Featurepoint.Keys, Featurepoint.KeysUn, Featurepoint.N);
+  UndistortKeyPoints(Featurepoint.mvKeys, Featurepoint.mvKeysUn, Featurepoint.N);
 
   // compute mvuRight and mvDepth
   // ComputeStereoFromRGBD(imDepth);
   // ComputeStereoFromRGBD(imDepth, mvuRight, mvDepth, N, mvKeys, mvKeysUn); 
-  ComputeStereoFromRGBD(imDepth, Featurepoint.uRight, Featurepoint.Depth, Featurepoint.N, Featurepoint.Keys, Featurepoint.KeysUn); 
+  ComputeStereoFromRGBD(imDepth, Featurepoint.mvuRight, Featurepoint.mvDepth, Featurepoint.N, Featurepoint.mvKeys, Featurepoint.mvKeysUn); 
 
   // map points
   // mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
-  Featurepoint.MapPoints = vector<MapPoint *>(Featurepoint.N, static_cast<MapPoint *>(NULL));
+  Featurepoint.mvpMapPoints = vector<MapPoint *>(Featurepoint.N, static_cast<MapPoint *>(NULL));
 
   // outliers
   // mvbOutlier = vector<bool>(N, false);
-  Featurepoint.Outlier = vector<bool>(Featurepoint.N, false);
+  Featurepoint.mvbOutlier = vector<bool>(Featurepoint.N, false);
 
   // AssignFeaturesToGrid();
   // AssignFeaturesToGrid(N, mvKeysUn, mGrid);
-  AssignFeaturesToGrid(Featurepoint.N, Featurepoint.KeysUn, Featurepoint.Grid);
+  AssignFeaturesToGrid(Featurepoint.N, Featurepoint.mvKeysUn, Featurepoint.mGrid);
 } 
 
 } // namespace ORB_SLAM2
