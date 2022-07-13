@@ -42,7 +42,7 @@ namespace ORB_SLAM2 {
 
 class MapPoint;
 class KeyFrame;
-// class FeaturePoint;
+class FeaturePoint;
 
 class Frame {
 public:
@@ -71,7 +71,7 @@ public:
         cv::Mat &distCoef, const float &bf, const float &thDepth);
 
   // Extract features, Ftype: ORB(0), GCN(1), imageFlag: left image (0), right image (1).
-  void ExtractFeatures(int Ftype, int imageFlag, const cv::Mat &im);
+  void ExtractFeatures(FeaturePoint &Featurepoint, const int Ftype, int imageFlag, const cv::Mat &im);
 
   // Compute Bag of Words representation.
   void ComputeBoW();
@@ -269,10 +269,10 @@ private:
   void AssignFeaturesToGrid(const int &refN, const std::vector<cv::KeyPoint> &KeysUn, 
                               std::vector<std::vector<std::vector<std::size_t>>> &Grid);
 
-  void ChooseFeature(const int Ftype);
+  void ChooseFeature(const int Ftype, const FeaturePoint &Featurepoint);
 
   // compute features and assign to grids
-  void ComputeFeatures(const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth);
+  void ComputeFeatures(FeaturePoint &Featurepoint, const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth);
 
   // Rotation, translation and camera center
   cv::Mat mRcw;
