@@ -3,6 +3,9 @@
 
 #include <vector>
 
+#include "DBoW2/BowVector.h"
+#include "DBoW2/FeatureVector.h"
+
 #include <opencv2/opencv.hpp>
 
 namespace ORB_SLAM2 {
@@ -34,6 +37,10 @@ public:
   std::vector<bool> mvbOutlier;
 
   std::vector<std::vector<std::vector<std::size_t>>> mGrid;
+
+  // Bag of Words std::vector structures.
+  DBoW2::BowVector mBowVec;
+  DBoW2::FeatureVector mFeatVec;
 };
     
 }

@@ -476,10 +476,18 @@ bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY) {
 
 // TO-DO add gcn and orb parms
 void Frame::ComputeBoW() {
-  if (mBowVec.empty()) {
-    vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);
-    mpORBvocabulary->transform(vCurrentDesc, mBowVec, mFeatVec, 4);
+
+  // TO-DO compute two features
+  for (int i = 0; i < 1; i++) {
+    if (mFeatData[i].mBowVec.empty()) {
+      vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mFeatData[i].mDescriptors);
+      mpORBvocabulary->transform(vCurrentDesc, mFeatData[i].mBowVec, mFeatData[i].mFeatVec, 4);
+    }
   }
+
+  // only orb works
+  mBowVec = mFeatData[0].mBowVec;
+  mFeatVec = mFeatData[0].mFeatVec;
 }
 
 void Frame::UndistortKeyPoints() {
