@@ -244,7 +244,7 @@ private:
   void AssignFeaturesToGrid(const int &refN, const std::vector<cv::KeyPoint> &KeysUn, 
                               std::vector<std::vector<std::vector<std::size_t>>> &Grid);
 
-  void ChooseFeature(const FeaturePoint &Featurepoint, const int Ftype);
+  void ChooseFeature(const FeaturePoint &Featurepoint);
 
   // compute features and assign to grids
   void ComputeFeatures(FeaturePoint &Featurepoint, const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth);

@@ -49,10 +49,13 @@ public:
   // Input sensor
   enum eSensor { MONOCULAR = 0, STEREO = 1, RGBD = 2 };
 
+  // Number of feature types
+  static const int Ntype = 2;
+
 public:
   // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and
   // Viewer threads.
-  System(const std::string &ORBstrVocFile, const std::string &GCNstrVocFile, const std::string &strSettingsFile,
+  System(const std::string (&strVocFile)[Ntype], const std::string &strSettingsFile,
          const eSensor sensor, const bool bUseViewer = true);
 
   // Proccess the given stereo frame. Images must be synchronized and rectified.
@@ -140,9 +143,11 @@ private:
   ORBVocabulary *mpORBVocabulary;
   ORBVocabulary *mpGCNVocabulary;
 
+  ORBVocabulary *mpVocabulary[Ntype];
+
   // KeyFrame database for place recognition (relocalization and loop
   // detection).
-  KeyFrameDatabase *mpKeyFrameDatabase;
+  KeyFrameDatabase *mpKeyFrameDatabase[Ntype];
 
   // Map structure that stores the pointers to all KeyFrames and MapPoints.
   Map *mpMap;

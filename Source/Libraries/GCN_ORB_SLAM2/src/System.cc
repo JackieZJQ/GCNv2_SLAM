@@ -35,7 +35,7 @@ bool has_suffix(const std::string &str, const std::string &suffix) {
 
 namespace ORB_SLAM2 {
 
-System::System(const string &ORBstrVocFile, const string &GCNstrVocFile, const string &strSettingsFile,
+System::System(const string (&strVocFile)[Ntype], const string &strSettingsFile,
                const eSensor sensor, const bool bUseViewer)
     : mSensor(sensor), mpViewer(static_cast<Viewer *>(NULL)), mbReset(false),
       mbActivateLocalizationMode(false), mbDeactivateLocalizationMode(false) {
@@ -65,66 +65,44 @@ System::System(const string &ORBstrVocFile, const string &GCNstrVocFile, const s
     cerr << "Failed to open settings file at: " << strSettingsFile << endl;
     exit(-1);
   }
-  
-  ///////////////////////////////////////////////////////////////////////////
-  // Load ORB Vocabulary
-  cout << endl
-       << "Loading ORB Vocabulary " << ORBstrVocFile << endl
-       << "This could take a while..." << endl;
-  clock_t tORBStart = clock();
-  mpORBVocabulary = new ORBVocabulary();
 
-  // bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
+  // Name of feature types
+  const std::string FeatName[Ntype] = {"ORB", "GCN"};
 
-  bool bORBVocLoad = false; // chose loading method based on file extension
-  if (has_suffix(ORBstrVocFile, ".txt")) {
-    bORBVocLoad = mpORBVocabulary->loadFromTextFile(ORBstrVocFile);
-    cout << "Loading ORB Vocabulary in txt mode." << endl;
-  } else {
-    bORBVocLoad = mpORBVocabulary->loadFromBinaryFile(ORBstrVocFile);
-    cout << "Loading ORB Vocabulary in binary mode." << endl;
+  for (int i = 0; i < Ntype; i++)
+  {
+    // Load Vocabulary
+    cout << endl
+         << "Loading Vocabulary : " << strVocFile[i] << endl
+         << "This could take a while..." << endl;
+    clock_t tStart = clock();
+    mpVocabulary[i] = new ORBVocabulary();
+
+    // bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
+
+    bool bVocLoad = false;
+
+    if (has_suffix(strVocFile[i], ".txt")) {
+      bVocLoad = mpVocabulary[i]->loadFromTextFile(strVocFile[i]);
+      cout << "Loading " << FeatName[i] << " Vocabulary in txt mode." << endl;
+    } else {
+      bVocLoad = mpVocabulary[i]->loadFromBinaryFile(strVocFile[i]);
+      cout << "Loading " << FeatName[i] << " Vocabulary in binary mode." << endl;
+    }
+    if (!bVocLoad) {
+      cerr << "Wrong path to " << FeatName[i] <<" vocabulary. " << endl;
+      cerr << "Falied to open " << FeatName[i] << " at: " << strVocFile[i] << endl;
+      exit(-1);
+    }
+    
+    cout << FeatName[i];
+    printf(" Vocabulary loaded in %.2fs\n",
+          (double)(clock() - tStart) / CLOCKS_PER_SEC);
+    cout << endl;
+    // Create KeyFrame Database
+    mpKeyFrameDatabase[i] = new KeyFrameDatabase(*mpVocabulary[i]);
   }
-  if (!bORBVocLoad) {
-    cerr << "Wrong path to ORB vocabulary. " << endl;
-    cerr << "Falied to open at: " << ORBstrVocFile << endl;
-    exit(-1);
-  }
-  //    cout << "ORB Vocabulary loaded!" << endl << endl;
-  printf("ORB Vocabulary loaded in %.2fs\n",
-         (double)(clock() - tORBStart) / CLOCKS_PER_SEC);
-  // Create KeyFrame Database
-  mpKeyFrameDatabase = new KeyFrameDatabase(*mpORBVocabulary);
-  
-  ///////////////////////////////////////////////////////////////////////////
-  // Load GCN Vocabulary
-  cout << endl
-       << "Loading GCN Vocabulary " << GCNstrVocFile << endl
-       << "This could take a while..." << endl;
-  clock_t tGCNStart = clock();
-  mpGCNVocabulary = new ORBVocabulary();
-
-  // bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
-  bool bGCNVocLoad = false; // chose loading method based on file extension
-  if (has_suffix(GCNstrVocFile, ".txt")) {
-    bGCNVocLoad = mpGCNVocabulary->loadFromTextFile(GCNstrVocFile);
-    cout << "Loading GCN Vocabulary in txt mode." << endl;
-  } else {
-    bGCNVocLoad = mpGCNVocabulary->loadFromBinaryFile(GCNstrVocFile);
-    cout << "Loading GCN Vocabulary in binary mode." << endl;
-  }
-  if (!bGCNVocLoad) {
-    cerr << "Wrong path to GCN vocabulary. " << endl;
-    cerr << "Falied to open at: " << GCNstrVocFile << endl;
-    exit(-1);
-  }
-  //    cout << "GCN Vocabulary loaded!" << endl << endl;
-  printf("GCN Vocabulary loaded in %.2fs\n",
-         (double)(clock() - tGCNStart) / CLOCKS_PER_SEC);
-  // TO-DO Create GCN KeyFrame Database
-  // mpKeyFrameDatabase = new KeyFrameDatabase(*mpGCNVocabulary);
-
-  ///////////////////////////////////////////////////////////////////////////
-
+    
   // Create the Map
   mpMap = new Map();
 
@@ -135,15 +113,15 @@ System::System(const string &ORBstrVocFile, const string &GCNstrVocFile, const s
   // Initialize the Tracking thread
   //(it will live in the main thread of execution, the one that called this
   //constructor)
-  mpTracker = new Tracking(this, mpORBVocabulary, mpFrameDrawer, mpMapDrawer,
-                           mpMap, mpKeyFrameDatabase, strSettingsFile, mSensor);
+  mpTracker = new Tracking(this, mpVocabulary[0], mpFrameDrawer, mpMapDrawer,
+                           mpMap, mpKeyFrameDatabase[0], strSettingsFile, mSensor);
 
   // Initialize the Local Mapping thread and launch
   mpLocalMapper = new LocalMapping(mpMap, mSensor == MONOCULAR);
   mptLocalMapping = new thread(&ORB_SLAM2::LocalMapping::Run, mpLocalMapper);
 
   // Initialize the Loop Closing thread and launch
-  mpLoopCloser = new LoopClosing(mpMap, mpKeyFrameDatabase, mpORBVocabulary,
+  mpLoopCloser = new LoopClosing(mpMap, mpKeyFrameDatabase[0], mpVocabulary[0],
                                  mSensor != MONOCULAR);
   mptLoopClosing = new thread(&ORB_SLAM2::LoopClosing::Run, mpLoopCloser);
 

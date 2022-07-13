@@ -198,7 +198,6 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
   // thread threadORB(&Frame::ComputeFeatures, featData[0], 0, imGray, imDepth);
   // thread threadGCN(&Frame::ComputeFeatures, featData[1], 1, imGray, imDepth);
-
   // threadORB.join();
   // threadGCN.join();
 
@@ -206,10 +205,10 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   // Use dictionary to store orb and gcn parms in parallel, then copy data to default variables
   // Choose orbfeatures
   if (getenv("USE_ORB") == nullptr) {
-    ChooseFeature(mFeatData[1], 1);
+    ChooseFeature(mFeatData[1]);
   }
   else {
-    ChooseFeature(mFeatData[0], 0);
+    ChooseFeature(mFeatData[0]);
   }
 }
 
@@ -815,7 +814,7 @@ cv::Mat Frame::UnprojectStereo(const int &i, const vector<float> &Depth,
     return cv::Mat();
 }
 
-void Frame::ChooseFeature(const FeaturePoint &Featurepoint, const int Ftype) {
+void Frame::ChooseFeature(const FeaturePoint &Featurepoint) {
 
   N = Featurepoint.N;
   mvKeys = Featurepoint.mvKeys;
