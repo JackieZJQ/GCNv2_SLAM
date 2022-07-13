@@ -29,6 +29,7 @@ add_library(${PROJECT_NAME} ${LIB_TYPE}
 src/Converter.cc
 src/FeatureExtractor.cc
 src/FeatureExtractorFactory.cc
+src/FeaturePoint.cc
 src/Frame.cc
 src/FrameDrawer.cc
 ${GCN_SOURCE}

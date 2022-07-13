@@ -200,13 +200,19 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   // threadORB.join();
   // threadGCN.join();
   // ORB：0， GCN：1
-  ExtractFeatures(0, 0, imGray);
-  ExtractFeatures(1, 0, imGray);
 
   // thread threadORB(&FRame::ComputeFeatures, this, 0, imGray, imDepth);
   // thread threadORB(&FRame::ComputeFeatures, this, 1, imGray, imDepth);
   // threadORB.join();
   // threadGCN.join();
+
+  FeaturePoint ORBfeature;
+  FeaturePoint GCNfeature;
+
+  ExtractFeatures(0, 0, imGray);
+  ExtractFeatures(1, 0, imGray);
+
+
 
   ComputeFeatures(0, imGray, imDepth);
   ComputeFeatures(1, imGray, imDepth);

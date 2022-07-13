@@ -26,6 +26,7 @@
 #include "DBoW2/BowVector.h"
 #include "DBoW2/FeatureVector.h"
 #include "FeatureExtractor.h"
+#include "FeaturePoint.h"
 #include "KeyFrame.h"
 #include "MapPoint.h"
 #include "ORBVocabulary.h"
