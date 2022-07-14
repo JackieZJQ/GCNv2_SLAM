@@ -54,7 +54,7 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB)
       mvInvLevelSigma2(F.mvInvLevelSigma2), mnMinX(F.mnMinX), mnMinY(F.mnMinY),
       mnMaxX(F.mnMaxX), mnMaxY(F.mnMaxY), mK(F.mK),
       mpKeyFrameDB(pKFDB),
-      mpORBvocabulary(F.mpORBvocabulary), mbFirstConnection(true),
+      mpvocabulary(F.mpvocabulary), mbFirstConnection(true),
       mpParent(NULL), mbNotErase(false), mbToBeErased(false), mbBad(false),
       mHalfBaseline(F.mb / 2), mpMap(pMap) {
   mnId = nNextId++;
@@ -71,13 +71,11 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB)
 }
 
 void KeyFrame::ComputeBoW() {
-  if (mBowVec.empty() || mFeatVec.empty()) {
-    std::vector<cv::Mat> vCurrentDesc =
-        Converter::toDescriptorVector(mDescriptors);
-    // Feature vector associate features with nodes in the 4th level (from
-    // leaves up) We assume the vocabulary tree has 6 levels, change the 4
-    // otherwise
-    mpORBvocabulary->transform(vCurrentDesc, mBowVec, mFeatVec, 4);
+  for (int i = 0; i < Ntype; i++) {
+    if (mFeatData[i].mBowVec.empty() || mFeatData[i].mFeatVec.empty()) {
+      std::vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mFeatData[i].mDescriptors);
+      mpvocabulary[i]->transform(vCurrentDesc, mFeatData[i].mBowVec, mFeatData[i].mFeatVec, 4);
+    }
   }
 }
 

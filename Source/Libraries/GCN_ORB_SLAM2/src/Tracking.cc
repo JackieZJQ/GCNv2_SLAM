@@ -42,15 +42,21 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
-Tracking::Tracking(System *pSys, ORBVocabulary *pVoc, FrameDrawer *pFrameDrawer,
-                   MapDrawer *pMapDrawer, Map *pMap, KeyFrameDatabase *pKFDB,
+Tracking::Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], FrameDrawer *pFrameDrawer,
+                   MapDrawer *pMapDrawer, Map *pMap, KeyFrameDatabase *pKFDB, KeyFrameDatabase *pKFDBtest[Ntype],
                    const string &strSettingPath, const int sensor)
     : mState(NO_IMAGES_YET), mSensor(sensor), mbOnlyTracking(false),
-      mbVO(false), mpORBVocabulary(pVoc), mpKeyFrameDB(pKFDB),
+      mbVO(false), mpKeyFrameDB(pKFDB),
       mpInitializer(static_cast<Initializer *>(NULL)), mpSystem(pSys),
       mpViewer(NULL), mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer),
       mpMap(pMap), mnLastRelocFrameId(0) {
   // Load camera parameters from settings file
+
+  // Initlize vocabulary vector
+  mpVocabulary.resize(Ntype);
+  for (int i = 0; i < Ntype; i++) {
+    mpVocabulary[i] = pVoc[i];
+  }
 
   cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
   float fx = fSettings["Camera.fx"];
@@ -180,6 +186,7 @@ void Tracking::SetLoopClosing(LoopClosing *pLoopClosing) {
 
 void Tracking::SetViewer(Viewer *pViewer) { mpViewer = pViewer; }
 
+// Stereo
 cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft,
                                   const cv::Mat &imRectRight,
                                   const double &timestamp) {
@@ -207,13 +214,14 @@ cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft,
   mCurrentFrame = Frame(mImGray, imGrayRight, timestamp, 
                         mpGCNExtractorLeft, mpGCNExtractorRight, 
                         mpORBExtractorLeft, mpORBExtractorRight, 
-                        mpORBVocabulary, mK, mDistCoef, mbf, mThDepth);
+                        mpVocabulary, mK, mDistCoef, mbf, mThDepth);
 
   Track();
 
   return mCurrentFrame.mTcw.clone();
 }
 
+// RGBD
 cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB, const cv::Mat &imD,
                                 const double &timestamp) {
   mImGray = imRGB;
@@ -240,12 +248,13 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB, const cv::Mat &imD,
     imDepth.convertTo(imDepth, CV_32F, mDepthMapFactor);
 
   mCurrentFrame = Frame(mImGray, imDepth, timestamp, mpGCNExtractorLeft, mpORBExtractorLeft,
-                        mpORBVocabulary, mK, mDistCoef, mbf, mThDepth);
+                        mpVocabulary, mK, mDistCoef, mbf, mThDepth);
   Track();
 
   return mCurrentFrame.mTcw.clone();
 }
 
+// MONO
 cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im,
                                      const double &timestamp) {
   mImGray = im;
@@ -264,10 +273,10 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im,
 
   if (mState == NOT_INITIALIZED || mState == NO_IMAGES_YET)
     mCurrentFrame = Frame(mImGray, timestamp, mpIniGCNExtractor, mpIniORBExtractor,
-                          mpORBVocabulary, mK, mDistCoef, mbf, mThDepth);
+                          mpVocabulary, mK, mDistCoef, mbf, mThDepth);
   else
     mCurrentFrame = Frame(mImGray, timestamp, mpGCNExtractorLeft, mpORBExtractorLeft,
-                          mpORBVocabulary, mK, mDistCoef, mbf, mThDepth);
+                          mpVocabulary, mK, mDistCoef, mbf, mThDepth);
 
   Track();
 

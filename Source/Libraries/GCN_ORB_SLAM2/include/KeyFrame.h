@@ -207,7 +207,9 @@ protected:
 
   // BoW
   KeyFrameDatabase *mpKeyFrameDB;
-  ORBVocabulary *mpORBvocabulary;
+
+  //
+  std::vector<ORBVocabulary *> mpvocabulary;
 
   // Grid over the image to speed up feature matching
   std::vector<std::vector<std::vector<std::size_t>>> mGrid;

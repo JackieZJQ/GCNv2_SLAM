@@ -37,7 +37,7 @@ Frame::Frame() {}
 
 // Copy Constructor
 Frame::Frame(const Frame &frame)
-    : mpORBvocabulary(frame.mpORBvocabulary),
+    : mpvocabulary(frame.mpvocabulary),
       mpGCNExtractorLeft(frame.mpGCNExtractorLeft),
       mpGCNExtractorRight(frame.mpGCNExtractorRight),
       mpORBExtractorLeft(frame.mpORBExtractorLeft),         
@@ -79,9 +79,9 @@ Frame::Frame(const Frame &frame)
 Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeStamp, 
              FeatureExtractor *GCNextractorLeft, FeatureExtractor *GCNextractorRight, 
              FeatureExtractor *ORBextractorLeft, FeatureExtractor *ORBextractorRight, 
-             ORBVocabulary *voc, cv::Mat &K,
+             vector<ORBVocabulary *> voc, cv::Mat &K,
              cv::Mat &distCoef, const float &bf, const float &thDepth)
-    : mpORBvocabulary(voc), 
+    : mpvocabulary(voc),
       mpGCNExtractorLeft(GCNextractorLeft), mpGCNExtractorRight(GCNextractorRight), 
       mpORBExtractorLeft(ORBextractorLeft), mpORBExtractorRight(ORBextractorRight), 
       mTimeStamp(timeStamp),
@@ -150,9 +150,9 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
 Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
              const double &timeStamp, 
              FeatureExtractor *GCNextractor, FeatureExtractor *ORBextractor,
-             ORBVocabulary *voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
+             vector<ORBVocabulary *> voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
              const float &thDepth)
-    : mpORBvocabulary(voc), 
+    : mpvocabulary(voc),
       mpGCNExtractorLeft(GCNextractor),
       mpGCNExtractorRight(static_cast<FeatureExtractor *>(NULL)),
       mpORBExtractorLeft(ORBextractor),
@@ -215,9 +215,9 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 // Mono
 Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
              FeatureExtractor *GCNextractor, FeatureExtractor *ORBextractor, 
-             ORBVocabulary *voc, cv::Mat &K,
+             vector<ORBVocabulary *> voc, cv::Mat &K,
              cv::Mat &distCoef, const float &bf, const float &thDepth)
-    : mpORBvocabulary(voc), 
+    : mpvocabulary(voc),
       mpGCNExtractorLeft(GCNextractor),
       mpGCNExtractorRight(static_cast<FeatureExtractor *>(NULL)),
       mpORBExtractorLeft(ORBextractor),
@@ -474,14 +474,12 @@ bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY) {
   return true;
 }
 
-// TO-DO add gcn and orb parms
 void Frame::ComputeBoW() {
 
-  // TO-DO compute two features
-  for (int i = 0; i < 1; i++) {
+  for (int i = 0; i < Ntype; i++) {
     if (mFeatData[i].mBowVec.empty()) {
       vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mFeatData[i].mDescriptors);
-      mpORBvocabulary->transform(vCurrentDesc, mFeatData[i].mBowVec, mFeatData[i].mFeatVec, 4);
+      mpvocabulary[i]->transform(vCurrentDesc, mFeatData[i].mBowVec, mFeatData[i].mFeatVec, 4);
     }
   }
 

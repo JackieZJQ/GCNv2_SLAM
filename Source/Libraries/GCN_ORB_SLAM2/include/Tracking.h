@@ -49,10 +49,13 @@ class LoopClosing;
 class System;
 
 class Tracking {
+public:
+
+  const static int Ntype = 2;
 
 public:
-  Tracking(System *pSys, ORBVocabulary *pVoc, FrameDrawer *pFrameDrawer,
-           MapDrawer *pMapDrawer, Map *pMap, KeyFrameDatabase *pKFDB,
+  Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], FrameDrawer *pFrameDrawer,
+           MapDrawer *pMapDrawer, Map *pMap, KeyFrameDatabase *pKFDB, KeyFrameDatabase *pKFDBtest[Ntype],
            const std::string &strSettingPath, const int sensor);
 
   // Preprocess the input and call Track(). Extract features and performs stereo
@@ -169,8 +172,10 @@ protected:
   FeatureExtractor *mpORBExtractor;
 
   // BoW
-  ORBVocabulary *mpORBVocabulary;
+  std::vector<ORBVocabulary *> mpVocabulary;
   KeyFrameDatabase *mpKeyFrameDB;
+
+  
 
   // Initalization (only for monocular)
   Initializer *mpInitializer;

@@ -45,6 +45,11 @@ class KeyFrame;
 
 class Frame {
 public:
+
+  // Numbers of feature types
+  const static int Ntype = 2;
+
+public:
   Frame();
   
   // Copy constructor.
@@ -54,19 +59,19 @@ public:
   Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeStamp,
         FeatureExtractor *GCNextractorLeft, FeatureExtractor *GCNextractorRight,
         FeatureExtractor *ORBextractorLeft, FeatureExtractor *ORBextractorRight,
-        ORBVocabulary *voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
+        std::vector<ORBVocabulary *> voctest, cv::Mat &K, cv::Mat &distCoef, const float &bf,
         const float &thDepth);
 
   // Constructor for RGB-D cameras.
   Frame(const cv::Mat &imGray, const cv::Mat &imDepth, const double &timeStamp,
         FeatureExtractor *GCNextractor, FeatureExtractor *ORBextractor,
-        ORBVocabulary *voc, cv::Mat &K,
+        std::vector<ORBVocabulary *> voctest, cv::Mat &K,
         cv::Mat &distCoef, const float &bf, const float &thDepth);
 
   // Constructor for Monocular cameras.
   Frame(const cv::Mat &imGray, const double &timeStamp,
         FeatureExtractor *GCNextractor, FeatureExtractor *ORBextractor,
-        ORBVocabulary *voc, cv::Mat &K,
+        std::vector<ORBVocabulary *> voctest, cv::Mat &K,
         cv::Mat &distCoef, const float &bf, const float &thDepth);
 
   // Extract features, Ftype: ORB(0), GCN(1), imageFlag: left image (0), right image (1).
@@ -121,8 +126,8 @@ public:
                                 const std::vector<cv::KeyPoint> &KeysUn);
 
 public:
-  // Vocabulary used for relocalization.
-  ORBVocabulary *mpORBvocabulary;
+  // Vocabulary vector used for relocalization
+  std::vector<ORBVocabulary *> mpvocabulary;
 
   // Feature extractor. The right is used only in the stereo case.
   // FeatureExtractor *mpFeatureExtractorLeft, *mpFeatureExtractorRight;
@@ -155,9 +160,6 @@ public:
   // Threshold close/far points. Close points are inserted from 1 view.
   // Far points are inserted as in the monocular case from 2 views.
   float mThDepth;
-
-  // Numbers of feature types
-  const static int Ntype = 2;
 
   // Feature data used to store feature points
   FeaturePoint mFeatData[Ntype];
