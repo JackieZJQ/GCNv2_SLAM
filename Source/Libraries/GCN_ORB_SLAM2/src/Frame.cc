@@ -193,11 +193,11 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
   mb = mbf / fx;
 
-  ComputeFeatures(mFeatData[0], 0, imGray, imDepth);
-  ComputeFeatures(mFeatData[1], 1, imGray, imDepth);
+  ComputeFeatures(0, imGray, imDepth);
+  ComputeFeatures(1, imGray, imDepth);
 
-  // thread threadORB(&Frame::ComputeFeatures, featData[0], 0, imGray, imDepth);
-  // thread threadGCN(&Frame::ComputeFeatures, featData[1], 1, imGray, imDepth);
+  // thread threadORB(&Frame::ComputeFeatures, this, 0, imGray, imDepth);
+  // thread threadGCN(&Frame::ComputeFeatures, this, 1, imGray, imDepth);
   // threadORB.join();
   // threadGCN.join();
 
@@ -835,36 +835,36 @@ void Frame::ChooseFeature(const FeaturePoint &Featurepoint) {
   mGrid = Featurepoint.mGrid;
 }
 
-void Frame::ComputeFeatures(FeaturePoint &Featurepoint, const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth) {
+void Frame::ComputeFeatures(const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth) {
   // Feature extraction
-  ExtractFeatures(Featurepoint, Ftype, 0, imGray);
+  ExtractFeatures(mFeatData[Ftype], Ftype, 0, imGray);
 
-  Featurepoint.N = Featurepoint.mvKeys.size();
+  mFeatData[Ftype].N = mFeatData[Ftype].mvKeys.size();
   
-  if (Featurepoint.mvKeys.empty())
+  if (mFeatData[Ftype].mvKeys.empty())
     return;
 
   // mvKeysUn, Left image
   // UndistortKeyPoints();
   // UndistortKeyPoints(mvKeys, mvKeysUn, N);
-  UndistortKeyPoints(Featurepoint.mvKeys, Featurepoint.mvKeysUn, Featurepoint.N);
+  UndistortKeyPoints(mFeatData[Ftype].mvKeys, mFeatData[Ftype].mvKeysUn, mFeatData[Ftype].N);
 
   // compute mvuRight and mvDepth
   // ComputeStereoFromRGBD(imDepth);
   // ComputeStereoFromRGBD(imDepth, mvuRight, mvDepth, N, mvKeys, mvKeysUn); 
-  ComputeStereoFromRGBD(imDepth, Featurepoint.mvuRight, Featurepoint.mvDepth, Featurepoint.N, Featurepoint.mvKeys, Featurepoint.mvKeysUn); 
+  ComputeStereoFromRGBD(imDepth, mFeatData[Ftype].mvuRight, mFeatData[Ftype].mvDepth, mFeatData[Ftype].N, mFeatData[Ftype].mvKeys, mFeatData[Ftype].mvKeysUn);  
 
   // map points
   // mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
-  Featurepoint.mvpMapPoints = vector<MapPoint *>(Featurepoint.N, static_cast<MapPoint *>(NULL));
+  mFeatData[Ftype].mvpMapPoints = vector<MapPoint *>(mFeatData[Ftype].N, static_cast<MapPoint *>(NULL));
 
   // outliers
   // mvbOutlier = vector<bool>(N, false);
-  Featurepoint.mvbOutlier = vector<bool>(Featurepoint.N, false);
+  mFeatData[Ftype].mvbOutlier = vector<bool>(mFeatData[Ftype].N, false);
 
   // AssignFeaturesToGrid();
   // AssignFeaturesToGrid(N, mvKeysUn, mGrid);
-  AssignFeaturesToGrid(Featurepoint.N, Featurepoint.mvKeysUn, Featurepoint.mGrid);
+  AssignFeaturesToGrid(mFeatData[Ftype].N, mFeatData[Ftype].mvKeysUn, mFeatData[Ftype].mGrid);
 } 
 
 } // namespace ORB_SLAM2
