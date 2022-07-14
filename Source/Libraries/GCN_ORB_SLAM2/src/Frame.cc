@@ -193,13 +193,13 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
   mb = mbf / fx;
 
-  ComputeFeatures(0, imGray, imDepth);
-  ComputeFeatures(1, imGray, imDepth);
+  // ComputeFeatures(0, imGray, imDepth);
+  // ComputeFeatures(1, imGray, imDepth);
 
-  // thread threadORB(&Frame::ComputeFeatures, this, 0, imGray, imDepth);
-  // thread threadGCN(&Frame::ComputeFeatures, this, 1, imGray, imDepth);
-  // threadORB.join();
-  // threadGCN.join();
+  thread threadORB(&Frame::ComputeFeatures, this, 0, imGray, imDepth);
+  thread threadGCN(&Frame::ComputeFeatures, this, 1, imGray, imDepth);
+  threadORB.join();
+  threadGCN.join();
 
 
   // Use dictionary to store orb and gcn parms in parallel, then copy data to default variables

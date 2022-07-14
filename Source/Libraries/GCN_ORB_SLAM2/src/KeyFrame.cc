@@ -77,6 +77,9 @@ void KeyFrame::ComputeBoW() {
       mpvocabulary[i]->transform(vCurrentDesc, mFeatData[i].mBowVec, mFeatData[i].mFeatVec, 4);
     }
   }
+  
+  mBowVec = mFeatData[0].mBowVec;
+  mFeatVec = mFeatData[0].mFeatVec;
 }
 
 void KeyFrame::SetPose(const cv::Mat &Tcw_) {
