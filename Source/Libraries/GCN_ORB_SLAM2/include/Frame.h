@@ -75,7 +75,7 @@ public:
         cv::Mat &distCoef, const float &bf, const float &thDepth);
 
   // Extract features, Ftype: ORB(0), GCN(1), imageFlag: left image (0), right image (1).
-  void ExtractFeatures(FeaturePoint &Featurepoint, const int Ftype, int imageFlag, const cv::Mat &im);
+  void ExtractFeatures(const int Ftype, int imageFlag, const cv::Mat &im);
 
   // Compute Bag of Words representation.
   void ComputeBoW();
@@ -252,7 +252,7 @@ private:
   void AssignFeaturesToGrid(const int &refN, const std::vector<cv::KeyPoint> &KeysUn, 
                               std::vector<std::vector<std::vector<std::size_t>>> &Grid);
 
-  void ChooseFeature(const FeaturePoint &Featurepoint);
+  void ChooseFeature(const int Ftype);
 
   // compute features and assign to grids
   void ComputeFeatures(const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth);

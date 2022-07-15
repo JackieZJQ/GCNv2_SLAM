@@ -105,8 +105,8 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
   // threadLeft.join();
   // threadRight.join();
 
-  ExtractFeatures(mFeatData[0], 0, 0, imLeft);
-  ExtractFeatures(mFeatData[0], 0, 0, imRight);
+  ExtractFeatures(0, 0, imLeft);
+  ExtractFeatures(0, 1, imRight);
 
   // Size of features
   N = mvKeys.size();
@@ -205,10 +205,10 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   // Use dictionary to store orb and gcn parms in parallel, then copy data to default variables
   // Choose orbfeatures
   if (getenv("USE_ORB") == nullptr) {
-    ChooseFeature(mFeatData[1]);
+    ChooseFeature(1);
   }
   else {
-    ChooseFeature(mFeatData[0]);
+    ChooseFeature(0);
   }
 }
 
@@ -237,7 +237,7 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
   mvInvLevelSigma2 = mpORBExtractorLeft->GetInverseScaleSigmaSquares();
 
   // ORB extraction
-  ExtractFeatures(mFeatData[0], 0, 0, imGray);
+  ExtractFeatures(0, 0, imGray);
 
   N = mvKeys.size();
 
@@ -314,21 +314,21 @@ void Frame::AssignFeaturesToGrid(const int &refN, const vector<cv::KeyPoint> &Ke
   }
 }
 
-void Frame::ExtractFeatures(FeaturePoint &Featurepoint, const int Ftype, int imageFlag, const cv::Mat &im) {
+void Frame::ExtractFeatures(const int Ftype, int imageFlag, const cv::Mat &im) {
   if (Ftype == 0) {
     if (imageFlag == 0) {
-      (*mpORBExtractorLeft)(im, cv::Mat(), Featurepoint.mvKeys, Featurepoint.mDescriptors);
+      (*mpORBExtractorLeft)(im, cv::Mat(), mFeatData[Ftype].mvKeys, mFeatData[Ftype].mDescriptors);
     }
     else {
-      (*mpORBExtractorRight)(im, cv::Mat(), Featurepoint.mvKeysRight, Featurepoint.mDescriptorsRight);
+      (*mpORBExtractorRight)(im, cv::Mat(), mFeatData[Ftype].mvKeysRight, mFeatData[Ftype].mDescriptorsRight);
     }
   }
   else {
     if (imageFlag == 0) {
-      (*mpGCNExtractorLeft)(im, cv::Mat(), Featurepoint.mvKeys, Featurepoint.mDescriptors);
+      (*mpGCNExtractorLeft)(im, cv::Mat(), mFeatData[Ftype].mvKeys, mFeatData[Ftype].mDescriptors);
     }
     else {
-      (*mpGCNExtractorRight)(im, cv::Mat(), Featurepoint.mvKeysRight, Featurepoint.mDescriptorsRight);
+      (*mpGCNExtractorRight)(im, cv::Mat(), mFeatData[Ftype].mvKeysRight, mFeatData[Ftype].mDescriptorsRight);
     }
   }
 }
@@ -532,6 +532,7 @@ bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY) {
   return true;
 }
 
+//TO-DO need rewrite
 void Frame::ComputeBoW() {
   if (mBowVec.empty()) {
     vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);
@@ -871,26 +872,26 @@ cv::Mat Frame::UnprojectStereo(const int &i, const vector<float> &Depth,
     return cv::Mat();
 }
 
-void Frame::ChooseFeature(const FeaturePoint &Featurepoint) {
+void Frame::ChooseFeature(const int Ftype) {
 
-  N = Featurepoint.N;
-  mvKeys = Featurepoint.mvKeys;
-  mvKeysUn = Featurepoint.mvKeysUn;
-  mDescriptors = Featurepoint.mDescriptors;
-  mvKeysRight = Featurepoint.mvKeysRight;
-  mDescriptorsRight = Featurepoint.mDescriptorsRight;
-  mvuRight = Featurepoint.mvuRight;
-  mvDepth = Featurepoint.mvDepth;
-  mvpMapPoints = Featurepoint.mvpMapPoints;
-  mvbOutlier = Featurepoint.mvbOutlier;
-  mGrid = Featurepoint.mGrid;
-  mBowVec = Featurepoint.mBowVec;
-  mFeatVec = Featurepoint.mFeatVec;
+  N = mFeatData[Ftype].N;
+  mvKeys = mFeatData[Ftype].mvKeys;
+  mvKeysUn = mFeatData[Ftype].mvKeysUn;
+  mDescriptors = mFeatData[Ftype].mDescriptors;
+  mvKeysRight = mFeatData[Ftype].mvKeysRight;
+  mDescriptorsRight = mFeatData[Ftype].mDescriptorsRight;
+  mvuRight = mFeatData[Ftype].mvuRight;
+  mvDepth = mFeatData[Ftype].mvDepth;
+  mvpMapPoints = mFeatData[Ftype].mvpMapPoints;
+  mvbOutlier = mFeatData[Ftype].mvbOutlier;
+  mGrid = mFeatData[Ftype].mGrid;
+  mBowVec = mFeatData[Ftype].mBowVec;
+  mFeatVec = mFeatData[Ftype].mFeatVec;
 }
 
 void Frame::ComputeFeatures(const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth) {
   // Feature extraction
-  ExtractFeatures(mFeatData[Ftype], Ftype, 0, imGray);
+  ExtractFeatures(Ftype, 0, imGray);
 
   mFeatData[Ftype].N = mFeatData[Ftype].mvKeys.size();
   
