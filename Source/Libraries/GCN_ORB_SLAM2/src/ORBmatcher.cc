@@ -37,83 +37,6 @@ const int ORBmatcher::HISTO_LENGTH = 30;
 ORBmatcher::ORBmatcher(float nnratio, bool checkOri)
     : mfNNratio(nnratio), mbCheckOrientation(checkOri) {}
 
-int ORBmatcher::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame,
-                         const float th, const bool bMono, const int Ftype) {
-  
-  int nmatches = 0;
-  
-  // step 1 build rotation histogram (to check rotation consistency)
-  vector<int> rotHist[HISTO_LENGTH];
-  for (int i = 0; i < HISTO_LENGTH; i++)
-    rotHist[i].reserve(500);
-  const float factor = 1.0f / HISTO_LENGTH;
-
-  // step 2 calcualte translation of current frame and last frame 
-  // pose of current frame
-  const cv::Mat Rcw = CurrentFrame.mTcw.rowRange(0, 3).colRange(0, 3);
-  const cv::Mat tcw = CurrentFrame.mTcw.rowRange(0, 3).col(3);
-
-  // translation from current frame to world coordinate
-  const cv::Mat twc = -Rcw.t() * tcw;
-
-  // pose of last frame 
-  const cv::Mat Rlw = LastFrame.mTcw.rowRange(0, 3).colRange(0, 3);
-  const cv::Mat tlw = LastFrame.mTcw.rowRange(0, 3).col(3);
-
-  // translation from current frame to last frame
-  const cv::Mat tlc = Rlw * twc + tlw;
-
-  // judge forward or backward
-  const bool bForward = tlc.at<float>(2) > CurrentFrame.mb && !bMono;
-  const bool bBackward = -tlc.at<float>(2) > CurrentFrame.mb && !bMono;
-
-  // step 3 project the mappoints created by last frame to current frame, calcualte its  u and v in pixel
-  // TO-DO need multi threads ??
-  for (int i = 0; i < LastFrame.mFeatData[Ftype].N; i++) {
-    MapPoint *pMP = LastFrame.mFeatData[Ftype].mvpMapPoints[i];
-  
-    if (pMP) {
-      if (!LastFrame.mFeatData[Ftype].mvbOutlier[i]) {
-        // Project
-        cv::Mat x3Dw = pMP->GetWorldPos();
-        cv::Mat x3Dc = Rcw * x3Dw + tcw;
-
-        const float xc = x3Dc.at<float>(0);
-        const float yc = x3Dc.at<float>(1);
-        const float invzc = 1.0 / x3Dc.at<float>(2);
-
-        if (invzc < 0)
-          continue;
-        
-        float u = CurrentFrame.fx * xc * invzc + CurrentFrame.cx;
-        float v = CurrentFrame.fy * yc * invzc + CurrentFrame.cy;
-
-        if (u < CurrentFrame.mnMinX || u > CurrentFrame.mnMaxX)
-          continue;
-        if (v < CurrentFrame.mnMinY || v > CurrentFrame.mnMaxY)
-          continue;
-
-        int nLastOctave = LastFrame.mFeatData[Ftype].mvKeys[i].octave;
-
-        // Search in a window. Size depends on scale
-        float radius = th * CurrentFrame.mvScaleFactors[nLastOctave];
-
-        vector<size_t> vIndices2;
-
-      }
-    }
-  }
-  
-  
-
-
-
-
-  return nmatches;
-
-}
-
-
 int ORBmatcher::SearchByProjection(Frame &F,
                                    const vector<MapPoint *> &vpMapPoints,
                                    const float th) {
@@ -1759,5 +1682,159 @@ int ORBmatcher::DescriptorDistance(const cv::Mat &a, const cv::Mat &b) {
 
   return dist;
 }
+
+//////////////////////////////////Rewrite////////////////////////////////////////////////////
+
+// Rewrite, it should be used in the trackmotionmodel
+int ORBmatcher::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame,
+                         const float th, const bool bMono, const int Ftype) {
+  
+  int nmatches = 0;
+  
+  // step 1 build rotation histogram (to check rotation consistency)
+  vector<int> rotHist[HISTO_LENGTH];
+  for (int i = 0; i < HISTO_LENGTH; i++)
+    rotHist[i].reserve(500);
+  const float factor = 1.0f / HISTO_LENGTH;
+
+  // step 2 calcualte translation of current frame and last frame 
+  // pose of current frame
+  const cv::Mat Rcw = CurrentFrame.mTcw.rowRange(0, 3).colRange(0, 3);
+  const cv::Mat tcw = CurrentFrame.mTcw.rowRange(0, 3).col(3);
+
+  // translation from current frame to world coordinate
+  const cv::Mat twc = -Rcw.t() * tcw;
+
+  // pose of last frame 
+  const cv::Mat Rlw = LastFrame.mTcw.rowRange(0, 3).colRange(0, 3);
+  const cv::Mat tlw = LastFrame.mTcw.rowRange(0, 3).col(3);
+
+  // translation from current frame to last frame
+  const cv::Mat tlc = Rlw * twc + tlw;
+
+  // judge forward or backward
+  const bool bForward = tlc.at<float>(2) > CurrentFrame.mb && !bMono;
+  const bool bBackward = -tlc.at<float>(2) > CurrentFrame.mb && !bMono;
+
+  // step 3 project the mappoints created by last frame to current frame, calcualte its  u and v in pixel
+  // TO-DO need multi threads ??
+  for (int i = 0; i < LastFrame.mFeatData[Ftype].N; i++) {
+    MapPoint *pMP = LastFrame.mFeatData[Ftype].mvpMapPoints[i];
+  
+    if (pMP) {
+      if (!LastFrame.mFeatData[Ftype].mvbOutlier[i]) {
+        // Project
+        cv::Mat x3Dw = pMP->GetWorldPos();
+        cv::Mat x3Dc = Rcw * x3Dw + tcw;
+
+        const float xc = x3Dc.at<float>(0);
+        const float yc = x3Dc.at<float>(1);
+        const float invzc = 1.0 / x3Dc.at<float>(2);
+
+        if (invzc < 0)
+          continue;
+        
+        float u = CurrentFrame.fx * xc * invzc + CurrentFrame.cx;
+        float v = CurrentFrame.fy * yc * invzc + CurrentFrame.cy;
+
+        if (u < CurrentFrame.mnMinX || u > CurrentFrame.mnMaxX)
+          continue;
+        if (v < CurrentFrame.mnMinY || v > CurrentFrame.mnMaxY)
+          continue;
+
+        int nLastOctave = LastFrame.mFeatData[Ftype].mvKeys[i].octave;
+
+        // Search in a window. Size depends on scale
+        float radius = th * CurrentFrame.mvScaleFactors[nLastOctave];
+
+        vector<size_t> vIndices2;
+
+        if (bForward)
+          vIndices2 = CurrentFrame.GetFeaturesInArea(Ftype, u, v, radius, nLastOctave);
+        else if (bBackward)
+          vIndices2 =
+              CurrentFrame.GetFeaturesInArea(Ftype ,u, v, radius, 0, nLastOctave);
+        else
+          vIndices2 = CurrentFrame.GetFeaturesInArea(
+              Ftype, u, v, radius, nLastOctave - 1, nLastOctave + 1);
+
+        if (vIndices2.empty())
+          continue;
+
+        const cv::Mat dMP = pMP->GetDescriptor();
+
+        int bestDist = 256;
+        int bestIdx2 = -1;
+
+        for (vector<size_t>::const_iterator vit = vIndices2.begin(),
+                                            vend = vIndices2.end();
+             vit != vend; vit++) {
+          const size_t i2 = *vit;
+          if (CurrentFrame.mFeatData[Ftype].mvpMapPoints[i2])
+            if (CurrentFrame.mFeatData[Ftype].mvpMapPoints[i2]->Observations() > 0)
+              continue;
+
+          if (CurrentFrame.mFeatData[Ftype].mvuRight[i2] > 0) {
+            const float ur = u - CurrentFrame.mbf * invzc;
+            const float er = fabs(ur - CurrentFrame.mFeatData[Ftype].mvuRight[i2]);
+            if (er > radius)
+              continue;
+          }
+
+          const cv::Mat &d = CurrentFrame.mFeatData[Ftype].mDescriptors.row(i2);
+
+          const int dist = DescriptorDistance(dMP, d);
+
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestIdx2 = i2;
+          }
+        }
+
+        if (bestDist <= TH_HIGH) {
+          CurrentFrame.mFeatData[Ftype].mvpMapPoints[bestIdx2] = pMP;
+          nmatches++;
+
+          if (mbCheckOrientation) {
+            float rot = LastFrame.mFeatData[Ftype].mvKeysUn[i].angle -
+                        CurrentFrame.mFeatData[Ftype].mvKeysUn[bestIdx2].angle;
+            if (rot < 0.0)
+              rot += 360.0f;
+            int bin = round(rot * factor);
+            if (bin == HISTO_LENGTH)
+              bin = 0;
+            assert(bin >= 0 && bin < HISTO_LENGTH);
+            rotHist[bin].push_back(bestIdx2);
+          }
+        }
+      }
+    }
+  }
+
+  // Apply rotation consistency
+  if (mbCheckOrientation) {
+    int ind1 = -1;
+    int ind2 = -1;
+    int ind3 = -1;
+
+    ComputeThreeMaxima(rotHist, HISTO_LENGTH, ind1, ind2, ind3);
+
+    for (int i = 0; i < HISTO_LENGTH; i++) {
+      if (i != ind1 && i != ind2 && i != ind3) {
+        for (size_t j = 0, jend = rotHist[i].size(); j < jend; j++) {
+          CurrentFrame.mFeatData[Ftype].mvpMapPoints[rotHist[i][j]] =
+              static_cast<MapPoint *>(NULL);
+          nmatches--;
+        }
+      }
+    }
+  }
+  
+  return nmatches;
+
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////
 
 } // namespace ORB_SLAM2

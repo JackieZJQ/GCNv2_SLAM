@@ -154,6 +154,13 @@ protected:
 
   void CheckReplacedInLastFrame(const int Ftype);
 
+  void UpdateLastFrame(const int Ftype);
+
+  ////////////////////////////////////////////////////////////////////
+  //////////////////////////////Newwrite//////////////////////////////
+
+  void DiscardOutliers(const int Ftype, int &nmatches, int &nmatchesMap);
+
   ////////////////////////////////////////////////////////////////////
 
   // In case of performing only localization, this flag is true when there are

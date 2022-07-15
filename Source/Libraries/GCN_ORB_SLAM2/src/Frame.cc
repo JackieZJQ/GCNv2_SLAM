@@ -516,19 +516,7 @@ vector<size_t> Frame::GetFeaturesInArea(const int Ftype, const float &x, const f
     }
   }
 
-
-
-
-  
-  
-  
-  
   return vIndices;
-}
-
-void GetFeaturesInAreaNew() {
-  
-
 }
 
 bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY) {
