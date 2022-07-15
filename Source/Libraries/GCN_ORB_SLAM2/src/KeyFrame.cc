@@ -79,7 +79,7 @@ void KeyFrame::ComputeBoW() {
     // Feature vector associate features with nodes in the 4th level (from
     // leaves up) We assume the vocabulary tree has 6 levels, change the 4
     // otherwise
-    mpvocabulary[0]->transform(vCurrentDesc, mBowVec, mFeatVec, 4);
+    mpvocabulary[1]->transform(vCurrentDesc, mBowVec, mFeatVec, 4);
   }
 }
 

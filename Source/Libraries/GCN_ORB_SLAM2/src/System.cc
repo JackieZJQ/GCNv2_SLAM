@@ -114,14 +114,14 @@ System::System(const string (&strVocFile)[Ntype], const string &strSettingsFile,
   //(it will live in the main thread of execution, the one that called this
   //constructor)
   mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer,
-                           mpMap, mpKeyFrameDatabase[0], mpKeyFrameDatabase, strSettingsFile, mSensor);
+                           mpMap, mpKeyFrameDatabase[1], mpKeyFrameDatabase, strSettingsFile, mSensor);
 
   // Initialize the Local Mapping thread and launch
   mpLocalMapper = new LocalMapping(mpMap, mSensor == MONOCULAR);
   mptLocalMapping = new thread(&ORB_SLAM2::LocalMapping::Run, mpLocalMapper);
 
   // Initialize the Loop Closing thread and launch
-  mpLoopCloser = new LoopClosing(mpMap, mpKeyFrameDatabase[0], mpVocabulary[0],
+  mpLoopCloser = new LoopClosing(mpMap, mpKeyFrameDatabase[1], mpVocabulary[1],
                                  mSensor != MONOCULAR);
   mptLoopClosing = new thread(&ORB_SLAM2::LoopClosing::Run, mpLoopCloser);
 

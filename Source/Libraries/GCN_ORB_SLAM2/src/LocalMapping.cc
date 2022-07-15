@@ -402,7 +402,7 @@ void LocalMapping::CreateNewMapPoints() {
         continue;
 
       // Triangulation is succesfull
-      MapPoint *pMP = new MapPoint(x3D, mpCurrentKeyFrame, mpMap, 0);
+      MapPoint *pMP = new MapPoint(x3D, mpCurrentKeyFrame, mpMap, 1);
 
       pMP->AddObservation(mpCurrentKeyFrame, idx1);
       pMP->AddObservation(pKF2, idx2);
