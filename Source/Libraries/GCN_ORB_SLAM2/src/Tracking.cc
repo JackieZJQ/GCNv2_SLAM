@@ -316,7 +316,7 @@ void Tracking::Track() {
       // you explicitly activate the "only tracking" mode.
       if (mState == OK) {
         // Local Mapping might have changed some MapPoints tracked in last frame
-        CheckReplacedInLastFrame();
+        CheckReplacedInLastFrame(0);
 
         // NN only keyframe tracking
         // bOK = TrackReferenceKeyFrame();
@@ -510,71 +510,6 @@ void Tracking::Track() {
   }
 }
 
-// void Tracking::StereoInitialization() {
-//   if (mCurrentFrame.N > 50) {
-//     // Set Frame pose to the origin
-//     mCurrentFrame.SetPose(mLastPose);
-
-//     int nGood = 0;
-//     for (int i = 0; i < mCurrentFrame.N; i++) {
-//       float z = mCurrentFrame.mvDepth[i];
-//       if (z > 0) {
-//         nGood++;
-//       }
-//     }
-
-//     if (nGood < 50) {
-//       cout << "Cannot create new map with only " << nGood << " points" << endl;
-//       return;
-//     }
-
-//     // Create KeyFrame
-//     KeyFrame *pKFini = new KeyFrame(mCurrentFrame, mpMap, mpKeyFrameDB);
-
-//     // Insert KeyFrame in the map
-//     mpMap->AddKeyFrame(pKFini);
-
-//     // Create MapPoints and asscoiate to KeyFrame
-//     for (int i = 0; i < mCurrentFrame.N; i++) {
-//       float z = mCurrentFrame.mvDepth[i];
-//       if (z > 0) {
-//         //cv::Mat x3D = mCurrentFrame.UnprojectStereo(i);
-//         cv::Mat x3D = mCurrentFrame.UnprojectStereo(i, mCurrentFrame.mvDepth, mCurrentFrame.mvKeysUn);
-//         MapPoint *pNewMP = new MapPoint(x3D, pKFini, mpMap, 0);
-//         pNewMP->AddObservation(pKFini, i);
-//         pKFini->AddMapPoint(pNewMP, i);
-//         pNewMP->ComputeDistinctiveDescriptors();
-//         pNewMP->UpdateNormalAndDepth();
-//         mpMap->AddMapPoint(pNewMP);
-
-//         mCurrentFrame.mvpMapPoints[i] = pNewMP;
-//       }
-//     }
-
-//     cout << "New map created with " << mpMap->MapPointsInMap() << " points"
-//          << endl;
-
-//     mpLocalMapper->InsertKeyFrame(pKFini);
-
-//     mLastFrame = Frame(mCurrentFrame);
-//     mnLastKeyFrameId = mCurrentFrame.mnId;
-//     mpLastKeyFrame = pKFini;
-
-//     mvpLocalKeyFrames.push_back(pKFini);
-//     mvpLocalMapPoints = mpMap->GetAllMapPoints();
-//     mpReferenceKF = pKFini;
-//     mCurrentFrame.mpReferenceKF = pKFini;
-
-//     mpMap->SetReferenceMapPoints(mvpLocalMapPoints);
-
-//     mpMap->mvpKeyFrameOrigins.push_back(pKFini);
-
-//     mpMapDrawer->SetCurrentCameraPose(mCurrentFrame.mTcw);
-
-//     mState = OK;
-//   }
-// }
-
 void Tracking::StereoInitialization() {
 
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
@@ -602,7 +537,7 @@ void Tracking::StereoInitialization() {
   mpMap->AddKeyFrame(pKFini);
 
   // Create MapPoints and asscoiate to KeyFrame
-  for (int Ftype = 0; Ftype < 1; Ftype++) {
+  for (int Ftype = 0; Ftype < 1; Ftype++) {               // TO-DO
     for (int i = 0; i < mCurrentFrame.mFeatData[Ftype].N; i++) {
       float z = mCurrentFrame.mFeatData[Ftype].mvDepth[i];
       if (z > 0) {
@@ -619,7 +554,7 @@ void Tracking::StereoInitialization() {
     }
   }
   
-
+  // copy data to the default variable
   mCurrentFrame.mvpMapPoints = mCurrentFrame.mFeatData[0].mvpMapPoints;
 
   cout << "New map created with " << mpMap->MapPointsInMap() << " points"
@@ -644,7 +579,6 @@ void Tracking::StereoInitialization() {
 
   mState = OK;
 }
-
 
 
 void Tracking::MonocularInitialization() {
@@ -821,6 +755,39 @@ void Tracking::CheckReplacedInLastFrame() {
       }
     }
   }
+}
+
+// void Tracking::CheckReplacedInLastFrame() {
+//   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+//     for (int i = 0; i < mLastFrame.mFeatData[Ftype].N; i++) {
+//       MapPoint *pMP = mLastFrame.mFeatData[Ftype].mvpMapPoints[i];
+
+//       if (pMP) {
+//         MapPoint *pRep = pMP->GetReplaced();
+//         if (pRep) {
+//           mLastFrame.mFeatData[Ftype].mvpMapPoints[i] = pRep;
+//         }
+//       }
+//     }
+//   }
+//   // copy data to the defatule variable
+//   mLastFrame.mvpMapPoints = mLastFrame.mFeatData[0].mvpMapPoints;
+// }
+
+void Tracking::CheckReplacedInLastFrame(const int Ftype) {
+
+  for (int i = 0; i < mLastFrame.mFeatData[Ftype].N; i++) {
+    MapPoint *pMP = mLastFrame.mFeatData[Ftype].mvpMapPoints[i];
+
+    if (pMP) {
+      MapPoint *pRep = pMP->GetReplaced();
+      if (pRep) {
+        mLastFrame.mFeatData[Ftype].mvpMapPoints[i] = pRep;
+      }
+    }
+  }
+  // copy data to the defatule variable
+  mLastFrame.mvpMapPoints = mLastFrame.mFeatData[Ftype].mvpMapPoints;
 }
 
 bool Tracking::TrackReferenceKeyFrame() {

@@ -402,7 +402,6 @@ bool Frame::isInFrustum(MapPoint *pMP, float viewingCosLimit) {
   return true;
 }
 
-// TO-DO rewrite
 vector<size_t> Frame::GetFeaturesInArea(const float &x, const float &y,
                                         const float &r, const int minLevel,
                                         const int maxLevel) const {
@@ -459,6 +458,77 @@ vector<size_t> Frame::GetFeaturesInArea(const float &x, const float &y,
   }
 
   return vIndices;
+}
+
+// Rewrite GetFeaturesInArea()
+vector<size_t> Frame::GetFeaturesInArea(const int Ftype, const float &x, const float &y,
+                                      const float &r, const int minLevel,
+                                      const int maxLevel) const {
+  vector<size_t> vIndices;
+  vIndices.reserve(mFeatData[Ftype].N);
+
+  const int nMinCellX =
+      max(0, (int)floor((x - mnMinX - r) * mfGridElementWidthInv));
+  if (nMinCellX >= FRAME_GRID_COLS)
+    return vIndices;
+
+  const int nMaxCellX =
+      min((int)FRAME_GRID_COLS - 1,
+          (int)ceil((x - mnMinX + r) * mfGridElementWidthInv));
+  if (nMaxCellX < 0)
+    return vIndices;
+
+  const int nMinCellY =
+      max(0, (int)floor((y - mnMinY - r) * mfGridElementHeightInv));
+  if (nMinCellY >= FRAME_GRID_ROWS)
+    return vIndices;
+
+  const int nMaxCellY =
+      min((int)FRAME_GRID_ROWS - 1,
+          (int)ceil((y - mnMinY + r) * mfGridElementHeightInv));
+  if (nMaxCellY < 0)
+    return vIndices;
+
+  const bool bCheckLevels = (minLevel > 0) || (maxLevel >= 0);
+
+  for (int ix = nMinCellX; ix <= nMaxCellX; ix++) {
+    for (int iy = nMinCellY; iy <= nMaxCellY; iy++) {
+      const vector<size_t> vCell = mFeatData[Ftype].mGrid[ix][iy];
+      if (vCell.empty())
+        continue;
+
+      for (size_t j = 0, jend = vCell.size(); j < jend; j++) {
+        const cv::KeyPoint &kpUn = mFeatData[Ftype].mvKeysUn[vCell[j]];
+        if (bCheckLevels) {
+          if (kpUn.octave < minLevel)
+            continue;
+          if (maxLevel >= 0)
+            if (kpUn.octave > maxLevel)
+              continue;
+        }
+
+        const float distx = kpUn.pt.x - x;
+        const float disty = kpUn.pt.y - y;
+
+        if (fabs(distx) < r && fabs(disty) < r)
+          vIndices.push_back(vCell[j]);
+      }
+    }
+  }
+
+
+
+
+  
+  
+  
+  
+  return vIndices;
+}
+
+void GetFeaturesInAreaNew() {
+  
+
 }
 
 bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY) {
@@ -833,6 +903,8 @@ void Frame::ChooseFeature(const FeaturePoint &Featurepoint) {
   mvpMapPoints = Featurepoint.mvpMapPoints;
   mvbOutlier = Featurepoint.mvbOutlier;
   mGrid = Featurepoint.mGrid;
+  mBowVec = Featurepoint.mBowVec;
+  mFeatVec = Featurepoint.mFeatVec;
 }
 
 void Frame::ComputeFeatures(const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth) {

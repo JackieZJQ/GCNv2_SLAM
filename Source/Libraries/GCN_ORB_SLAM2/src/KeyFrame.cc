@@ -48,7 +48,8 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB)
       mDescriptors(F.mDescriptors.clone()), 
       mvpMapPoints(F.mvpMapPoints), 
       mBowVec(F.mBowVec),
-      mFeatVec(F.mFeatVec), mnScaleLevels(F.mnScaleLevels),
+      mFeatVec(F.mFeatVec), 
+      mnScaleLevels(F.mnScaleLevels),
       mfScaleFactor(F.mfScaleFactor), mfLogScaleFactor(F.mfLogScaleFactor),
       mvScaleFactors(F.mvScaleFactors), mvLevelSigma2(F.mvLevelSigma2),
       mvInvLevelSigma2(F.mvInvLevelSigma2), mnMinX(F.mnMinX), mnMinY(F.mnMinY),
@@ -77,7 +78,8 @@ void KeyFrame::ComputeBoW() {
       mpvocabulary[i]->transform(vCurrentDesc, mFeatData[i].mBowVec, mFeatData[i].mFeatVec, 4);
     }
   }
-  
+
+  // use featdata to store data, in this stage, copy data to the default variable
   mBowVec = mFeatData[0].mBowVec;
   mFeatVec = mFeatData[0].mFeatVec;
 }

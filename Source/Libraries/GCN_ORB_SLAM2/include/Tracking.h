@@ -150,6 +150,12 @@ protected:
   bool NeedNewKeyFrame();
   void CreateNewKeyFrame();
 
+  //////////////////////////////Rewrite///////////////////////////////
+
+  void CheckReplacedInLastFrame(const int Ftype);
+
+  ////////////////////////////////////////////////////////////////////
+
   // In case of performing only localization, this flag is true when there are
   // no matches to points in the map. Still tracking will continue if there are
   // enough matches with temporal points. In that case we are doing visual

@@ -103,6 +103,10 @@ public:
   std::vector<size_t> GetFeaturesInArea(const float &x, const float &y,
                                         const float &r, const int minLevel = -1,
                                         const int maxLevel = -1) const;
+  
+  std::vector<size_t> GetFeaturesInArea(const int Ftype, const float &x, const float &y,
+                                        const float &r, const int minLevel = -1,
+                                        const int maxLevel = -1) const;
 
   // Search a match for each keypoint in the left image to a keypoint in the
   // right image. If there is a match, depth is computed and the right
