@@ -71,17 +71,16 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB)
   SetPose(F.mTcw);
 }
 
+//TO-DO need rewrite
 void KeyFrame::ComputeBoW() {
-  for (int i = 0; i < Ntype; i++) {
-    if (mFeatData[i].mBowVec.empty() || mFeatData[i].mFeatVec.empty()) {
-      std::vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mFeatData[i].mDescriptors);
-      mpvocabulary[i]->transform(vCurrentDesc, mFeatData[i].mBowVec, mFeatData[i].mFeatVec, 4);
-    }
+  if (mBowVec.empty() || mFeatVec.empty()) {
+    std::vector<cv::Mat> vCurrentDesc =
+        Converter::toDescriptorVector(mDescriptors);
+    // Feature vector associate features with nodes in the 4th level (from
+    // leaves up) We assume the vocabulary tree has 6 levels, change the 4
+    // otherwise
+    mpvocabulary[0]->transform(vCurrentDesc, mBowVec, mFeatVec, 4);
   }
-
-  // use featdata to store data, in this stage, copy data to the default variable
-  mBowVec = mFeatData[0].mBowVec;
-  mFeatVec = mFeatData[0].mFeatVec;
 }
 
 void KeyFrame::SetPose(const cv::Mat &Tcw_) {
@@ -629,5 +628,33 @@ float KeyFrame::ComputeSceneMedianDepth(const int q) {
 
   return vDepths[(vDepths.size() - 1) / q];
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// void KeyFrame::ComputeBoW() {
+//   for (int i = 0; i < Ntype; i++) {
+//     if (mFeatData[i].mBowVec.empty() || mFeatData[i].mFeatVec.empty()) {
+//       std::vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mFeatData[i].mDescriptors);
+//       mpvocabulary[i]->transform(vCurrentDesc, mFeatData[i].mBowVec, mFeatData[i].mFeatVec, 4);
+//     }
+//   }
+
+//   // use featdata to store data, in this stage, copy data to the default variable
+//   mBowVec = mFeatData[0].mBowVec;
+//   mFeatVec = mFeatData[0].mFeatVec;
+// }
+
+void KeyFrame::ComputeBoW(const int Ftype) {
+  if (mFeatData[Ftype].mBowVec.empty() || mFeatData[Ftype].mFeatVec.empty()) {
+    std::vector<cv::Mat> vCurrentDesc =
+        Converter::toDescriptorVector(mFeatData[Ftype].mDescriptors);
+    // Feature vector associate features with nodes in the 4th level (from
+    // leaves up) We assume the vocabulary tree has 6 levels, change the 4
+    // otherwise
+    mpvocabulary[Ftype]->transform(vCurrentDesc, mFeatData[Ftype].mBowVec, mFeatData[Ftype].mFeatVec, 4);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 } // namespace ORB_SLAM2

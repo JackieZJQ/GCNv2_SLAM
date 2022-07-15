@@ -533,17 +533,10 @@ bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY) {
 }
 
 void Frame::ComputeBoW() {
-
-  for (int i = 0; i < Ntype; i++) {
-    if (mFeatData[i].mBowVec.empty()) {
-      vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mFeatData[i].mDescriptors);
-      mpvocabulary[i]->transform(vCurrentDesc, mFeatData[i].mBowVec, mFeatData[i].mFeatVec, 4);
-    }
+  if (mBowVec.empty()) {
+    vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);
+    mpvocabulary[0]->transform(vCurrentDesc, mBowVec, mFeatVec, 4);
   }
-
-  // only orb works
-  mBowVec = mFeatData[0].mBowVec;
-  mFeatVec = mFeatData[0].mFeatVec;
 }
 
 void Frame::UndistortKeyPoints() {
@@ -925,6 +918,31 @@ void Frame::ComputeFeatures(const int Ftype, const cv::Mat &imGray, const cv::Ma
   // AssignFeaturesToGrid();
   // AssignFeaturesToGrid(N, mvKeysUn, mGrid);
   AssignFeaturesToGrid(mFeatData[Ftype].N, mFeatData[Ftype].mvKeysUn, mFeatData[Ftype].mGrid);
-} 
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// void Frame::ComputeBoW() {
+
+//   for (int i = 0; i < Ntype; i++) {
+//     if (mFeatData[i].mBowVec.empty()) {
+//       vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mFeatData[i].mDescriptors);
+//       mpvocabulary[i]->transform(vCurrentDesc, mFeatData[i].mBowVec, mFeatData[i].mFeatVec, 4);
+//     }
+//   }
+
+//   // only orb works
+//   mBowVec = mFeatData[0].mBowVec;
+//   mFeatVec = mFeatData[0].mFeatVec;
+// }
+
+void Frame::ComputeBoW(const int Ftype) {
+  if (mFeatData[Ftype].mBowVec.empty()) {
+    vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mFeatData[Ftype].mDescriptors);
+    mpvocabulary[Ftype]->transform(vCurrentDesc, mFeatData[Ftype].mBowVec, mFeatData[Ftype].mFeatVec, 4);
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 } // namespace ORB_SLAM2
