@@ -164,6 +164,39 @@ int Associater::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame,
   return nmatches;
 }
 
+// search by nearest nerghbour
+int Associater::SearchByNN(Frame &CurrentFrame, const Frame &LastFrame, const int Ftype) {
+  
+  std::vector<cv::DMatch> matches;
+  cv::BFMatcher desc_matcher(cv::NORM_HAMMING, true);
+  desc_matcher.match(LastFrame.mFeatData[Ftype].mDescriptors, CurrentFrame.mFeatData[Ftype].mDescriptors, matches,
+                     cv::Mat());
+
+  int nmatches = 0;
+  for (int i = 0; i < static_cast<int>(matches.size()); ++i) {
+    int realIdxKF = matches[i].queryIdx;
+    int bestIdxF = matches[i].trainIdx;
+
+    if (matches[i].distance > TH_LOW)
+      continue;
+    
+    MapPoint *pMP = LastFrame.mFeatData[Ftype].mvpMapPoints[realIdxKF];
+    if (!pMP)
+      continue;
+
+    if (pMP->isBad())
+      continue;
+
+    if (!LastFrame.mFeatData[Ftype].mvbOutlier[realIdxKF])
+      CurrentFrame.mFeatData[Ftype].mvpMapPoints[bestIdxF] = pMP;
+
+    nmatches++;
+
+  }
+  
+  return nmatches;
+}
+
 // compute three maxima
 void Associater::ComputeThreeMaxima(vector<int> *histo, const int L, int &ind1,
                                     int &ind2, int &ind3) {

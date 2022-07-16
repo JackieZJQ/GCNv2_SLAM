@@ -23,6 +23,8 @@ public:
   int SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame,
                          const float th, const bool bMono, const int Ftype);
 
+  int SearchByNN(Frame &CurrentFrame, const Frame &LastFrame, const int Ftype);
+
 public:
   static const int TH_LOW;
   static const int TH_HIGH;

@@ -28,6 +28,7 @@
 #include "Initializer.h"
 #include "Map.h"
 #include "ORBmatcher.h"
+#include "Associater.h"
 
 #include "FeatureExtractorFactory.h"
 #include "Optimizer.h"
@@ -861,6 +862,7 @@ void Tracking::UpdateLastFrame() {
 
 bool Tracking::TrackWithMotionModel() {
   ORBmatcher matcher(0.9, true);
+  Associater Associater(0.9, true);
 
   // Update last frame pose according to its reference keyframe
   // Create "visual odometry" points if in Localization Mode
@@ -874,6 +876,9 @@ bool Tracking::TrackWithMotionModel() {
   fill(mCurrentFrame.mvpMapPoints.begin(), mCurrentFrame.mvpMapPoints.end(),
        static_cast<MapPoint *>(NULL));
 
+  fill(mCurrentFrame.mFeatData[1].mvpMapPoints.begin(), mCurrentFrame.mFeatData[1].mvpMapPoints.end(),
+       static_cast<MapPoint *>(NULL));
+
   // Project points seen in previous frame
   // int th;
   // if(mSensor!=System::STEREO)
@@ -881,41 +886,42 @@ bool Tracking::TrackWithMotionModel() {
   // else
   //     th=7;
   int th = 15;
-  int nmatches = matcher.SearchByProjection(mCurrentFrame, mLastFrame, th,
-                                            mSensor == System::MONOCULAR);
-
   // int nmatches = matcher.SearchByProjection(mCurrentFrame, mLastFrame, th,
-  //                                           mSensor == System::MONOCULAR, 0);
+  //                                           mSensor == System::MONOCULAR);
 
-  // int nmatches = matcher.SearchByProjection(mCurrentFrame, mLastFrame, th,
-  //                                           mSensor == System::MONOCULAR, 1);
-  
-  // mCurrentFrame.mvpMapPoints = mCurrentFrame.mFeatData[0].mvpMapPoints;
+  int nmatches = Associater.SearchByProjection(mCurrentFrame, mLastFrame, th,
+                                                mSensor == System::MONOCULAR, 1);
 
   // If few matches, uses a wider window search
   if (nmatches < 20) {
-    fill(mCurrentFrame.mvpMapPoints.begin(), mCurrentFrame.mvpMapPoints.end(),
+    // fill(mCurrentFrame.mvpMapPoints.begin(), mCurrentFrame.mvpMapPoints.end(),
+    //      static_cast<MapPoint *>(NULL));
+    fill(mCurrentFrame.mFeatData[1].mvpMapPoints.begin(), mCurrentFrame.mFeatData[1].mvpMapPoints.end(),
          static_cast<MapPoint *>(NULL));
-    nmatches = matcher.SearchByProjection(mCurrentFrame, mLastFrame, 2 * th,
-                                          mSensor == System::MONOCULAR);
-
     // nmatches = matcher.SearchByProjection(mCurrentFrame, mLastFrame, 2 * th,
-    //                                       mSensor == System::MONOCULAR, 0);
+    //                                       mSensor == System::MONOCULAR);
 
-    // nmatches = matcher.SearchByProjection(mCurrentFrame, mLastFrame, 2 * th,
-    //                                       mSensor == System::MONOCULAR, 1);
-
-    // mCurrentFrame.mvpMapPoints = mCurrentFrame.mFeatData[0].mvpMapPoints;
-
+    nmatches = Associater.SearchByProjection(mCurrentFrame, mLastFrame, th,
+                                              mSensor == System::MONOCULAR, 1);
   }
 
+  // mCurrentFrame.mvpMapPoints = mCurrentFrame.mFeatData[1].mvpMapPoints;
+
   // int nmatches = matcher.SearchByNN(mCurrentFrame,mLastFrame);
+
+  
 
   if (nmatches < 20)
     return false;
 
   // Optimize frame pose with all matches
-  Optimizer::PoseOptimization(&mCurrentFrame);
+  //Optimizer::PoseOptimization(&mCurrentFrame);
+
+  Optimizer::PoseOptimizationMultiChannels(&mCurrentFrame);
+  mCurrentFrame.mvpMapPoints = mCurrentFrame.mFeatData[1].mvpMapPoints;
+  mCurrentFrame.mvbOutlier = mCurrentFrame.mFeatData[1].mvbOutlier;
+
+
 
   //////////////////////////// Discard outliers /////////////////////////////////
   int nmatchesMap = 0;
@@ -1720,7 +1726,7 @@ void Tracking::UpdateLastFrame(const int Ftype) {
 }
 
 // used in track with motion model
-void Tracking::DiscardOutliers(const int Ftype, int &nmatches, int &nmatchesMap) {
+void Tracking::DiscardOutliers(int &nmatches, int &nmatchesMap, const int Ftype) {
 
   for (int i = 0; i < mCurrentFrame.mFeatData[Ftype].N; i++) {
     if (mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i]) {

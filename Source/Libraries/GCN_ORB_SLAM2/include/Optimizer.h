@@ -40,12 +40,17 @@ public:
                                int nIterations = 5, bool *pbStopFlag = NULL,
                                const unsigned long nLoopKF = 0,
                                const bool bRobust = true);
+  
   void static GlobalBundleAdjustemnt(Map *pMap, int nIterations = 5,
                                      bool *pbStopFlag = NULL,
                                      const unsigned long nLoopKF = 0,
                                      const bool bRobust = true);
+  
   void static LocalBundleAdjustment(KeyFrame *pKF, bool *pbStopFlag, Map *pMap);
+  
   int static PoseOptimization(Frame *pFrame);
+
+  int static PoseOptimizationMultiChannels(Frame *pFrame);
 
   // if bFixScale is true, 6DoF optimization (stereo,rgbd), 7DoF otherwise
   // (mono)
