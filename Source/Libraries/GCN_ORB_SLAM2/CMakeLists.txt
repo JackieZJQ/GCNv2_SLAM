@@ -26,6 +26,7 @@ if (USE_GCN)
 endif()
 
 add_library(${PROJECT_NAME} ${LIB_TYPE}
+src/Associater.cc
 src/Converter.cc
 src/FeatureExtractor.cc
 src/FeatureExtractorFactory.cc

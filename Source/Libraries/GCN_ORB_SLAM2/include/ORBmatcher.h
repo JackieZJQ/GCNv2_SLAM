@@ -60,8 +60,6 @@ public:
                          const std::vector<MapPoint *> &vpPoints,
                          std::vector<MapPoint *> &vpMatched, int th);
 
-  
-
   // Search matches between MapPoints in a KeyFrame and ORB in a Frame.
   // Brute force constrained to ORB that belong to the same vocabulary node (at
   // a certain level) Used in Relocalisation and Loop Detection
@@ -101,12 +99,6 @@ public:
   // duplicated MapPoints.
   int Fuse(KeyFrame *pKF, cv::Mat Scw, const std::vector<MapPoint *> &vpPoints,
            float th, std::vector<MapPoint *> &vpReplacePoint);
-
-//////////////////////////////////////////////////////////////
-  int SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame,
-                         const float th, const bool bMono, const int Ftype);
-                         
-//////////////////////////////////////////////////////////////
 
 public:
   static const int TH_LOW;
