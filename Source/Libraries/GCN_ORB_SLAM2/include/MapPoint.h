@@ -84,7 +84,7 @@ public:
   int nObs;
 
   // Define Flag, ORB:0, GCN:1
-  const int mFeatureType;
+  const int mFType;
 
   // Number of feature types
   const static int Ntype = 2;

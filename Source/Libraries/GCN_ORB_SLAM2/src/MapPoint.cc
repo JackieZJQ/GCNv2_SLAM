@@ -30,14 +30,14 @@ namespace ORB_SLAM2 {
 long unsigned int MapPoint::nNextId = 0;
 mutex MapPoint::mGlobalMutex;
 
-MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap, int FeatureType)
+MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap, int FType)
     : mnFirstKFid(pRefKF->mnId), mnFirstFrame(pRefKF->mnFrameId), nObs(0),
       mnTrackReferenceForFrame(0), mnLastFrameSeen(0), mnBALocalForKF(0),
       mnFuseCandidateForKF(0), mnLoopPointForKF(0), mnCorrectedByKF(0),
       mnCorrectedReference(0), mnBAGlobalForKF(0), mpRefKF(pRefKF),
       mnVisible(1), mnFound(1), mbBad(false),
       mpReplaced(static_cast<MapPoint *>(NULL)), mfMinDistance(0),
-      mfMaxDistance(0), mpMap(pMap), mFeatureType(FeatureType) {
+      mfMaxDistance(0), mpMap(pMap), mFType(FType) {
   Pos.copyTo(mWorldPos);
   mNormalVector = cv::Mat::zeros(3, 1, CV_32F);
 
@@ -48,13 +48,13 @@ MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap, int FeatureT
 }
 
 MapPoint::MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame,
-                   const int &idxF, int FeatureType)
+                   const int &idxF, int FType)
     : mnFirstKFid(-1), mnFirstFrame(pFrame->mnId), nObs(0),
       mnTrackReferenceForFrame(0), mnLastFrameSeen(0), mnBALocalForKF(0),
       mnFuseCandidateForKF(0), mnLoopPointForKF(0), mnCorrectedByKF(0),
       mnCorrectedReference(0), mnBAGlobalForKF(0),
       mpRefKF(static_cast<KeyFrame *>(NULL)), mnVisible(1), mnFound(1),
-      mbBad(false), mpReplaced(NULL), mpMap(pMap), mFeatureType(FeatureType) {
+      mbBad(false), mpReplaced(NULL), mpMap(pMap), mFType(FType) {
   Pos.copyTo(mWorldPos);
   cv::Mat Ow = pFrame->GetCameraCenter();
   mNormalVector = mWorldPos - Ow;
@@ -62,14 +62,14 @@ MapPoint::MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame,
 
   cv::Mat PC = Pos - Ow;
   const float dist = cv::norm(PC);
-  const int level = pFrame->mFeatData[mFeatureType].mvKeysUn[idxF].octave;
+  const int level = pFrame->mvKeysUn[idxF].octave;
   const float levelScaleFactor = pFrame->mvScaleFactors[level];
   const int nLevels = pFrame->mnScaleLevels;
 
   mfMaxDistance = dist * levelScaleFactor;
   mfMinDistance = mfMaxDistance / pFrame->mvScaleFactors[nLevels - 1];
 
-  pFrame->mFeatData[mFeatureType].mDescriptors.row(idxF).copyTo(mDescriptor);
+  pFrame->mDescriptors.row(idxF).copyTo(mDescriptor);
 
   // MapPoints can be created from Tracking and Local Mapping. This mutex avoid
   // conflicts with id.
@@ -105,7 +105,7 @@ void MapPoint::AddObservation(KeyFrame *pKF, std::size_t idx) {
     return;
   mObservations[pKF] = idx;
 
-  if (pKF->mFeatData[mFeatureType].mvuRight[idx] >= 0)
+  if (pKF->mvuRight[idx] >= 0)
     nObs += 2;
   else
     nObs++;
@@ -117,7 +117,7 @@ void MapPoint::EraseObservation(KeyFrame *pKF) {
     unique_lock<mutex> lock(mMutexFeatures);
     if (mObservations.count(pKF)) {
       int idx = mObservations[pKF];
-      if (pKF->mFeatData[mFeatureType].mvuRight[idx] >= 0)
+      if (pKF->mvuRight[idx] >= 0)
         nObs -= 2;
       else
         nObs--;
@@ -254,7 +254,7 @@ void MapPoint::ComputeDistinctiveDescriptors() {
     KeyFrame *pKF = mit->first;
 
     if (!pKF->isBad())
-      vDescriptors.push_back(pKF->mFeatData[mFeatureType].mDescriptors.row(mit->second));
+      vDescriptors.push_back(pKF->mDescriptors.row(mit->second));
   }
 
   if (vDescriptors.empty())
@@ -343,7 +343,7 @@ void MapPoint::UpdateNormalAndDepth() {
 
   cv::Mat PC = Pos - pRefKF->GetCameraCenter();
   const float dist = cv::norm(PC);
-  const int level = pRefKF->mFeatData[mFeatureType].mvKeysUn[observations[pRefKF]].octave;
+  const int level = pRefKF->mvKeysUn[observations[pRefKF]].octave;
   const float levelScaleFactor = pRefKF->mvScaleFactors[level];
   const int nLevels = pRefKF->mnScaleLevels;
 
