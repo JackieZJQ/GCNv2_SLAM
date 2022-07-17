@@ -18,8 +18,7 @@ Associater::Associater(float nnratio, bool checkOri)
     : mfNNratio(nnratio), mbCheckOrientation(checkOri) {}
 
 // Rewrite, it should be used in the trackmotionmodel
-int Associater::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame,
-                         const float th, const bool bMono, const int Ftype) {
+int Associater::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, const float th, const bool bMono, const int Ftype) {
   
   int nmatches = 0;
   
@@ -97,9 +96,7 @@ int Associater::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame,
         int bestDist = 256;
         int bestIdx2 = -1;
 
-        for (vector<size_t>::const_iterator vit = vIndices2.begin(),
-                                            vend = vIndices2.end();
-             vit != vend; vit++) {
+        for (vector<size_t>::const_iterator vit = vIndices2.begin(), vend = vIndices2.end(); vit != vend; vit++) {
           const size_t i2 = *vit;
           if (CurrentFrame.mFeatData[Ftype].mvpMapPoints[i2])
             if (CurrentFrame.mFeatData[Ftype].mvpMapPoints[i2]->Observations() > 0)
@@ -164,8 +161,7 @@ int Associater::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame,
   return nmatches;
 }
 
-int Associater::SearchByBoW(KeyFrame *pKF, Frame &F,
-                            vector<MapPoint *> &vpMapPointMatches, const int Ftype) {
+int Associater::SearchByBoW(KeyFrame *pKF, Frame &F, vector<MapPoint *> &vpMapPointMatches, const int Ftype) {
   const vector<MapPoint *> vpMapPointsKF = pKF->GetMapPointMatches(Ftype);
 
   vpMapPointMatches = vector<MapPoint *>(F.mFeatData[Ftype].N, static_cast<MapPoint *>(NULL));
@@ -349,8 +345,7 @@ int Associater::SearchByNN(KeyFrame *pKF, Frame &F, std::vector<MapPoint *> &vpM
 }
 
 // compute three maxima
-void Associater::ComputeThreeMaxima(vector<int> *histo, const int L, int &ind1,
-                                    int &ind2, int &ind3) {
+void Associater::ComputeThreeMaxima(vector<int> *histo, const int L, int &ind1, int &ind2, int &ind3) {
   int max1 = 0;
   int max2 = 0;
   int max3 = 0;

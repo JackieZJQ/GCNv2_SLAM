@@ -79,6 +79,8 @@ public:
   int PredictScale(const float &currentDist, KeyFrame *pKF);
   int PredictScale(const float &currentDist, Frame *pF);
 
+  int GetFeatureType();
+
 public:
   long unsigned int mnId;
   static long unsigned int nNextId;
@@ -87,7 +89,7 @@ public:
   int nObs;
 
   // Define Flag, ORB:0, GCN:1
-  int mFType;
+  const int mFType;
 
   // Number of feature types
   const static int Ntype = 2;
