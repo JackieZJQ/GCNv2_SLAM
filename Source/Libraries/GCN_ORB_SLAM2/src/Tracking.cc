@@ -758,8 +758,8 @@ void Tracking::CheckReplacedInLastFrame() {
 bool Tracking::TrackReferenceKeyFrame() {
   // Compute Bag of Words vector
   mCurrentFrame.ComputeBoW();
-  mCurrentFrame.ComputeBoW(0);
-  mCurrentFrame.ComputeBoW(1);
+  // mCurrentFrame.ComputeBoW(0);
+  // mCurrentFrame.ComputeBoW(1);
 
   // We perform first an ORB matching with the reference keyframe
   // If enough matches are found we setup a PnP solver
@@ -772,8 +772,8 @@ bool Tracking::TrackReferenceKeyFrame() {
   matcher.SearchByBoW(mpReferenceKF,mCurrentFrame,vpMapPointMatches);
 
   // NN only matching
-  nmatches =
-      matcher.SearchByNN(mpReferenceKF, mCurrentFrame, vpMapPointMatches);
+  // nmatches =
+  //     matcher.SearchByNN(mpReferenceKF, mCurrentFrame, vpMapPointMatches);
 
   if (nmatches < 15)
     return false;
@@ -1745,6 +1745,132 @@ void Tracking::DiscardOutliers(int &nmatches, int &nmatchesMap, const int Ftype)
   }
 }
 
+bool Tracking::RelocalizationMultiChannels() {
+  // Compute Bag of Words Vector
+  mCurrentFrame.ComputeBoW(0);
+  mCurrentFrame.ComputeBoW(1);
+
+
+}
+
+void Tracking::UpdateLocalKeyFramesMultiChannels() {
+  
+  // Iterate all channels
+  // Each map point vote for the keyframes in which it has been observed
+  map<KeyFrame *, int> keyframeCounter;
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    for (int i = 0; i < mCurrentFrame.mFeatData[Ftype].N; i++) {
+      if (mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i]) {
+        MapPoint *pMP = mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i];
+        if (!pMP->isBad()) {
+          const map<KeyFrame *, size_t> observations = pMP->GetObservations();
+          for (map<KeyFrame *, size_t>::const_iterator it = observations.begin(), itend = observations.end(); it != itend; it++)
+            keyframeCounter[it->first]++;
+        } else {
+          mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i] = NULL;
+        }
+      }
+    }
+  }
+
+  if (keyframeCounter.empty())
+    return;
+
+  // used for finding the referencekeyframe
+  int max = 0;
+  KeyFrame *pKFmax = static_cast<KeyFrame *>(NULL);
+
+  mvpLocalKeyFrames.clear();
+  mvpLocalKeyFrames.reserve(3 * keyframeCounter.size());
+
+  // All keyframes that observe a map point are included in the local map. Also
+  // check which keyframe shares most points
+  for (map<KeyFrame *, int>::const_iterator it = keyframeCounter.begin(), itEnd = keyframeCounter.end(); it != itEnd; it++) {
+    KeyFrame *pKF = it->first;
+
+    if (pKF->isBad())
+      continue;
+
+    if (it->second > max) {
+      max = it->second;
+      pKFmax = pKF;
+    }
+
+    mvpLocalKeyFrames.push_back(it->first);
+    pKF->mnTrackReferenceForFrame = mCurrentFrame.mnId;
+  }
+
+  // Include also some not-already-included keyframes that are neighbors to
+  // already-included keyframes
+  for (vector<KeyFrame *>::const_iterator itKF = mvpLocalKeyFrames.begin(), itEndKF = mvpLocalKeyFrames.end(); itKF != itEndKF; itKF++) {
+    // Limit the number of keyframes
+    if (mvpLocalKeyFrames.size() > 80)
+      break;
+
+    KeyFrame *pKF = *itKF;
+
+    const vector<KeyFrame *> vNeighs = pKF->GetBestCovisibilityKeyFrames(10);
+
+    for (vector<KeyFrame *>::const_iterator itNeighKF = vNeighs.begin(), itEndNeighKF = vNeighs.end(); itNeighKF != itEndNeighKF; itNeighKF++) {
+      KeyFrame *pNeighKF = *itNeighKF;
+      if (!pNeighKF->isBad()) {
+        if (pNeighKF->mnTrackReferenceForFrame != mCurrentFrame.mnId) {
+          mvpLocalKeyFrames.push_back(pNeighKF);
+          pNeighKF->mnTrackReferenceForFrame = mCurrentFrame.mnId;
+          break;
+        }
+      }
+    }
+
+    const set<KeyFrame *> spChilds = pKF->GetChilds();
+    for (set<KeyFrame *>::const_iterator sit = spChilds.begin(), send = spChilds.end(); sit != send; sit++) {
+      KeyFrame *pChildKF = *sit;
+      if (!pChildKF->isBad()) {
+        if (pChildKF->mnTrackReferenceForFrame != mCurrentFrame.mnId) {
+          mvpLocalKeyFrames.push_back(pChildKF);
+          pChildKF->mnTrackReferenceForFrame = mCurrentFrame.mnId;
+          break;
+        }
+      }
+    }
+
+    KeyFrame *pParent = pKF->GetParent();
+    if (pParent) {
+      if (pParent->mnTrackReferenceForFrame != mCurrentFrame.mnId) {
+        mvpLocalKeyFrames.push_back(pParent);
+        pParent->mnTrackReferenceForFrame = mCurrentFrame.mnId;
+        break; // BUG ??
+      }
+    }
+  }
+
+  if (pKFmax) {
+    mpReferenceKF = pKFmax;
+    mCurrentFrame.mpReferenceKF = mpReferenceKF;
+  }
+}
+
+void Tracking::UpdateLocalPointsMultiChannels() {
+  mvpLocalMapPoints.clear();
+
+  for (vector<KeyFrame *>::const_iterator itKF = mvpLocalKeyFrames.begin(), itEndKF = mvpLocalKeyFrames.end(); itKF != itEndKF; itKF++) {
+    KeyFrame *pKF = *itKF;
+    for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+      const vector<MapPoint *> vpMPs = pKF->GetMapPointMatches(Ftype);
+      for (vector<MapPoint *>::const_iterator itMP = vpMPs.begin(), itEndMP = vpMPs.end(); itMP != itEndMP; itMP++) {
+        MapPoint *pMP = *itMP;
+        if (!pMP)
+          continue;
+        if (pMP->mnTrackReferenceForFrame == mCurrentFrame.mnId)
+          continue;
+        if (!pMP->isBad()) {
+          mvpLocalMapPoints.push_back(pMP);
+          pMP->mnTrackReferenceForFrame = mCurrentFrame.mnId;
+        }
+      }
+    }
+  }
+}
 
 } // namespace ORB_SLAM2
 

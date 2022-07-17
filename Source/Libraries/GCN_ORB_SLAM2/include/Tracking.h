@@ -156,12 +156,21 @@ protected:
 
   void UpdateLastFrame(const int Ftype);
 
+  bool RelocalizationMultiChannels();
+
+  void UpdateLocalKeyFramesMultiChannels();
+
+  void UpdateLocalPointsMultiChannels();
+
+
   ////////////////////////////////////////////////////////////////////
   //////////////////////////////Newwrite//////////////////////////////
 
   void DiscardOutliers(int &nmatches, int &nmatchesMap, const int Ftype);
 
   ////////////////////////////////////////////////////////////////////
+
+  
 
   // In case of performing only localization, this flag is true when there are
   // no matches to points in the map. Still tracking will continue if there are
