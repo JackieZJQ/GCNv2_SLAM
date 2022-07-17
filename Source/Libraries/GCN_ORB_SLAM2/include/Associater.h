@@ -20,12 +20,16 @@ public:
 
   // Project MapPoints tracked in last frame into the current frame and search
   // matches. Used to track from previous frame (Tracking)
-  int SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame,
-                         const float th, const bool bMono, const int Ftype);
+  int SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, const float th, const bool bMono, const int Ftype);
+
+  // Search matches between Frame keypoints and projected MapPoints. Returns
+  // number of matches Used to track the local map (Tracking)
+  int SearchByProjection(Frame &F, const std::vector<MapPoint*> &vpMapPoints, const float th);
 
   int SearchByBoW(KeyFrame *pKF, Frame &F, std::vector<MapPoint *> &vpMapPointMatches, const int Ftype);
 
   int SearchByNN(Frame &CurrentFrame, const Frame &LastFrame, const int Ftype);
+  
   int SearchByNN(KeyFrame *pKF, Frame &F, std::vector<MapPoint *> &vpMapPointMatches, const int Ftype);
 
 public:
@@ -37,8 +41,9 @@ protected:
   float mfNNratio;
   bool mbCheckOrientation;
 
-  void ComputeThreeMaxima(std::vector<int> *histo, const int L, int &ind1,
-                          int &ind2, int &ind3);
+  void ComputeThreeMaxima(std::vector<int> *histo, const int L, int &ind1, int &ind2, int &ind3);
+
+  float RadiusByViewingCos(const float &viewCos);
 
 };
 
