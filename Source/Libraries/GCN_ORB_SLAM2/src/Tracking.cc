@@ -1870,6 +1870,7 @@ void Tracking::UpdateLocalPointsMultiChannels() {
       }
     }
   }
+
 }
 
 } // namespace ORB_SLAM2

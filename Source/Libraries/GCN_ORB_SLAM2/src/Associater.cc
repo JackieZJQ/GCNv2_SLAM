@@ -434,6 +434,83 @@ int Associater::SearchByNN(KeyFrame *pKF, Frame &F, std::vector<MapPoint *> &vpM
   return nmatches;
 }
 
+int Associater::SearchByNN(Frame &F, const vector<MapPoint *> &vpMapPoints) {
+  // std::cout << "Matching Localmap" << std::endl;
+  // std::cout << vpMapPoints.size() << std::endl;
+  // std::cout << F.mFeatData[0].mDescriptors.rows << std::endl;
+
+  vector<vector<cv::Mat>> MPdescriptorAll;
+  vector<vector<int>> select_indice;
+  MPdescriptorAll.resize(F.Ntype);
+  select_indice.resize(F.Ntype);
+  for (size_t iMP = 0; iMP < vpMapPoints.size(); iMP++) {
+    MapPoint *pMP = vpMapPoints[iMP];
+
+    if (!pMP)
+      continue;
+
+    if (!pMP->mbTrackInView)
+      continue;
+
+    if (pMP->isBad())
+      continue;
+    
+    int Ftype = pMP->GetFeatureType();
+    if (Ftype == -1)
+      continue;
+
+    const cv::Mat MPdescriptor = pMP->GetDescriptor();
+    MPdescriptorAll[Ftype].push_back(MPdescriptor);
+    select_indice[Ftype].push_back(iMP);
+  }
+
+  vector<cv::Mat> MPdescriptors;
+  MPdescriptors.resize(F.Ntype);
+  for (int Ftype = 0; Ftype < F.Ntype; Ftype++) {
+    MPdescriptors[Ftype].create(MPdescriptorAll[Ftype].size(), 32, CV_8U);
+  }
+  
+  for (int Ftype = 0; Ftype < F.Ntype; Ftype++) {
+    for (int i = 0; i < static_cast<int>(MPdescriptorAll[Ftype].size()); i++) {
+      for (int j = 0; j < 32; j++) {
+        MPdescriptors[Ftype].at<unsigned char>(i, j) = MPdescriptorAll[Ftype][i].at<unsigned char>(j);
+      }
+    }
+  }
+
+  vector<vector<cv::DMatch>> matches;
+  matches.resize(F.Ntype);
+  cv::BFMatcher desc_matcher(cv::NORM_HAMMING, true);
+  for (int Ftype = 0; Ftype < F.Ntype; Ftype++) {
+    desc_matcher.match(MPdescriptors[Ftype], F.mFeatData[Ftype].mDescriptors, matches[Ftype], cv::Mat());
+  }
+  
+  int nmatches = 0;
+  for (int Ftype = 0; Ftype < F.Ntype; Ftype++) {
+    for (int i = 0; i < static_cast<int>(matches[Ftype].size()); ++i) {
+      int realIdxMap = select_indice[Ftype][matches[Ftype][i].queryIdx];
+      int bestIdxF = matches[Ftype][i].trainIdx;
+
+      if (matches[Ftype][i].distance > TH_HIGH)
+        continue;
+
+      if (F.mFeatData[Ftype].mvpMapPoints[bestIdxF])
+        if (F.mFeatData[Ftype].mvpMapPoints[bestIdxF]->Observations() > 0)
+          continue;
+
+      MapPoint *pMP = vpMapPoints[realIdxMap];
+      F.mFeatData[Ftype].mvpMapPoints[bestIdxF] = pMP;
+
+      nmatches++;
+    }
+  }
+  
+  // std::cout << MPdescriptors[0].rows << std::endl;
+  // std::cout << nmatches << std::endl;
+
+  return nmatches;
+}
+
 // compute three maxima
 void Associater::ComputeThreeMaxima(vector<int> *histo, const int L, int &ind1, int &ind2, int &ind3) {
   int max1 = 0;
