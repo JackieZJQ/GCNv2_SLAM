@@ -310,6 +310,44 @@ int Associater::SearchByNN(Frame &CurrentFrame, const Frame &LastFrame, const in
   return nmatches;
 }
 
+// vpMapPointMatches should be the mappoints of frame, we want to match the points on frame to the keyframe
+int Associater::SearchByNN(KeyFrame *pKF, Frame &F, std::vector<MapPoint *> &vpMapPointMatches, const int FType) {
+
+  // std::cout << "Matching KeyFrame" << std::endl;
+  // std::cout << pKF->mDescriptors.rows << std::endl;
+  // std::cout << F.mDescriptors.rows << std::endl;
+
+  const vector<MapPoint *> vpMapPointsKF = pKF->GetMapPointMatches(FType);
+  vpMapPointMatches = vector<MapPoint *>(F.mFeatData[FType].N, static_cast<MapPoint *>(NULL));
+
+  std::vector<cv::DMatch> matches;
+  cv::BFMatcher desc_matcher(cv::NORM_HAMMING, true);
+  desc_matcher.match(pKF->mFeatData[FType].mDescriptors, F.mFeatData[FType].mDescriptors, matches, cv::Mat());
+
+  int nmatches = 0;
+  for (int i = 0; i < static_cast<int>(matches.size()); ++i) {
+    int realIdxKF = matches[i].queryIdx;
+    int bestIdxF = matches[i].trainIdx;
+
+    if (matches[i].distance > TH_HIGH)
+      continue;
+
+    MapPoint *pMP = vpMapPointsKF[realIdxKF];
+
+    if (!pMP)
+      continue;
+
+    if (pMP->isBad())
+      continue;
+
+    vpMapPointMatches[bestIdxF] = pMP;
+    nmatches++;
+  }
+  // std::cout << nmatches << std::endl;
+
+  return nmatches;
+}
+
 // compute three maxima
 void Associater::ComputeThreeMaxima(vector<int> *histo, const int L, int &ind1,
                                     int &ind2, int &ind3) {

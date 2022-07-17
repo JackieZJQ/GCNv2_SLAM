@@ -26,6 +26,7 @@ public:
   int SearchByBoW(KeyFrame *pKF, Frame &F, std::vector<MapPoint *> &vpMapPointMatches, const int Ftype);
 
   int SearchByNN(Frame &CurrentFrame, const Frame &LastFrame, const int Ftype);
+  int SearchByNN(KeyFrame *pKF, Frame &F, std::vector<MapPoint *> &vpMapPointMatches, const int Ftype);
 
 public:
   static const int TH_LOW;
