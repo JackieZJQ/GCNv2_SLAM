@@ -23,6 +23,8 @@ public:
   int SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame,
                          const float th, const bool bMono, const int Ftype);
 
+  int SearchByBoW(KeyFrame *pKF, Frame &F, std::vector<MapPoint *> &vpMapPointMatches, const int Ftype);
+
   int SearchByNN(Frame &CurrentFrame, const Frame &LastFrame, const int Ftype);
 
 public:
