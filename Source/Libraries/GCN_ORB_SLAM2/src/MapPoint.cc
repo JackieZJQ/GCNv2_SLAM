@@ -37,7 +37,7 @@ MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap, int FType)
       mnCorrectedReference(0), mnBAGlobalForKF(0), mpRefKF(pRefKF),
       mnVisible(1), mnFound(1), mbBad(false),
       mpReplaced(static_cast<MapPoint *>(NULL)), mfMinDistance(0),
-      mfMaxDistance(0), mpMap(pMap), mFType(FType) {
+      mfMaxDistance(0), mpMap(pMap), FType(FType) {
   Pos.copyTo(mWorldPos);
   mNormalVector = cv::Mat::zeros(3, 1, CV_32F);
 
@@ -54,7 +54,7 @@ MapPoint::MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame,
       mnFuseCandidateForKF(0), mnLoopPointForKF(0), mnCorrectedByKF(0),
       mnCorrectedReference(0), mnBAGlobalForKF(0),
       mpRefKF(static_cast<KeyFrame *>(NULL)), mnVisible(1), mnFound(1),
-      mbBad(false), mpReplaced(NULL), mpMap(pMap), mFType(FType) {
+      mbBad(false), mpReplaced(NULL), mpMap(pMap), FType(FType) {
   Pos.copyTo(mWorldPos);
   cv::Mat Ow = pFrame->GetCameraCenter();
   mNormalVector = mWorldPos - Ow;
@@ -306,6 +306,15 @@ int MapPoint::GetIndexInKeyFrame(KeyFrame *pKF) {
   else
     return -1;
 }
+
+int MapPoint::GetIndexInKeyFrame(KeyFrame *pKF) {
+  unique_lock<mutex> lock(mMutexFeatures);
+  if (mObservations.count(pKF))
+    return mObservations[pKF];
+  else
+    return -1;
+}
+
 
 bool MapPoint::IsInKeyFrame(KeyFrame *pKF) {
   unique_lock<mutex> lock(mMutexFeatures);

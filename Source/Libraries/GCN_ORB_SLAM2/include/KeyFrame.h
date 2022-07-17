@@ -53,7 +53,6 @@ public:
 
   // Bag of Words Representation
   void ComputeBoW();
-  
   void ComputeBoW(const int Ftype);
 
   // Covisibility graph functions
@@ -81,18 +80,37 @@ public:
 
   // MapPoint observation functions
   void AddMapPoint(MapPoint *pMP, const std::size_t &idx);
+  void AddMapPoint(MapPoint *pMP, const std::size_t &idx, const int Ftype);
+
   void EraseMapPointMatch(const std::size_t &idx);
+  void EraseMapPointMatch(const std::size_t &idx, const int Ftype);
+
   void EraseMapPointMatch(MapPoint *pMP);
+  void EraseMapPointMatch(MapPoint *pMP, const int Ftype);
+
   void ReplaceMapPointMatch(const std::size_t &idx, MapPoint *pMP);
+  void ReplaceMapPointMatch(const std::size_t &idx, MapPoint *pMP, const int Ftype);
+
   std::set<MapPoint *> GetMapPoints();
+  std::set<MapPoint *> GetMapPoints(const int Ftype);
+
   std::vector<MapPoint *> GetMapPointMatches();
+  std::vector<MapPoint *> GetMapPointMatches(const int Ftype);
+
   int TrackedMapPoints(const int &minObs);
+  int TrackedMapPoints(const int &minObs, const int Ftype);
+
   MapPoint *GetMapPoint(const std::size_t &idx);
+  MapPoint *GetMapPoint(const std::size_t &idx, const int Ftype);
 
   // KeyPoint functions
   std::vector<std::size_t> GetFeaturesInArea(const float &x, const float &y,
                                              const float &r) const;
+  std::vector<std::size_t> GetFeaturesInArea(const float &x, const float &y,
+                                             const float &r, const int Ftype) const;
+
   cv::Mat UnprojectStereo(int i);
+  cv::Mat UnprojectStereo(int i, const int Ftype);
 
   // Image
   bool IsInImage(const float &x, const float &y) const;
@@ -107,6 +125,7 @@ public:
 
   // Compute Scene Depth (q=2 median). Used in monocular.
   float ComputeSceneMedianDepth(const int q);
+  float ComputeSceneMedianDepth(const int q, const int Ftype);
 
   static bool weightComp(int a, int b) { return a > b; }
 

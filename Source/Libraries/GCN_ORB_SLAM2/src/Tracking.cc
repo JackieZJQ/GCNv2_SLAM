@@ -758,6 +758,8 @@ void Tracking::CheckReplacedInLastFrame() {
 bool Tracking::TrackReferenceKeyFrame() {
   // Compute Bag of Words vector
   mCurrentFrame.ComputeBoW();
+  mCurrentFrame.ComputeBoW(0);
+  mCurrentFrame.ComputeBoW(1);
 
   // We perform first an ORB matching with the reference keyframe
   // If enough matches are found we setup a PnP solver
@@ -766,8 +768,8 @@ bool Tracking::TrackReferenceKeyFrame() {
 
   int nmatches = 0;
 
-  // nmatches =
-  // matcher.SearchByBoW(mpReferenceKF,mCurrentFrame,vpMapPointMatches);
+  nmatches =
+  matcher.SearchByBoW(mpReferenceKF,mCurrentFrame,vpMapPointMatches);
 
   // NN only matching
   nmatches =
@@ -781,7 +783,7 @@ bool Tracking::TrackReferenceKeyFrame() {
 
   Optimizer::PoseOptimization(&mCurrentFrame);
 
-  // Discard outliers
+  /////////////////////////////////////////////////Discard outliers///////////////////////////////////////////////
   int nmatchesMap = 0;
   for (int i = 0; i < mCurrentFrame.N; i++) {
     if (mCurrentFrame.mvpMapPoints[i]) {
@@ -797,7 +799,7 @@ bool Tracking::TrackReferenceKeyFrame() {
         nmatchesMap++;
     }
   }
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   return nmatchesMap >= 10;
 }
 
@@ -876,8 +878,8 @@ bool Tracking::TrackWithMotionModel() {
   fill(mCurrentFrame.mvpMapPoints.begin(), mCurrentFrame.mvpMapPoints.end(),
        static_cast<MapPoint *>(NULL));
 
-  fill(mCurrentFrame.mFeatData[1].mvpMapPoints.begin(), mCurrentFrame.mFeatData[1].mvpMapPoints.end(),
-       static_cast<MapPoint *>(NULL));
+  // fill(mCurrentFrame.mFeatData[1].mvpMapPoints.begin(), mCurrentFrame.mFeatData[1].mvpMapPoints.end(),
+  //      static_cast<MapPoint *>(NULL));
 
   // Project points seen in previous frame
   // int th;
@@ -886,40 +888,39 @@ bool Tracking::TrackWithMotionModel() {
   // else
   //     th=7;
   int th = 15;
-  // int nmatches = matcher.SearchByProjection(mCurrentFrame, mLastFrame, th,
-  //                                           mSensor == System::MONOCULAR);
+  int nmatches = matcher.SearchByProjection(mCurrentFrame, mLastFrame, th,
+                                            mSensor == System::MONOCULAR);
 
-  int nmatches = Associater.SearchByProjection(mCurrentFrame, mLastFrame, th,
-                                                mSensor == System::MONOCULAR, 1);
+  // int nmatches = Associater.SearchByProjection(mCurrentFrame, mLastFrame, th,
+  //                                               mSensor == System::MONOCULAR, 1);
 
   // If few matches, uses a wider window search
   if (nmatches < 20) {
-    // fill(mCurrentFrame.mvpMapPoints.begin(), mCurrentFrame.mvpMapPoints.end(),
-    //      static_cast<MapPoint *>(NULL));
-    fill(mCurrentFrame.mFeatData[1].mvpMapPoints.begin(), mCurrentFrame.mFeatData[1].mvpMapPoints.end(),
+    fill(mCurrentFrame.mvpMapPoints.begin(), mCurrentFrame.mvpMapPoints.end(),
          static_cast<MapPoint *>(NULL));
-    // nmatches = matcher.SearchByProjection(mCurrentFrame, mLastFrame, 2 * th,
-    //                                       mSensor == System::MONOCULAR);
 
-    nmatches = Associater.SearchByProjection(mCurrentFrame, mLastFrame, th,
-                                              mSensor == System::MONOCULAR, 1);
+    nmatches = matcher.SearchByProjection(mCurrentFrame, mLastFrame, 2 * th,
+                                          mSensor == System::MONOCULAR);
+    
+    // fill(mCurrentFrame.mFeatData[1].mvpMapPoints.begin(), mCurrentFrame.mFeatData[1].mvpMapPoints.end(),
+    //      static_cast<MapPoint *>(NULL));
+    // nmatches = Associater.SearchByProjection(mCurrentFrame, mLastFrame, th,
+    //                                           mSensor == System::MONOCULAR, 1);
   }
 
   // mCurrentFrame.mvpMapPoints = mCurrentFrame.mFeatData[1].mvpMapPoints;
 
   // int nmatches = matcher.SearchByNN(mCurrentFrame,mLastFrame);
 
-  
-
   if (nmatches < 20)
     return false;
 
   // Optimize frame pose with all matches
-  //Optimizer::PoseOptimization(&mCurrentFrame);
+  Optimizer::PoseOptimization(&mCurrentFrame);
 
-  Optimizer::PoseOptimizationMultiChannels(&mCurrentFrame);
-  mCurrentFrame.mvpMapPoints = mCurrentFrame.mFeatData[1].mvpMapPoints;
-  mCurrentFrame.mvbOutlier = mCurrentFrame.mFeatData[1].mvbOutlier;
+  // Optimizer::PoseOptimizationMultiChannels(&mCurrentFrame);
+  // mCurrentFrame.mvpMapPoints = mCurrentFrame.mFeatData[1].mvpMapPoints;
+  // mCurrentFrame.mvbOutlier = mCurrentFrame.mFeatData[1].mvbOutlier;
 
 
 

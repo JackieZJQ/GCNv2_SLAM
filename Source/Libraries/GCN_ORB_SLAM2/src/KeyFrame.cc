@@ -71,15 +71,30 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB)
   SetPose(F.mTcw);
 }
 
-//TO-DO need rewrite
+
 void KeyFrame::ComputeBoW() {
+
+  int Ftype;
+  if (getenv("USE_ORB") == nullptr) 
+    Ftype = 1;
+  else
+    Ftype = 0;
+
   if (mBowVec.empty() || mFeatVec.empty()) {
     std::vector<cv::Mat> vCurrentDesc =
         Converter::toDescriptorVector(mDescriptors);
     // Feature vector associate features with nodes in the 4th level (from
     // leaves up) We assume the vocabulary tree has 6 levels, change the 4
     // otherwise
-    mpvocabulary[1]->transform(vCurrentDesc, mBowVec, mFeatVec, 4);
+    mpvocabulary[Ftype]->transform(vCurrentDesc, mBowVec, mFeatVec, 4);
+  }
+}
+
+void KeyFrame::ComputeBoW(const int Ftype) {
+  if (mFeatData[Ftype].mBowVec.empty() || mFeatData[Ftype].mFeatVec.empty()) {
+    std::vector<cv::Mat> vCurrentDesc =
+        Converter::toDescriptorVector(mFeatData[Ftype].mDescriptors);
+    mpvocabulary[Ftype]->transform(vCurrentDesc, mFeatData[Ftype].mBowVec, mFeatData[Ftype].mFeatVec, 4);
   }
 }
 
@@ -218,9 +233,19 @@ void KeyFrame::AddMapPoint(MapPoint *pMP, const std::size_t &idx) {
   mvpMapPoints[idx] = pMP;
 }
 
+void KeyFrame::AddMapPoint(MapPoint *pMP, const std::size_t &idx, const int Ftype) {
+  unique_lock<mutex> lock(mMutexFeatures);
+  mFeatData[Ftype].mvpMapPoints[idx] = pMP;
+}
+
 void KeyFrame::EraseMapPointMatch(const std::size_t &idx) {
   unique_lock<mutex> lock(mMutexFeatures);
   mvpMapPoints[idx] = static_cast<MapPoint *>(NULL);
+}
+
+void KeyFrame::EraseMapPointMatch(const std::size_t &idx, const int Ftype) {
+  unique_lock<mutex> lock(mMutexFeatures);
+  mFeatData[Ftype].mvpMapPoints[idx] = static_cast<MapPoint *>(NULL);
 }
 
 void KeyFrame::EraseMapPointMatch(MapPoint *pMP) {
@@ -229,8 +254,18 @@ void KeyFrame::EraseMapPointMatch(MapPoint *pMP) {
     mvpMapPoints[idx] = static_cast<MapPoint *>(NULL);
 }
 
+void KeyFrame::EraseMapPointMatch(MapPoint *pMP, const int Ftype) {
+  int idx = pMP->GetIndexInKeyFrame(this);
+  if (idx >= 0)
+    mFeatData[Ftype].mvpMapPoints[idx] = static_cast<MapPoint *>(NULL);
+}
+
 void KeyFrame::ReplaceMapPointMatch(const std::size_t &idx, MapPoint *pMP) {
   mvpMapPoints[idx] = pMP;
+}
+
+void KeyFrame::ReplaceMapPointMatch(const std::size_t &idx, MapPoint *pMP, const int Ftype) {
+  mFeatData[Ftype].mvpMapPoints[idx] = pMP;
 }
 
 set<MapPoint *> KeyFrame::GetMapPoints() {
@@ -240,6 +275,19 @@ set<MapPoint *> KeyFrame::GetMapPoints() {
     if (!mvpMapPoints[i])
       continue;
     MapPoint *pMP = mvpMapPoints[i];
+    if (!pMP->isBad())
+      s.insert(pMP);
+  }
+  return s;
+}
+
+set<MapPoint *> KeyFrame::GetMapPoints(const int Ftype) {
+  unique_lock<mutex> lock(mMutexFeatures);
+  set<MapPoint *> s;
+  for (std::size_t i = 0, iend = mFeatData[Ftype].mvpMapPoints.size(); i < iend; i++) {
+    if (!mFeatData[Ftype].mvpMapPoints[i])
+      continue;
+    MapPoint *pMP = mFeatData[Ftype].mvpMapPoints[i];
     if (!pMP->isBad())
       s.insert(pMP);
   }
@@ -267,9 +315,35 @@ int KeyFrame::TrackedMapPoints(const int &minObs) {
   return nPoints;
 }
 
+int KeyFrame::TrackedMapPoints(const int &minObs, const int Ftype) {
+  unique_lock<mutex> lock(mMutexFeatures);
+
+  int nPoints = 0;
+  const bool bCheckObs = minObs > 0;
+  for (int i = 0; i < mFeatData[Ftype].N; i++) {
+    MapPoint *pMP = mFeatData[Ftype].mvpMapPoints[i];
+    if (pMP) {
+      if (!pMP->isBad()) {
+        if (bCheckObs) {
+          if (mFeatData[Ftype].mvpMapPoints[i]->Observations() >= minObs)
+            nPoints++;
+        } else
+          nPoints++;
+      }
+    }
+  }
+
+  return nPoints;
+}
+
 std::vector<MapPoint *> KeyFrame::GetMapPointMatches() {
   unique_lock<mutex> lock(mMutexFeatures);
   return mvpMapPoints;
+}
+
+std::vector<MapPoint *> KeyFrame::GetMapPointMatches(const int Ftype) {
+  unique_lock<mutex> lock(mMutexFeatures);
+  return mFeatData[Ftype].mvpMapPoints;
 }
 
 MapPoint *KeyFrame::GetMapPoint(const std::size_t &idx) {
@@ -277,6 +351,12 @@ MapPoint *KeyFrame::GetMapPoint(const std::size_t &idx) {
   return mvpMapPoints[idx];
 }
 
+MapPoint *KeyFrame::GetMapPoint(const std::size_t &idx, const int Ftype) {
+  unique_lock<mutex> lock(mMutexFeatures);
+  return mFeatData[Ftype].mvpMapPoints[idx];
+}
+
+//TO-DO, need rewrite, use orb or gcn or both
 void KeyFrame::UpdateConnections() {
   map<KeyFrame *, int> KFcounter;
 
@@ -442,9 +522,18 @@ void KeyFrame::SetBadFlag() {
        mit != mend; mit++)
     mit->first->EraseConnection(this);
 
+  // erase observation of every kind of map points (one keyframe, two kinds of mappoints)
+
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    for (std::size_t i = 0; i < mFeatData[Ftype].mvpMapPoints.size(); i++)
+      if (mFeatData[Ftype].mvpMapPoints[i])
+        mFeatData[Ftype].mvpMapPoints[i]->EraseObservation(this);
+  }
+  
   for (std::size_t i = 0; i < mvpMapPoints.size(); i++)
     if (mvpMapPoints[i])
       mvpMapPoints[i]->EraseObservation(this);
+
   {
     unique_lock<mutex> lock(mMutexConnections);
     unique_lock<mutex> lock1(mMutexFeatures);
@@ -581,6 +670,50 @@ std::vector<std::size_t> KeyFrame::GetFeaturesInArea(const float &x,
   return vIndices;
 }
 
+std::vector<std::size_t> KeyFrame::GetFeaturesInArea(const float &x,
+                                                     const float &y,
+                                                     const float &r, const int Ftype) const {
+  std::vector<std::size_t> vIndices;
+  vIndices.reserve(mFeatData[Ftype].N);
+
+  const int nMinCellX =
+      max(0, (int)floor((x - mnMinX - r) * mfGridElementWidthInv));
+  if (nMinCellX >= mnGridCols)
+    return vIndices;
+
+  const int nMaxCellX = min(
+      (int)mnGridCols - 1, (int)ceil((x - mnMinX + r) * mfGridElementWidthInv));
+  if (nMaxCellX < 0)
+    return vIndices;
+
+  const int nMinCellY =
+      max(0, (int)floor((y - mnMinY - r) * mfGridElementHeightInv));
+  if (nMinCellY >= mnGridRows)
+    return vIndices;
+
+  const int nMaxCellY =
+      min((int)mnGridRows - 1,
+          (int)ceil((y - mnMinY + r) * mfGridElementHeightInv));
+  if (nMaxCellY < 0)
+    return vIndices;
+
+  for (int ix = nMinCellX; ix <= nMaxCellX; ix++) {
+    for (int iy = nMinCellY; iy <= nMaxCellY; iy++) {
+      const std::vector<std::size_t> vCell = mFeatData[Ftype].mGrid[ix][iy];
+      for (std::size_t j = 0, jend = vCell.size(); j < jend; j++) {
+        const cv::KeyPoint &kpUn = mFeatData[Ftype].mvKeysUn[vCell[j]];
+        const float distx = kpUn.pt.x - x;
+        const float disty = kpUn.pt.y - y;
+
+        if (fabs(distx) < r && fabs(disty) < r)
+          vIndices.push_back(vCell[j]);
+      }
+    }
+  }
+
+  return vIndices;
+}
+
 bool KeyFrame::IsInImage(const float &x, const float &y) const {
   return (x >= mnMinX && x < mnMaxX && y >= mnMinY && y < mnMaxY);
 }
@@ -590,6 +723,21 @@ cv::Mat KeyFrame::UnprojectStereo(int i) {
   if (z > 0) {
     const float u = mvKeys[i].pt.x;
     const float v = mvKeys[i].pt.y;
+    const float x = (u - cx) * z * invfx;
+    const float y = (v - cy) * z * invfy;
+    cv::Mat x3Dc = (cv::Mat_<float>(3, 1) << x, y, z);
+
+    unique_lock<mutex> lock(mMutexPose);
+    return Twc.rowRange(0, 3).colRange(0, 3) * x3Dc + Twc.rowRange(0, 3).col(3);
+  } else
+    return cv::Mat();
+}
+
+cv::Mat KeyFrame::UnprojectStereo(int i, const int Ftype) {
+  const float z = mFeatData[Ftype].mvDepth[i];
+  if (z > 0) {
+    const float u = mFeatData[Ftype].mvKeys[i].pt.x;
+    const float v = mFeatData[Ftype].mvKeys[i].pt.y;
     const float x = (u - cx) * z * invfx;
     const float y = (v - cy) * z * invfy;
     cv::Mat x3Dc = (cv::Mat_<float>(3, 1) << x, y, z);
@@ -629,6 +777,35 @@ float KeyFrame::ComputeSceneMedianDepth(const int q) {
   return vDepths[(vDepths.size() - 1) / q];
 }
 
+float KeyFrame::ComputeSceneMedianDepth(const int q, const int Ftype) {
+  std::vector<MapPoint *> vpMapPoints;
+  cv::Mat Tcw_;
+  {
+    unique_lock<mutex> lock(mMutexFeatures);
+    unique_lock<mutex> lock2(mMutexPose);
+    vpMapPoints = mFeatData[Ftype].mvpMapPoints;
+    Tcw_ = Tcw.clone();
+  }
+
+  std::vector<float> vDepths;
+  vDepths.reserve(mFeatData[Ftype].N);
+  cv::Mat Rcw2 = Tcw_.row(2).colRange(0, 3);
+  Rcw2 = Rcw2.t();
+  float zcw = Tcw_.at<float>(2, 3);
+  for (int i = 0; i < mFeatData[Ftype].N; i++) {
+    if (mFeatData[Ftype].mvpMapPoints[i]) {
+      MapPoint *pMP = mFeatData[Ftype].mvpMapPoints[i];
+      cv::Mat x3Dw = pMP->GetWorldPos();
+      float z = Rcw2.dot(x3Dw) + zcw;
+      vDepths.push_back(z);
+    }
+  }
+
+  sort(vDepths.begin(), vDepths.end());
+
+  return vDepths[(vDepths.size() - 1) / q];
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // void KeyFrame::ComputeBoW() {
@@ -644,16 +821,7 @@ float KeyFrame::ComputeSceneMedianDepth(const int q) {
 //   mFeatVec = mFeatData[0].mFeatVec;
 // }
 
-void KeyFrame::ComputeBoW(const int Ftype) {
-  if (mFeatData[Ftype].mBowVec.empty() || mFeatData[Ftype].mFeatVec.empty()) {
-    std::vector<cv::Mat> vCurrentDesc =
-        Converter::toDescriptorVector(mFeatData[Ftype].mDescriptors);
-    // Feature vector associate features with nodes in the 4th level (from
-    // leaves up) We assume the vocabulary tree has 6 levels, change the 4
-    // otherwise
-    mpvocabulary[Ftype]->transform(vCurrentDesc, mFeatData[Ftype].mBowVec, mFeatData[Ftype].mFeatVec, 4);
-  }
-}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

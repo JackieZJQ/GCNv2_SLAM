@@ -204,12 +204,10 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
   // Use dictionary to store orb and gcn parms in parallel, then copy data to default variables
   // Choose orbfeatures
-  if (getenv("USE_ORB") == nullptr) {
+  if (getenv("USE_ORB") == nullptr)
     ChooseFeature(1);
-  }
-  else {
+  else 
     ChooseFeature(0);
-  }
 }
 
 // Mono
@@ -532,11 +530,24 @@ bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY) {
   return true;
 }
 
-//TO-DO need rewrite
 void Frame::ComputeBoW() {
+
+  int Ftype;
+  if (getenv("USE_ORB") == nullptr) 
+    Ftype = 1;
+  else
+    Ftype = 0;
+
   if (mBowVec.empty()) {
     vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);
-    mpvocabulary[1]->transform(vCurrentDesc, mBowVec, mFeatVec, 4);
+    mpvocabulary[Ftype]->transform(vCurrentDesc, mBowVec, mFeatVec, 4);
+  }
+}
+
+void Frame::ComputeBoW(const int Ftype) {
+  if (mFeatData[Ftype].mBowVec.empty()) {
+    vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mFeatData[Ftype].mDescriptors);
+    mpvocabulary[Ftype]->transform(vCurrentDesc, mFeatData[Ftype].mBowVec, mFeatData[Ftype].mFeatVec, 4);
   }
 }
 
@@ -936,13 +947,6 @@ void Frame::ComputeFeatures(const int Ftype, const cv::Mat &imGray, const cv::Ma
 //   mBowVec = mFeatData[0].mBowVec;
 //   mFeatVec = mFeatData[0].mFeatVec;
 // }
-
-void Frame::ComputeBoW(const int Ftype) {
-  if (mFeatData[Ftype].mBowVec.empty()) {
-    vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mFeatData[Ftype].mDescriptors);
-    mpvocabulary[Ftype]->transform(vCurrentDesc, mFeatData[Ftype].mBowVec, mFeatData[Ftype].mFeatVec, 4);
-  }
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
