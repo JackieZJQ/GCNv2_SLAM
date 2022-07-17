@@ -51,6 +51,7 @@ public:
 
   // Relocalization
   std::vector<KeyFrame *> DetectRelocalizationCandidates(Frame *F);
+  std::vector<KeyFrame *> DetectRelocalizationCandidates(Frame *F, const int Ftype);
 
 protected:
   // Associated vocabulary
