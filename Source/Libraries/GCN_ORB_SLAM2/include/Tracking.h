@@ -158,9 +158,15 @@ protected:
 
   bool RelocalizationMultiChannels();
 
+  void UpdateLocalMapMultiChannels();
   void UpdateLocalKeyFramesMultiChannels();
-
   void UpdateLocalPointsMultiChannels();
+
+  bool TrackLocalMapMultiChannels();
+  void SearchLocalPointsMultiChannels();
+
+
+
 
 
   ////////////////////////////////////////////////////////////////////

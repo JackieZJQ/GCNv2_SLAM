@@ -1870,7 +1870,99 @@ void Tracking::UpdateLocalPointsMultiChannels() {
       }
     }
   }
+}
 
+void Tracking::SearchLocalPointsMultiChannels() {
+  // Do not search map points already matched
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    for (vector<MapPoint *>::iterator vit = mCurrentFrame.mFeatData[Ftype].mvpMapPoints.begin(), vend = mCurrentFrame.mFeatData[Ftype].mvpMapPoints.end(); vit != vend; vit++) {
+      MapPoint *pMP = *vit;
+      if (pMP->isBad()) {
+        *vit = static_cast<MapPoint *>(NULL);
+      } else {
+        pMP->IncreaseVisible();
+        pMP->mnLastFrameSeen = mCurrentFrame.mnId;
+        pMP->mbTrackInView = false;
+      }
+    }
+  }
+  
+  int nToMatch = 0;
+
+  // Project points in frame and check its visibility
+  for (vector<MapPoint *>::iterator vit = mvpLocalMapPoints.begin(), vend = mvpLocalMapPoints.end(); vit != vend; vit++) {
+    MapPoint *pMP = *vit;
+    if (pMP->mnLastFrameSeen == mCurrentFrame.mnId)
+      continue;
+    if (pMP->isBad())
+      continue;
+    // Project (this fills MapPoint variables for matching)
+    if (mCurrentFrame.isInFrustum(pMP, 0.5)) {
+      pMP->IncreaseVisible();
+      nToMatch++;
+    }
+  }
+
+    if (nToMatch > 0) {
+      Associater associater(0.8);
+      // int th = 1;
+      // if(mSensor==System::RGBD)
+      //     th=3;
+      // // If the camera has been relocalised recently, perform a coarser search
+      // if(mCurrentFrame.mnId<mnLastRelocFrameId+2)
+      //     th=5;
+      
+      // associater.SearchByProjection(mCurrentFrame, mvpLocalMapPoints, th);
+
+      // NN only matching
+      associater.SearchByNN(mCurrentFrame, mvpLocalMapPoints);
+  }
+}
+
+void Tracking::UpdateLocalMapMultiChannels() {
+  // This is for visualization
+  mpMap->SetReferenceMapPoints(mvpLocalMapPoints);
+
+  // Update
+  UpdateLocalKeyFramesMultiChannels();
+  UpdateLocalPointsMultiChannels();
+
+}
+
+bool Tracking::TrackLocalMapMultiChannels() {
+
+  UpdateLocalMapMultiChannels();
+
+  SearchLocalPointsMultiChannels();
+
+  Optimizer::PoseOptimizationMultiChannels(&mCurrentFrame);
+  mnMatchesInliers = 0;
+
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    for (int i = 0; i < mCurrentFrame.mFeatData[Ftype].N; i++) {
+      if (mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i]) {
+        if (!mCurrentFrame.mFeatData[Ftype].mvbOutlier[i]) {
+          mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i]->IncreaseFound();
+          if (!mbOnlyTracking) {
+            if (mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i]->Observations() > 0)
+              mnMatchesInliers++;
+          } else
+            mnMatchesInliers++;
+        } else if (mSensor == System::STEREO)
+          mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i] = static_cast<MapPoint *>(NULL);
+      }
+    }
+  }
+  
+  // Decide if the tracking was succesful
+  // More restrictive if there was a relocalization recently
+  if (mCurrentFrame.mnId < mnLastRelocFrameId + mMaxFrames && mnMatchesInliers < 50)
+    return false;
+
+  if (mnMatchesInliers < 10)
+    return false;
+  else
+    return true;
 }
 
 } // namespace ORB_SLAM2
