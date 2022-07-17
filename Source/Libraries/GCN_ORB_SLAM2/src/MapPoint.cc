@@ -30,14 +30,31 @@ namespace ORB_SLAM2 {
 long unsigned int MapPoint::nNextId = 0;
 mutex MapPoint::mGlobalMutex;
 
-MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap, int FType)
+MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap)
     : mnFirstKFid(pRefKF->mnId), mnFirstFrame(pRefKF->mnFrameId), nObs(0),
       mnTrackReferenceForFrame(0), mnLastFrameSeen(0), mnBALocalForKF(0),
       mnFuseCandidateForKF(0), mnLoopPointForKF(0), mnCorrectedByKF(0),
       mnCorrectedReference(0), mnBAGlobalForKF(0), mpRefKF(pRefKF),
       mnVisible(1), mnFound(1), mbBad(false),
       mpReplaced(static_cast<MapPoint *>(NULL)), mfMinDistance(0),
-      mfMaxDistance(0), mpMap(pMap), FType(FType) {
+      mfMaxDistance(0), mpMap(pMap) {
+  Pos.copyTo(mWorldPos);
+  mNormalVector = cv::Mat::zeros(3, 1, CV_32F);
+
+  // MapPoints can be created from Tracking and Local Mapping. This mutex avoid
+  // conflicts with id.
+  unique_lock<mutex> lock(mpMap->mMutexPointCreation);
+  mnId = nNextId++;
+}
+
+MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap, const int Ftype)
+    : mnFirstKFid(pRefKF->mnId), mnFirstFrame(pRefKF->mnFrameId), nObs(0),
+      mnTrackReferenceForFrame(0), mnLastFrameSeen(0), mnBALocalForKF(0),
+      mnFuseCandidateForKF(0), mnLoopPointForKF(0), mnCorrectedByKF(0),
+      mnCorrectedReference(0), mnBAGlobalForKF(0), mpRefKF(pRefKF),
+      mnVisible(1), mnFound(1), mbBad(false),
+      mpReplaced(static_cast<MapPoint *>(NULL)), mfMinDistance(0),
+      mfMaxDistance(0), mpMap(pMap), mFType(Ftype) {
   Pos.copyTo(mWorldPos);
   mNormalVector = cv::Mat::zeros(3, 1, CV_32F);
 
@@ -48,13 +65,13 @@ MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap, int FType)
 }
 
 MapPoint::MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame,
-                   const int &idxF, int FType)
+                   const int &idxF)
     : mnFirstKFid(-1), mnFirstFrame(pFrame->mnId), nObs(0),
       mnTrackReferenceForFrame(0), mnLastFrameSeen(0), mnBALocalForKF(0),
       mnFuseCandidateForKF(0), mnLoopPointForKF(0), mnCorrectedByKF(0),
       mnCorrectedReference(0), mnBAGlobalForKF(0),
       mpRefKF(static_cast<KeyFrame *>(NULL)), mnVisible(1), mnFound(1),
-      mbBad(false), mpReplaced(NULL), mpMap(pMap), FType(FType) {
+      mbBad(false), mpReplaced(NULL), mpMap(pMap) {
   Pos.copyTo(mWorldPos);
   cv::Mat Ow = pFrame->GetCameraCenter();
   mNormalVector = mWorldPos - Ow;
@@ -70,6 +87,36 @@ MapPoint::MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame,
   mfMinDistance = mfMaxDistance / pFrame->mvScaleFactors[nLevels - 1];
 
   pFrame->mDescriptors.row(idxF).copyTo(mDescriptor);
+
+  // MapPoints can be created from Tracking and Local Mapping. This mutex avoid
+  // conflicts with id.
+  unique_lock<mutex> lock(mpMap->mMutexPointCreation);
+  mnId = nNextId++;
+}
+
+MapPoint::MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame,
+                   const int &idxF, const int Ftype)
+    : mnFirstKFid(-1), mnFirstFrame(pFrame->mnId), nObs(0),
+      mnTrackReferenceForFrame(0), mnLastFrameSeen(0), mnBALocalForKF(0),
+      mnFuseCandidateForKF(0), mnLoopPointForKF(0), mnCorrectedByKF(0),
+      mnCorrectedReference(0), mnBAGlobalForKF(0),
+      mpRefKF(static_cast<KeyFrame *>(NULL)), mnVisible(1), mnFound(1),
+      mbBad(false), mpReplaced(NULL), mpMap(pMap), mFType(Ftype) {
+  Pos.copyTo(mWorldPos);
+  cv::Mat Ow = pFrame->GetCameraCenter();
+  mNormalVector = mWorldPos - Ow;
+  mNormalVector = mNormalVector / cv::norm(mNormalVector);
+
+  cv::Mat PC = Pos - Ow;
+  const float dist = cv::norm(PC);
+  const int level = pFrame->mFeatData[mFType].mvKeysUn[idxF].octave;
+  const float levelScaleFactor = pFrame->mvScaleFactors[level];
+  const int nLevels = pFrame->mnScaleLevels;
+
+  mfMaxDistance = dist * levelScaleFactor;
+  mfMinDistance = mfMaxDistance / pFrame->mvScaleFactors[nLevels - 1];
+
+  pFrame->mFeatData[mFType].mDescriptors.row(idxF).copyTo(mDescriptor);
 
   // MapPoints can be created from Tracking and Local Mapping. This mutex avoid
   // conflicts with id.
@@ -306,15 +353,6 @@ int MapPoint::GetIndexInKeyFrame(KeyFrame *pKF) {
   else
     return -1;
 }
-
-int MapPoint::GetIndexInKeyFrame(KeyFrame *pKF) {
-  unique_lock<mutex> lock(mMutexFeatures);
-  if (mObservations.count(pKF))
-    return mObservations[pKF];
-  else
-    return -1;
-}
-
 
 bool MapPoint::IsInKeyFrame(KeyFrame *pKF) {
   unique_lock<mutex> lock(mMutexFeatures);

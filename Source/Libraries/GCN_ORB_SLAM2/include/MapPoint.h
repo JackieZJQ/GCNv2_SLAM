@@ -36,8 +36,11 @@ class Frame;
 
 class MapPoint {
 public:
-  MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap, int FeatureType);
-  MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame, const int &idxF, int FeatureType);
+  MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap);
+  MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap, const int Ftype);
+
+  MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame, const int &idxF);
+  MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame, const int &idxF, const int Ftype);
 
   void SetWorldPos(const cv::Mat &Pos);
   cv::Mat GetWorldPos();
@@ -84,7 +87,7 @@ public:
   int nObs;
 
   // Define Flag, ORB:0, GCN:1
-  const int mFType;
+  int mFType;
 
   // Number of feature types
   const static int Ntype = 2;
