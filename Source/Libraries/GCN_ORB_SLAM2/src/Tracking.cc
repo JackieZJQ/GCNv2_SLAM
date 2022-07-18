@@ -1745,6 +1745,85 @@ void Tracking::DiscardOutliers(int &nmatches, int &nmatchesMap, const int Ftype)
   }
 }
 
+bool Tracking::TrackWithMotionModelMultiChannels() {
+  Associater associater(0.9, true);
+
+  // Update last frame pose according to its reference keyframe
+  // Create "visual odometry" points if in Localization Mode
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) 
+    UpdateLastFrame(Ftype);
+
+  mCurrentFrame.SetPose(mVelocity * mLastFrame.mTcw);
+
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    fill(mCurrentFrame.mFeatData[Ftype].mvpMapPoints.begin(), mCurrentFrame.mFeatData[Ftype].mvpMapPoints.end(), static_cast<MapPoint *>(NULL));
+
+  // Project points seen in previous frame
+  // int th;
+  // if(mSensor!=System::STEREO)
+  //     th=15;
+  // else
+  //     th=7;
+
+  int th = 15;
+  int nmatches[Ntype];
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    nmatches[Ftype] = associater.SearchByProjection(mCurrentFrame, mLastFrame, th, mSensor == System::MONOCULAR, Ftype);
+
+    // nmatches[Ftype] = associater.SearchByNN(mCurrentFrame,mLastFrame, Ftype);
+
+  // sum of all matches
+  int nmatchesSum = 0;
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    nmatchesSum += nmatches[Ftype];
+
+  if (nmatchesSum < 20) {
+    for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+      fill(mCurrentFrame.mFeatData[Ftype].mvpMapPoints.begin(), mCurrentFrame.mFeatData[Ftype].mvpMapPoints.end(), static_cast<MapPoint *>(NULL));
+      nmatches[Ftype] = associater.SearchByProjection(mCurrentFrame, mLastFrame, th, mSensor == System::MONOCULAR, Ftype);
+
+      // nmatches[Ftype] = associater.SearchByNN(mCurrentFrame,mLastFrame, Ftype);
+    }
+
+    // sum of all matches
+    nmatchesSum = 0;
+    for (int Ftype = 0; Ftype < Ntype; Ftype++)
+      nmatchesSum += nmatches[Ftype];
+  }
+  
+  if (nmatchesSum < 20)
+    return false;
+
+  // Optimize frame pose with all matches
+  Optimizer::PoseOptimizationMultiChannels(&mCurrentFrame);
+
+  // Discard outliers
+  int nmatchesMap = 0;
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    for (int i = 0; i < mCurrentFrame.mFeatData[Ftype].N; i++) {
+      if (mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i]) {
+        if (mCurrentFrame.mFeatData[Ftype].mvbOutlier[i]) {
+          MapPoint *pMP = mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i];
+
+          mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i] = static_cast<MapPoint *>(NULL);
+          mCurrentFrame.mFeatData[Ftype].mvbOutlier[i] = false;
+          pMP->mbTrackInView = false;
+          pMP->mnLastFrameSeen = mCurrentFrame.mnId;
+          nmatchesSum--;
+        } else if (mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i]->Observations() > 0)
+          nmatchesMap++;
+      }
+    }
+  }
+
+  if (mbOnlyTracking) {
+    mbVO = nmatchesMap < 10;
+    return nmatchesSum > 20;
+  }
+
+  return nmatchesMap >= 10;
+}
+
 bool Tracking::RelocalizationMultiChannels() {
   // Compute Bag of Words Vector
   mCurrentFrame.ComputeBoW(0);

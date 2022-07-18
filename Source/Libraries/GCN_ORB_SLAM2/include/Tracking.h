@@ -153,9 +153,10 @@ protected:
   //////////////////////////////Rewrite///////////////////////////////
 
   void CheckReplacedInLastFrame(const int Ftype);
-
   void UpdateLastFrame(const int Ftype);
 
+  bool TrackWithMotionModelMultiChannels();
+  bool TrackReferenceKeyFrameMultiChannels();
   bool RelocalizationMultiChannels();
 
   void UpdateLocalMapMultiChannels();
@@ -164,9 +165,6 @@ protected:
 
   bool TrackLocalMapMultiChannels();
   void SearchLocalPointsMultiChannels();
-
-
-
 
 
   ////////////////////////////////////////////////////////////////////
