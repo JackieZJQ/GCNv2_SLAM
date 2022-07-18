@@ -1824,11 +1824,63 @@ bool Tracking::TrackWithMotionModelMultiChannels() {
   return nmatchesMap >= 10;
 }
 
+bool Tracking::TrackReferenceKeyFrameMultiChannels() {
+  // Compute Bag of Words vector
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) 
+    mCurrentFrame.ComputeBoW(Ftype);
+  
+  // Assocaiter
+  Associater associater(0.7, true);
+  vector<vector<MapPoint *>> vvpMapPointMatches;
+  vvpMapPointMatches.resize(Ntype);
+
+  int nmatches[Ntype];
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    nmatches[Ftype] = associater.SearchByBoW(mpReferenceKF, mCurrentFrame, vvpMapPointMatches[Ftype], Ftype); 
+
+    // nmatches[Ftype] = associater.SearchByNN(mpReferenceKF, mCurrentFrame, vvpMapPointMatches[Ftype], Ftype);
+
+  // sum of all matches
+  int nmatchesSum = 0;
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    nmatchesSum += nmatches[Ftype];
+  
+  if (nmatchesSum < 15)
+    return false;
+
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) 
+    mCurrentFrame.mFeatData[Ftype].mvpMapPoints = vvpMapPointMatches[Ftype];
+  
+  mCurrentFrame.SetPose(mLastFrame.mTcw);
+
+  Optimizer::PoseOptimizationMultiChannels(&mCurrentFrame);
+
+  // Discard outliers
+  int nmatchesMap = 0;
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    for (int i = 0; i < mCurrentFrame.mFeatData[Ftype].N; i++) {
+      if (mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i]) {
+        if (mCurrentFrame.mFeatData[Ftype].mvbOutlier[i]) {
+          MapPoint *pMP = mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i];
+
+          mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i] = static_cast<MapPoint *>(NULL);
+          mCurrentFrame.mFeatData[Ftype].mvbOutlier[i] = false;
+          pMP->mbTrackInView = false;
+          pMP->mnLastFrameSeen = mCurrentFrame.mnId;
+          nmatchesSum--;
+        } else if (mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i]->Observations() > 0)
+          nmatchesMap++;
+      }
+    }
+  }
+
+  return nmatchesMap >= 10;
+}
+
 bool Tracking::RelocalizationMultiChannels() {
   // Compute Bag of Words Vector
-  mCurrentFrame.ComputeBoW(0);
-  mCurrentFrame.ComputeBoW(1);
-
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    mCurrentFrame.ComputeBoW(Ftype);
 
 }
 
