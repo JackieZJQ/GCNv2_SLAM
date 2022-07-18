@@ -1726,25 +1726,6 @@ void Tracking::UpdateLastFrame(const int Ftype) {
   }
 }
 
-// used in track with motion model
-void Tracking::DiscardOutliers(int &nmatches, int &nmatchesMap, const int Ftype) {
-
-  for (int i = 0; i < mCurrentFrame.mFeatData[Ftype].N; i++) {
-    if (mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i]) {
-      if (mCurrentFrame.mFeatData[Ftype].mvbOutlier[i]) {
-        MapPoint *pMP = mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i];
-
-        mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i] = static_cast<MapPoint *>(NULL);
-        mCurrentFrame.mFeatData[Ftype].mvbOutlier[i] = false;
-        pMP->mbTrackInView = false;
-        pMP->mnLastFrameSeen = mCurrentFrame.mnId;
-        nmatches--;
-      } else if (mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i]->Observations() > 0)
-        nmatchesMap++;
-    }
-  }
-}
-
 bool Tracking::TrackWithMotionModelMultiChannels() {
   Associater associater(0.9, true);
 
@@ -2034,19 +2015,19 @@ void Tracking::SearchLocalPointsMultiChannels() {
     }
   }
 
-    if (nToMatch > 0) {
-      Associater associater(0.8);
-      // int th = 1;
-      // if(mSensor==System::RGBD)
-      //     th=3;
-      // // If the camera has been relocalised recently, perform a coarser search
-      // if(mCurrentFrame.mnId<mnLastRelocFrameId+2)
-      //     th=5;
+  if (nToMatch > 0) {
+    Associater associater(0.8);
+    // int th = 1;
+    // if(mSensor==System::RGBD)
+    //     th=3;
+    // // If the camera has been relocalised recently, perform a coarser search
+    // if(mCurrentFrame.mnId<mnLastRelocFrameId+2)
+    //     th=5;
       
-      // associater.SearchByProjection(mCurrentFrame, mvpLocalMapPoints, th);
+    // associater.SearchByProjection(mCurrentFrame, mvpLocalMapPoints, th);
 
-      // NN only matching
-      associater.SearchByNN(mCurrentFrame, mvpLocalMapPoints);
+    // NN only matching
+    associater.SearchByNN(mCurrentFrame, mvpLocalMapPoints);
   }
 }
 
@@ -2283,6 +2264,7 @@ void Tracking::DiscardOutliersMappoints(Frame &F, const int Ftype) {
     }
   }
 }
+
 
 } // namespace ORB_SLAM2
 
