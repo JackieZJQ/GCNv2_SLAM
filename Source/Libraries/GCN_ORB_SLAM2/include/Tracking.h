@@ -166,11 +166,9 @@ protected:
   bool TrackLocalMapMultiChannels();
   void SearchLocalPointsMultiChannels();
 
-
-  ////////////////////////////////////////////////////////////////////
-  //////////////////////////////Newwrite//////////////////////////////
-
   void DiscardOutliers(int &nmatches, int &nmatchesMap, const int Ftype);
+  void DiscardUnobservedMappoints(Frame &F, const int Ftype);
+  void DiscardOutliersMappoints(Frame &F, const int Ftype);
 
   ////////////////////////////////////////////////////////////////////
 

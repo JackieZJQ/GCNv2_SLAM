@@ -2096,6 +2096,28 @@ bool Tracking::TrackLocalMapMultiChannels() {
     return true;
 }
 
+void Tracking::DiscardUnobservedMappoints(Frame &F, const int Ftype) {
+
+  for(int i = 0; i < F.mFeatData[Ftype].N; i++) {
+    MapPoint* pMP = F.mFeatData[Ftype].mvpMapPoints[i];
+    if(pMP) {
+      if(pMP->Observations()<1) {
+        F.mFeatData[Ftype].mvbOutlier[i] = false;
+        F.mFeatData[Ftype].mvpMapPoints[i] = static_cast<MapPoint*>(NULL); 
+      }
+    }
+  }
+}
+
+void Tracking::DiscardOutliersMappoints(Frame &F, const int Ftype) {
+
+  for (int i = 0; i < F.mFeatData[Ftype].N; i++) {
+    if (F.mFeatData[Ftype].mvpMapPoints[i] && F.mFeatData[Ftype].mvbOutlier[i]) {
+      F.mFeatData[Ftype].mvpMapPoints[i] = static_cast<MapPoint*>(NULL);
+    }
+  }
+}
+
 } // namespace ORB_SLAM2
 
 
