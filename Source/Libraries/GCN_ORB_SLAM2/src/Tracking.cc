@@ -2096,6 +2096,172 @@ bool Tracking::TrackLocalMapMultiChannels() {
     return true;
 }
 
+bool Tracking::NeedNewKeyFrameMultiChannels() {
+  
+  // step 1 : check VO
+  if (mbOnlyTracking)
+    return false;
+
+  // step 2 : If Local Mapping is freezed by a Loop Closure do not insert keyframes
+  if (mpLocalMapper->isStopped() || mpLocalMapper->stopRequested())
+    return false;
+
+  // step 3 : Do not insert keyframes if not enough frames have passed from last relocalisation
+  const int nKFs = mpMap->KeyFramesInMap();
+  if (mCurrentFrame.mnId < mnLastRelocFrameId + mMaxFrames && nKFs > mMaxFrames)
+    return false;
+
+  // step 4 : Tracked MapPoints in the reference keyframe
+  int nMinObs = 3;
+  if (nKFs <= 2)
+    nMinObs = 2;
+
+  // sum all tracked map points
+  int nRefMatches = 0;
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    nRefMatches += mpReferenceKF->TrackedMapPoints(nMinObs, Ftype);
+
+  // step 5 : Local Mapping accept keyframes?
+  bool bLocalMappingIdle = mpLocalMapper->AcceptKeyFrames();
+
+  // step 6 : Check how many "close" points are being tracked and how many could be potentially created (for rgdb and sterreo)
+  int nNonTrackedClose = 0;
+  int nTrackedClose = 0;
+  if (mSensor != System::MONOCULAR) {
+    for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+      for (int i = 0; i < mCurrentFrame.mFeatData[Ftype].N; i++) {
+        if (mCurrentFrame.mFeatData[Ftype].mvDepth[i] > 0 && mCurrentFrame.mFeatData[Ftype].mvDepth[i] < mThDepth) {
+          if (mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i] && !mCurrentFrame.mFeatData[Ftype].mvbOutlier[i])
+            nTrackedClose++;
+          else
+            nNonTrackedClose++;
+        }
+      }
+    }
+  }
+  
+  bool bNeedToInsertClose = (nTrackedClose < 100) && (nNonTrackedClose > 70);
+
+  // step 7   : decision
+  // step 7.1 : Thresholds
+  float thRefRatio = 0.75f;
+  if (nKFs < 2)
+    thRefRatio = 0.4f;
+
+  if (mSensor == System::MONOCULAR)
+    thRefRatio = 0.9f;
+
+  // step 7.2 : Condition 1a: More than "MaxFrames" have passed from last keyframe insertion
+  const bool c1a = mCurrentFrame.mnId >= mnLastKeyFrameId + mMaxFrames;
+  
+  // step 7.3 : Condition 1b: More than "MinFrames" have passed and Local Mapping is idle
+  const bool c1b = (mCurrentFrame.mnId >= mnLastKeyFrameId + mMinFrames && bLocalMappingIdle);
+  
+  // step 7.4 : Condition 1c: tracking is weak
+  const bool c1c = mSensor != System::MONOCULAR && (mnMatchesInliers < nRefMatches * 0.25 || bNeedToInsertClose);
+  
+  // step 7.5 : Condition 2: Few tracked points compared to reference keyframe. Lots of visual odometry compared to map matches.
+  const bool c2 = ((mnMatchesInliers < nRefMatches * thRefRatio || bNeedToInsertClose) && mnMatchesInliers > 15);
+
+  if ((c1a || c1b || c1c) && c2) {
+    // If the mapping accepts keyframes, insert keyframe. Otherwise send a signal to interrupt BA
+    if (bLocalMappingIdle) {
+      return true;
+    } else {
+      mpLocalMapper->InterruptBA();
+      if (mSensor != System::MONOCULAR) {
+        if (mpLocalMapper->KeyframesInQueue() < 3)
+          return true;
+        else
+          return false;
+      } else
+        return false;
+    }
+  } else
+    return false;
+}
+
+void Tracking::CreateNewKeyFrameMultiChannels() {
+  if (!mpLocalMapper->SetNotStop(true))
+    return;
+
+  // step 1 : create keyframe
+  KeyFrame *pKF = new KeyFrame(mCurrentFrame, mpMap, mpKeyFrameDB);
+
+  // step 2 : reference keyframe 
+  mpReferenceKF = pKF;
+  mCurrentFrame.mpReferenceKF = pKF;
+
+  // step 3 : create map points
+  if (mSensor != System::MONOCULAR) {
+    mCurrentFrame.UpdatePoseMatrices();
+
+    // We sort points by the measured depth by the stereo/RGBD sensor.
+    // We create all those MapPoints whose depth < mThDepth.
+    // If there are less than 100 close points we create the 100 closest.
+    // step 3.1 
+    vector<vector<pair<float, int>>> vDepthIdx;
+    vDepthIdx.resize(Ntype);
+    for (int Ftype = 0; Ftype < Ntype; Ftype++) 
+      vDepthIdx[Ftype].reserve(mCurrentFrame.mFeatData[Ftype].N);
+
+    for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+      for (int i = 0; i < mCurrentFrame.mFeatData[Ftype].N; i++) {
+        float z = mCurrentFrame.mFeatData[Ftype].mvDepth[i];
+        if (z > 0) {
+          vDepthIdx[Ftype].push_back(make_pair(z, i));
+        }
+      }
+    }
+    
+    for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+      if (!vDepthIdx[Ftype].empty()) {
+        sort(vDepthIdx[Ftype].begin(), vDepthIdx[Ftype].end());
+
+        int nPoints = 0;
+        for (size_t j = 0; j < vDepthIdx[Ftype].size(); j++) {
+          int i = vDepthIdx[Ftype][j].second;
+
+          bool bCreateNew = false;
+
+          MapPoint *pMP = mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i];
+          if (!pMP)
+            bCreateNew = true;
+          else if (pMP->Observations() < 1) {
+            bCreateNew = true;
+            mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i] = static_cast<MapPoint *>(NULL);
+          }
+
+          if (bCreateNew) {
+            cv::Mat x3D = mCurrentFrame.UnprojectStereo(i, mCurrentFrame.mFeatData[Ftype].mvDepth, mCurrentFrame.mFeatData[Ftype].mvKeysUn);
+            MapPoint *pNewMP = new MapPoint(x3D, pKF, mpMap, Ftype);
+            pNewMP->AddObservation(pKF, i);
+            pKF->AddMapPoint(pNewMP, i, Ftype);
+            pNewMP->ComputeDistinctiveDescriptors(); //TO-DO compute desc should be in the corresponding channels
+            pNewMP->UpdateNormalAndDepth();
+            mpMap->AddMapPoint(pNewMP);
+
+            mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i] = pNewMP;
+            nPoints++;
+          } else {
+            nPoints++;
+          }
+
+          if (vDepthIdx[Ftype][j].first > mThDepth && nPoints > 100)
+            break;
+        }
+      }
+    }
+  }
+
+  mpLocalMapper->InsertKeyFrame(pKF);
+
+  mpLocalMapper->SetNotStop(false);
+
+  mnLastKeyFrameId = mCurrentFrame.mnId;
+  mpLastKeyFrame = pKF;
+}
+
 void Tracking::DiscardUnobservedMappoints(Frame &F, const int Ftype) {
 
   for(int i = 0; i < F.mFeatData[Ftype].N; i++) {

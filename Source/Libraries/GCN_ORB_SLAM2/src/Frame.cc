@@ -869,8 +869,7 @@ cv::Mat Frame::UnprojectStereo(const int &i) {
 }
 
 // Rewrite UnprojectStereo()
-cv::Mat Frame::UnprojectStereo(const int &i, const vector<float> &Depth, 
-                                const vector<cv::KeyPoint> &KeysUn) {
+cv::Mat Frame::UnprojectStereo(const int &i, const vector<float> &Depth, const vector<cv::KeyPoint> &KeysUn) {
   const float z = Depth[i];
   if (z > 0) {
     const float u = KeysUn[i].pt.x;

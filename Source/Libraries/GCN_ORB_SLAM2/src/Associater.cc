@@ -124,8 +124,7 @@ int Associater::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, 
           nmatches++;
 
           if (mbCheckOrientation) {
-            float rot = LastFrame.mFeatData[Ftype].mvKeysUn[i].angle -
-                        CurrentFrame.mFeatData[Ftype].mvKeysUn[bestIdx2].angle;
+            float rot = LastFrame.mFeatData[Ftype].mvKeysUn[i].angle - CurrentFrame.mFeatData[Ftype].mvKeysUn[bestIdx2].angle;
             if (rot < 0.0)
               rot += 360.0f;
             int bin = round(rot * factor);
@@ -150,8 +149,7 @@ int Associater::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, 
     for (int i = 0; i < HISTO_LENGTH; i++) {
       if (i != ind1 && i != ind2 && i != ind3) {
         for (size_t j = 0, jend = rotHist[i].size(); j < jend; j++) {
-          CurrentFrame.mFeatData[Ftype].mvpMapPoints[rotHist[i][j]] =
-              static_cast<MapPoint *>(NULL);
+          CurrentFrame.mFeatData[Ftype].mvpMapPoints[rotHist[i][j]] = static_cast<MapPoint *>(NULL);
           nmatches--;
         }
       }
@@ -368,8 +366,7 @@ int Associater::SearchByNN(Frame &CurrentFrame, const Frame &LastFrame, const in
   
   std::vector<cv::DMatch> matches;
   cv::BFMatcher desc_matcher(cv::NORM_HAMMING, true);
-  desc_matcher.match(LastFrame.mFeatData[Ftype].mDescriptors, CurrentFrame.mFeatData[Ftype].mDescriptors, matches,
-                     cv::Mat());
+  desc_matcher.match(LastFrame.mFeatData[Ftype].mDescriptors, CurrentFrame.mFeatData[Ftype].mDescriptors, matches, cv::Mat());
 
   int nmatches = 0;
   for (int i = 0; i < static_cast<int>(matches.size()); ++i) {
