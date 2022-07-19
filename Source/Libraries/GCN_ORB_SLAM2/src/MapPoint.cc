@@ -31,13 +31,26 @@ long unsigned int MapPoint::nNextId = 0;
 mutex MapPoint::mGlobalMutex;
 
 MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap)
-    : mnFirstKFid(pRefKF->mnId), mnFirstFrame(pRefKF->mnFrameId), nObs(0),
-      mnTrackReferenceForFrame(0), mnLastFrameSeen(0), mnBALocalForKF(0),
-      mnFuseCandidateForKF(0), mnLoopPointForKF(0), mnCorrectedByKF(0),
-      mnCorrectedReference(0), mnBAGlobalForKF(0), mpRefKF(pRefKF),
-      mnVisible(1), mnFound(1), mbBad(false),
-      mpReplaced(static_cast<MapPoint *>(NULL)), mfMinDistance(0),
-      mfMaxDistance(0), mpMap(pMap), mFtype(-1) {
+    : mnFirstKFid(pRefKF->mnId), 
+      mnFirstFrame(pRefKF->mnFrameId), 
+      nObs(0),
+      mnTrackReferenceForFrame(0), 
+      mnLastFrameSeen(0), 
+      mnBALocalForKF(0),
+      mnFuseCandidateForKF(0), 
+      mnLoopPointForKF(0), 
+      mnCorrectedByKF(0),
+      mnCorrectedReference(0), 
+      mnBAGlobalForKF(0), 
+      mpRefKF(pRefKF),
+      mnVisible(1), 
+      mnFound(1), 
+      mbBad(false),
+      mpReplaced(static_cast<MapPoint *>(NULL)), 
+      mfMinDistance(0),
+      mfMaxDistance(0), 
+      mpMap(pMap), 
+      mFtype(-1) {
   Pos.copyTo(mWorldPos);
   mNormalVector = cv::Mat::zeros(3, 1, CV_32F);
 
@@ -48,13 +61,26 @@ MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap)
 }
 
 MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap, const int Ftype)
-    : mnFirstKFid(pRefKF->mnId), mnFirstFrame(pRefKF->mnFrameId), nObs(0),
-      mnTrackReferenceForFrame(0), mnLastFrameSeen(0), mnBALocalForKF(0),
-      mnFuseCandidateForKF(0), mnLoopPointForKF(0), mnCorrectedByKF(0),
-      mnCorrectedReference(0), mnBAGlobalForKF(0), mpRefKF(pRefKF),
-      mnVisible(1), mnFound(1), mbBad(false),
-      mpReplaced(static_cast<MapPoint *>(NULL)), mfMinDistance(0),
-      mfMaxDistance(0), mpMap(pMap), mFtype(Ftype) {
+    : mnFirstKFid(pRefKF->mnId), 
+      mnFirstFrame(pRefKF->mnFrameId), 
+      nObs(0),
+      mnTrackReferenceForFrame(0), 
+      mnLastFrameSeen(0), 
+      mnBALocalForKF(0),
+      mnFuseCandidateForKF(0), 
+      mnLoopPointForKF(0), 
+      mnCorrectedByKF(0),
+      mnCorrectedReference(0), 
+      mnBAGlobalForKF(0), 
+      mpRefKF(pRefKF),
+      mnVisible(1), 
+      mnFound(1), 
+      mbBad(false),
+      mpReplaced(static_cast<MapPoint *>(NULL)), 
+      mfMinDistance(0),
+      mfMaxDistance(0), 
+      mpMap(pMap), 
+      mFtype(Ftype) {
   Pos.copyTo(mWorldPos);
   mNormalVector = cv::Mat::zeros(3, 1, CV_32F);
 
@@ -64,14 +90,25 @@ MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap, const int Ft
   mnId = nNextId++;
 }
 
-MapPoint::MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame,
-                   const int &idxF)
-    : mnFirstKFid(-1), mnFirstFrame(pFrame->mnId), nObs(0),
-      mnTrackReferenceForFrame(0), mnLastFrameSeen(0), mnBALocalForKF(0),
-      mnFuseCandidateForKF(0), mnLoopPointForKF(0), mnCorrectedByKF(0),
-      mnCorrectedReference(0), mnBAGlobalForKF(0),
-      mpRefKF(static_cast<KeyFrame *>(NULL)), mnVisible(1), mnFound(1),
-      mbBad(false), mpReplaced(NULL), mpMap(pMap), mFtype(-1) {
+MapPoint::MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame, const int &idxF)
+    : mnFirstKFid(-1), 
+      mnFirstFrame(pFrame->mnId), 
+      nObs(0),
+      mnTrackReferenceForFrame(0), 
+      mnLastFrameSeen(0), 
+      mnBALocalForKF(0),
+      mnFuseCandidateForKF(0), 
+      mnLoopPointForKF(0), 
+      mnCorrectedByKF(0),
+      mnCorrectedReference(0), 
+      mnBAGlobalForKF(0),
+      mpRefKF(static_cast<KeyFrame *>(NULL)), 
+      mnVisible(1), 
+      mnFound(1),
+      mbBad(false), 
+      mpReplaced(NULL), 
+      mpMap(pMap), 
+      mFtype(-1) {
   Pos.copyTo(mWorldPos);
   cv::Mat Ow = pFrame->GetCameraCenter();
   mNormalVector = mWorldPos - Ow;
@@ -94,14 +131,25 @@ MapPoint::MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame,
   mnId = nNextId++;
 }
 
-MapPoint::MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame,
-                   const int &idxF, const int Ftype)
-    : mnFirstKFid(-1), mnFirstFrame(pFrame->mnId), nObs(0),
-      mnTrackReferenceForFrame(0), mnLastFrameSeen(0), mnBALocalForKF(0),
-      mnFuseCandidateForKF(0), mnLoopPointForKF(0), mnCorrectedByKF(0),
-      mnCorrectedReference(0), mnBAGlobalForKF(0),
-      mpRefKF(static_cast<KeyFrame *>(NULL)), mnVisible(1), mnFound(1),
-      mbBad(false), mpReplaced(NULL), mpMap(pMap), mFtype(Ftype) {
+MapPoint::MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame, const int &idxF, const int Ftype)
+    : mnFirstKFid(-1), 
+      mnFirstFrame(pFrame->mnId),
+      nObs(0),
+      mnTrackReferenceForFrame(0), 
+      mnLastFrameSeen(0), 
+      mnBALocalForKF(0),
+      mnFuseCandidateForKF(0), 
+      mnLoopPointForKF(0), 
+      mnCorrectedByKF(0),
+      mnCorrectedReference(0),
+      mnBAGlobalForKF(0),
+      mpRefKF(static_cast<KeyFrame *>(NULL)), 
+      mnVisible(1), 
+      mnFound(1),
+      mbBad(false), 
+      mpReplaced(NULL), 
+      mpMap(pMap), 
+      mFtype(Ftype) {
   Pos.copyTo(mWorldPos);
   cv::Mat Ow = pFrame->GetCameraCenter();
   mNormalVector = mWorldPos - Ow;
@@ -118,8 +166,7 @@ MapPoint::MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame,
 
   pFrame->Channels[mFtype].mDescriptors.row(idxF).copyTo(mDescriptor);
 
-  // MapPoints can be created from Tracking and Local Mapping. This mutex avoid
-  // conflicts with id.
+  // MapPoints can be created from Tracking and Local Mapping. This mutex avoid conflicts with id.
   unique_lock<mutex> lock(mpMap->mMutexPointCreation);
   mnId = nNextId++;
 }
@@ -204,9 +251,7 @@ void MapPoint::SetBadFlag() {
     obs = mObservations;
     mObservations.clear();
   }
-  for (map<KeyFrame *, std::size_t>::iterator mit = obs.begin(),
-                                              mend = obs.end();
-       mit != mend; mit++) {
+  for (map<KeyFrame *, std::size_t>::iterator mit = obs.begin(), mend = obs.end(); mit != mend; mit++) {
     KeyFrame *pKF = mit->first;
     pKF->EraseMapPointMatch(mit->second, Ftype);
   }

@@ -63,6 +63,7 @@ Frame::Frame(const Frame &frame)
       mvInvScaleFactors(frame.mvInvScaleFactors),
       mvLevelSigma2(frame.mvLevelSigma2),
       mvInvLevelSigma2(frame.mvInvLevelSigma2) {
+
   mGrid.resize(FRAME_GRID_COLS);
   for (unsigned int i = 0; i < FRAME_GRID_COLS; i++) {
     mGrid[i].resize(FRAME_GRID_ROWS);
@@ -82,10 +83,15 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
              vector<ORBVocabulary *> voc, cv::Mat &K,
              cv::Mat &distCoef, const float &bf, const float &thDepth)
     : mpvocabulary(voc),
-      mpGCNExtractorLeft(GCNextractorLeft), mpGCNExtractorRight(GCNextractorRight), 
-      mpORBExtractorLeft(ORBextractorLeft), mpORBExtractorRight(ORBextractorRight), 
+      mpGCNExtractorLeft(GCNextractorLeft), 
+      mpGCNExtractorRight(GCNextractorRight), 
+      mpORBExtractorLeft(ORBextractorLeft), 
+      mpORBExtractorRight(ORBextractorRight), 
       mTimeStamp(timeStamp),
-      mK(K.clone()), mDistCoef(distCoef.clone()), mbf(bf), mThDepth(thDepth),
+      mK(K.clone()), 
+      mDistCoef(distCoef.clone()), 
+      mbf(bf), 
+      mThDepth(thDepth),
       mpReferenceKF(static_cast<KeyFrame *>(NULL)) {
   // Frame ID
   mnId = nNextId++;
@@ -157,8 +163,11 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
       mpGCNExtractorRight(static_cast<FeatureExtractor *>(NULL)),
       mpORBExtractorLeft(ORBextractor),
       mpORBExtractorRight(static_cast<FeatureExtractor *>(NULL)), 
-      mTimeStamp(timeStamp), mK(K.clone()), mDistCoef(distCoef.clone()),
-      mbf(bf), mThDepth(thDepth) {
+      mTimeStamp(timeStamp), 
+      mK(K.clone()), 
+      mDistCoef(distCoef.clone()),
+      mbf(bf), 
+      mThDepth(thDepth) {
   // Frame ID
   mnId = nNextId++;
 
@@ -220,8 +229,11 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
       mpGCNExtractorRight(static_cast<FeatureExtractor *>(NULL)),
       mpORBExtractorLeft(ORBextractor),
       mpORBExtractorRight(static_cast<FeatureExtractor *>(NULL)), 
-      mTimeStamp(timeStamp), mK(K.clone()), mDistCoef(distCoef.clone()),
-      mbf(bf), mThDepth(thDepth) {
+      mTimeStamp(timeStamp), 
+      mK(K.clone()), 
+      mDistCoef(distCoef.clone()),
+      mbf(bf), 
+      mThDepth(thDepth) {
   // Frame ID
   mnId = nNextId++;
 

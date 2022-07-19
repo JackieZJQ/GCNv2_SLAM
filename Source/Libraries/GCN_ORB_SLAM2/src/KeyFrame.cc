@@ -30,14 +30,29 @@ namespace ORB_SLAM2 {
 long unsigned int KeyFrame::nNextId = 0;
 
 KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB)
-    : mnFrameId(F.mnId), mTimeStamp(F.mTimeStamp), mnGridCols(FRAME_GRID_COLS),
+    : mnFrameId(F.mnId), 
+      mTimeStamp(F.mTimeStamp), 
+      mnGridCols(FRAME_GRID_COLS),
       mnGridRows(FRAME_GRID_ROWS),
       mfGridElementWidthInv(F.mfGridElementWidthInv),
       mfGridElementHeightInv(F.mfGridElementHeightInv),
-      mnTrackReferenceForFrame(0), mnFuseTargetForKF(0), mnBALocalForKF(0),
-      mnBAFixedForKF(0), mnLoopQuery(0), mnLoopWords(0), mnRelocQuery(0),
-      mnRelocWords(0), mnBAGlobalForKF(0), fx(F.fx), fy(F.fy), cx(F.cx),
-      cy(F.cy), invfx(F.invfx), invfy(F.invfy), mbf(F.mbf), mb(F.mb),
+      mnTrackReferenceForFrame(0), 
+      mnFuseTargetForKF(0),
+      mnBALocalForKF(0),
+      mnBAFixedForKF(0),
+      mnLoopQuery(0), 
+      mnLoopWords(0), 
+      mnRelocQuery(0),
+      mnRelocWords(0), 
+      mnBAGlobalForKF(0), 
+      fx(F.fx), 
+      fy(F.fy), 
+      cx(F.cx),
+      cy(F.cy), 
+      invfx(F.invfx), 
+      invfy(F.invfy), 
+      mbf(F.mbf),
+       mb(F.mb),
       mThDepth(F.mThDepth),
       Channels(F.Channels), 
       N(F.N), 
@@ -50,14 +65,25 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB)
       mBowVec(F.mBowVec),
       mFeatVec(F.mFeatVec), 
       mnScaleLevels(F.mnScaleLevels),
-      mfScaleFactor(F.mfScaleFactor), mfLogScaleFactor(F.mfLogScaleFactor),
-      mvScaleFactors(F.mvScaleFactors), mvLevelSigma2(F.mvLevelSigma2),
-      mvInvLevelSigma2(F.mvInvLevelSigma2), mnMinX(F.mnMinX), mnMinY(F.mnMinY),
-      mnMaxX(F.mnMaxX), mnMaxY(F.mnMaxY), mK(F.mK),
+      mfScaleFactor(F.mfScaleFactor), 
+      mfLogScaleFactor(F.mfLogScaleFactor),
+      mvScaleFactors(F.mvScaleFactors), 
+      mvLevelSigma2(F.mvLevelSigma2),
+      mvInvLevelSigma2(F.mvInvLevelSigma2), 
+      mnMinX(F.mnMinX), 
+      mnMinY(F.mnMinY),
+      mnMaxX(F.mnMaxX), 
+      mnMaxY(F.mnMaxY), 
+      mK(F.mK),
       mpKeyFrameDB(pKFDB),
-      mpvocabulary(F.mpvocabulary), mbFirstConnection(true),
-      mpParent(NULL), mbNotErase(false), mbToBeErased(false), mbBad(false),
-      mHalfBaseline(F.mb / 2), mpMap(pMap) {
+      mpvocabulary(F.mpvocabulary), 
+      mbFirstConnection(true),
+      mpParent(NULL), 
+      mbNotErase(false), 
+      mbToBeErased(false), 
+      mbBad(false),
+      mHalfBaseline(F.mb / 2), 
+      mpMap(pMap) {
   mnId = nNextId++;
 
   mGrid.resize(mnGridCols);
@@ -81,19 +107,14 @@ void KeyFrame::ComputeBoW() {
     Ftype = 0;
 
   if (mBowVec.empty() || mFeatVec.empty()) {
-    std::vector<cv::Mat> vCurrentDesc =
-        Converter::toDescriptorVector(mDescriptors);
-    // Feature vector associate features with nodes in the 4th level (from
-    // leaves up) We assume the vocabulary tree has 6 levels, change the 4
-    // otherwise
+    std::vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);
     mpvocabulary[Ftype]->transform(vCurrentDesc, mBowVec, mFeatVec, 4);
   }
 }
 
 void KeyFrame::ComputeBoW(const int Ftype) {
   if (Channels[Ftype].mBowVec.empty() || Channels[Ftype].mFeatVec.empty()) {
-    std::vector<cv::Mat> vCurrentDesc =
-        Converter::toDescriptorVector(Channels[Ftype].mDescriptors);
+    std::vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(Channels[Ftype].mDescriptors);
     mpvocabulary[Ftype]->transform(vCurrentDesc, Channels[Ftype].mBowVec, Channels[Ftype].mFeatVec, 4);
   }
 }
@@ -143,6 +164,7 @@ cv::Mat KeyFrame::GetTranslation() {
   return Tcw.rowRange(0, 3).col(3).clone();
 }
 
+// TO-DO multi channels ?
 void KeyFrame::AddConnection(KeyFrame *pKF, const int &weight) {
   {
     unique_lock<mutex> lock(mMutexConnections);
@@ -157,13 +179,12 @@ void KeyFrame::AddConnection(KeyFrame *pKF, const int &weight) {
   UpdateBestCovisibles();
 }
 
+// TO-DO multi channels ?
 void KeyFrame::UpdateBestCovisibles() {
   unique_lock<mutex> lock(mMutexConnections);
   std::vector<pair<int, KeyFrame *>> vPairs;
   vPairs.reserve(mConnectedKeyFrameWeights.size());
-  for (map<KeyFrame *, int>::iterator mit = mConnectedKeyFrameWeights.begin(),
-                                      mend = mConnectedKeyFrameWeights.end();
-       mit != mend; mit++)
+  for (map<KeyFrame *, int>::iterator mit = mConnectedKeyFrameWeights.begin(), mend = mConnectedKeyFrameWeights.end(); mit != mend; mit++)
     vPairs.push_back(make_pair(mit->second, mit->first));
 
   sort(vPairs.begin(), vPairs.end());
@@ -174,16 +195,14 @@ void KeyFrame::UpdateBestCovisibles() {
     lWs.push_front(vPairs[i].first);
   }
 
-  mvpOrderedConnectedKeyFrames =
-      std::vector<KeyFrame *>(lKFs.begin(), lKFs.end());
+  mvpOrderedConnectedKeyFrames = std::vector<KeyFrame *>(lKFs.begin(), lKFs.end());
   mvOrderedWeights = std::vector<int>(lWs.begin(), lWs.end());
 }
 
 set<KeyFrame *> KeyFrame::GetConnectedKeyFrames() {
   unique_lock<mutex> lock(mMutexConnections);
   set<KeyFrame *> s;
-  for (map<KeyFrame *, int>::iterator mit = mConnectedKeyFrameWeights.begin();
-       mit != mConnectedKeyFrameWeights.end(); mit++)
+  for (map<KeyFrame *, int>::iterator mit = mConnectedKeyFrameWeights.begin(); mit != mConnectedKeyFrameWeights.end(); mit++)
     s.insert(mit->first);
   return s;
 }
@@ -198,8 +217,7 @@ std::vector<KeyFrame *> KeyFrame::GetBestCovisibilityKeyFrames(const int &N) {
   if ((int)mvpOrderedConnectedKeyFrames.size() < N)
     return mvpOrderedConnectedKeyFrames;
   else
-    return std::vector<KeyFrame *>(mvpOrderedConnectedKeyFrames.begin(),
-                                   mvpOrderedConnectedKeyFrames.begin() + N);
+    return std::vector<KeyFrame *>(mvpOrderedConnectedKeyFrames.begin(), mvpOrderedConnectedKeyFrames.begin() + N);
 }
 
 std::vector<KeyFrame *> KeyFrame::GetCovisiblesByWeight(const int &w) {
@@ -208,15 +226,12 @@ std::vector<KeyFrame *> KeyFrame::GetCovisiblesByWeight(const int &w) {
   if (mvpOrderedConnectedKeyFrames.empty())
     return std::vector<KeyFrame *>();
 
-  std::vector<int>::iterator it =
-      upper_bound(mvOrderedWeights.begin(), mvOrderedWeights.end(), w,
-                  KeyFrame::weightComp);
+  std::vector<int>::iterator it = upper_bound(mvOrderedWeights.begin(), mvOrderedWeights.end(), w, KeyFrame::weightComp);
   if (it == mvOrderedWeights.end())
     return std::vector<KeyFrame *>();
   else {
     int n = it - mvOrderedWeights.begin();
-    return std::vector<KeyFrame *>(mvpOrderedConnectedKeyFrames.begin(),
-                                   mvpOrderedConnectedKeyFrames.begin() + n);
+    return std::vector<KeyFrame *>(mvpOrderedConnectedKeyFrames.begin(), mvpOrderedConnectedKeyFrames.begin() + n);
   }
 }
 
@@ -356,7 +371,7 @@ MapPoint *KeyFrame::GetMapPoint(const std::size_t &idx, const int Ftype) {
   return Channels[Ftype].mvpMapPoints[idx];
 }
 
-//TO-DO, need rewrite, use orb or gcn or both
+// TO-DO, rewrite it as updateconnections multi channels
 void KeyFrame::UpdateConnections() {
   map<KeyFrame *, int> KFcounter;
 
@@ -367,10 +382,8 @@ void KeyFrame::UpdateConnections() {
     vpMP = mvpMapPoints;
   }
 
-  // For all map points in keyframe check in which other keyframes are they seen
-  // Increase counter for those keyframes
-  for (std::vector<MapPoint *>::iterator vit = vpMP.begin(), vend = vpMP.end();
-       vit != vend; vit++) {
+  // For all map points in keyframe check in which other keyframes are they seen, increase counter for those keyframes
+  for (std::vector<MapPoint *>::iterator vit = vpMP.begin(), vend = vpMP.end(); vit != vend; vit++) {
     MapPoint *pMP = *vit;
 
     if (!pMP)
@@ -381,9 +394,7 @@ void KeyFrame::UpdateConnections() {
 
     map<KeyFrame *, std::size_t> observations = pMP->GetObservations();
 
-    for (map<KeyFrame *, std::size_t>::iterator mit = observations.begin(),
-                                                mend = observations.end();
-         mit != mend; mit++) {
+    for (map<KeyFrame *, std::size_t>::iterator mit = observations.begin(), mend = observations.end(); mit != mend; mit++) {
       if (mit->first->mnId == mnId)
         continue;
       KFcounter[mit->first]++;
@@ -394,18 +405,14 @@ void KeyFrame::UpdateConnections() {
   if (KFcounter.empty())
     return;
 
-  // If the counter is greater than threshold add connection
-  // In case no keyframe counter is over threshold add the one with maximum
-  // counter
+  // If the counter is greater than threshold add connection, in case no keyframe counter is over threshold add the one with maximum counter
   int nmax = 0;
   KeyFrame *pKFmax = NULL;
   int th = 15;
 
   std::vector<pair<int, KeyFrame *>> vPairs;
   vPairs.reserve(KFcounter.size());
-  for (map<KeyFrame *, int>::iterator mit = KFcounter.begin(),
-                                      mend = KFcounter.end();
-       mit != mend; mit++) {
+  for (map<KeyFrame *, int>::iterator mit = KFcounter.begin(), mend = KFcounter.end(); mit != mend; mit++) {
     if (mit->second > nmax) {
       nmax = mit->second;
       pKFmax = mit->first;
@@ -434,8 +441,7 @@ void KeyFrame::UpdateConnections() {
 
     // mspConnectedKeyFrames = spConnectedKeyFrames;
     mConnectedKeyFrameWeights = KFcounter;
-    mvpOrderedConnectedKeyFrames =
-        std::vector<KeyFrame *>(lKFs.begin(), lKFs.end());
+    mvpOrderedConnectedKeyFrames = std::vector<KeyFrame *>(lKFs.begin(), lKFs.end());
     mvOrderedWeights = std::vector<int>(lWs.begin(), lWs.end());
 
     if (mbFirstConnection && mnId != 0) {
@@ -517,9 +523,7 @@ void KeyFrame::SetBadFlag() {
     }
   }
 
-  for (map<KeyFrame *, int>::iterator mit = mConnectedKeyFrameWeights.begin(),
-                                      mend = mConnectedKeyFrameWeights.end();
-       mit != mend; mit++)
+  for (map<KeyFrame *, int>::iterator mit = mConnectedKeyFrameWeights.begin(), mend = mConnectedKeyFrameWeights.end(); mit != mend; mit++)
     mit->first->EraseConnection(this);
 
   // erase observation of every kind of map points (one keyframe, two kinds of mappoints)
@@ -555,20 +559,15 @@ void KeyFrame::SetBadFlag() {
       KeyFrame *pC;
       KeyFrame *pP;
 
-      for (set<KeyFrame *>::iterator sit = mspChildrens.begin(),
-                                     send = mspChildrens.end();
-           sit != send; sit++) {
+      for (set<KeyFrame *>::iterator sit = mspChildrens.begin(), send = mspChildrens.end(); sit != send; sit++) {
         KeyFrame *pKF = *sit;
         if (pKF->isBad())
           continue;
 
         // Check if a parent candidate is connected to the keyframe
-        std::vector<KeyFrame *> vpConnected =
-            pKF->GetVectorCovisibleKeyFrames();
+        std::vector<KeyFrame *> vpConnected = pKF->GetVectorCovisibleKeyFrames();
         for (std::size_t i = 0, iend = vpConnected.size(); i < iend; i++) {
-          for (set<KeyFrame *>::iterator spcit = sParentCandidates.begin(),
-                                         spcend = sParentCandidates.end();
-               spcit != spcend; spcit++) {
+          for (set<KeyFrame *>::iterator spcit = sParentCandidates.begin(), spcend = sParentCandidates.end(); spcit != spcend; spcit++) {
             if (vpConnected[i]->mnId == (*spcit)->mnId) {
               int w = pKF->GetWeight(vpConnected[i]);
               if (w > max) {
@@ -593,8 +592,7 @@ void KeyFrame::SetBadFlag() {
     // If a children has no covisibility links with any parent candidate, assign
     // to the original parent of this KF
     if (!mspChildrens.empty())
-      for (set<KeyFrame *>::iterator sit = mspChildrens.begin();
-           sit != mspChildrens.end(); sit++) {
+      for (set<KeyFrame *>::iterator sit = mspChildrens.begin(); sit != mspChildrens.end(); sit++) {
         (*sit)->ChangeParent(mpParent);
       }
 
@@ -670,9 +668,7 @@ std::vector<std::size_t> KeyFrame::GetFeaturesInArea(const float &x,
   return vIndices;
 }
 
-std::vector<std::size_t> KeyFrame::GetFeaturesInArea(const float &x,
-                                                     const float &y,
-                                                     const float &r, const int Ftype) const {
+std::vector<std::size_t> KeyFrame::GetFeaturesInArea(const float &x, const float &y, const float &r, const int Ftype) const {
   std::vector<std::size_t> vIndices;
   vIndices.reserve(Channels[Ftype].N);
 
