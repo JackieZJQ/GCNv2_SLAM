@@ -40,6 +40,9 @@ class KeyFrameDatabase;
 
 class KeyFrame {
 public:
+  const static int Ntype = 2; // Number of channels
+  
+public:
   KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB);
 
   // Pose functions
@@ -172,10 +175,7 @@ public:
   // Calibration parameters
   const float fx, fy, cx, cy, invfx, invfy, mbf, mb, mThDepth;
 
-  // Number of feature types
-  const static int Ntype = 2;
-
-  FeaturePoint mFeatData[Ntype];
+  FeaturePoint Channels[Ntype];
 
   // Number of KeyPoints
   const int N;

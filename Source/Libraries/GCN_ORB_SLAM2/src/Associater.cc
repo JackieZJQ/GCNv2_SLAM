@@ -48,11 +48,11 @@ int Associater::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, 
   const bool bBackward = -tlc.at<float>(2) > CurrentFrame.mb && !bMono;
 
   // step 3 project the mappoints created by last frame to current frame, calcualte its  u and v in pixel
-  for (int i = 0; i < LastFrame.mFeatData[Ftype].N; i++) {
-    MapPoint *pMP = LastFrame.mFeatData[Ftype].mvpMapPoints[i];
+  for (int i = 0; i < LastFrame.Channels[Ftype].N; i++) {
+    MapPoint *pMP = LastFrame.Channels[Ftype].mvpMapPoints[i];
   
     if (pMP) {
-      if (!LastFrame.mFeatData[Ftype].mvbOutlier[i]) {
+      if (!LastFrame.Channels[Ftype].mvbOutlier[i]) {
         // Project
         cv::Mat x3Dw = pMP->GetWorldPos();
         cv::Mat x3Dc = Rcw * x3Dw + tcw;
@@ -72,7 +72,7 @@ int Associater::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, 
         if (v < CurrentFrame.mnMinY || v > CurrentFrame.mnMaxY)
           continue;
 
-        int nLastOctave = LastFrame.mFeatData[Ftype].mvKeys[i].octave;
+        int nLastOctave = LastFrame.Channels[Ftype].mvKeys[i].octave;
 
         // Search in a window. Size depends on scale
         float radius = th * CurrentFrame.mvScaleFactors[nLastOctave];
@@ -98,18 +98,18 @@ int Associater::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, 
 
         for (vector<size_t>::const_iterator vit = vIndices2.begin(), vend = vIndices2.end(); vit != vend; vit++) {
           const size_t i2 = *vit;
-          if (CurrentFrame.mFeatData[Ftype].mvpMapPoints[i2])
-            if (CurrentFrame.mFeatData[Ftype].mvpMapPoints[i2]->Observations() > 0)
+          if (CurrentFrame.Channels[Ftype].mvpMapPoints[i2])
+            if (CurrentFrame.Channels[Ftype].mvpMapPoints[i2]->Observations() > 0)
               continue;
 
-          if (CurrentFrame.mFeatData[Ftype].mvuRight[i2] > 0) {
+          if (CurrentFrame.Channels[Ftype].mvuRight[i2] > 0) {
             const float ur = u - CurrentFrame.mbf * invzc;
-            const float er = fabs(ur - CurrentFrame.mFeatData[Ftype].mvuRight[i2]);
+            const float er = fabs(ur - CurrentFrame.Channels[Ftype].mvuRight[i2]);
             if (er > radius)
               continue;
           }
 
-          const cv::Mat &d = CurrentFrame.mFeatData[Ftype].mDescriptors.row(i2);
+          const cv::Mat &d = CurrentFrame.Channels[Ftype].mDescriptors.row(i2);
 
           const int dist = DescriptorDistance(dMP, d);
 
@@ -120,11 +120,11 @@ int Associater::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, 
         }
 
         if (bestDist <= TH_HIGH) {
-          CurrentFrame.mFeatData[Ftype].mvpMapPoints[bestIdx2] = pMP;
+          CurrentFrame.Channels[Ftype].mvpMapPoints[bestIdx2] = pMP;
           nmatches++;
 
           if (mbCheckOrientation) {
-            float rot = LastFrame.mFeatData[Ftype].mvKeysUn[i].angle - CurrentFrame.mFeatData[Ftype].mvKeysUn[bestIdx2].angle;
+            float rot = LastFrame.Channels[Ftype].mvKeysUn[i].angle - CurrentFrame.Channels[Ftype].mvKeysUn[bestIdx2].angle;
             if (rot < 0.0)
               rot += 360.0f;
             int bin = round(rot * factor);
@@ -149,7 +149,7 @@ int Associater::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, 
     for (int i = 0; i < HISTO_LENGTH; i++) {
       if (i != ind1 && i != ind2 && i != ind3) {
         for (size_t j = 0, jend = rotHist[i].size(); j < jend; j++) {
-          CurrentFrame.mFeatData[Ftype].mvpMapPoints[rotHist[i][j]] = static_cast<MapPoint *>(NULL);
+          CurrentFrame.Channels[Ftype].mvpMapPoints[rotHist[i][j]] = static_cast<MapPoint *>(NULL);
           nmatches--;
         }
       }
@@ -204,17 +204,17 @@ int Associater::SearchByProjection(Frame &F, const vector<MapPoint*> &vpMapPoint
     for (vector<size_t>::const_iterator vit = vIndices.begin(), vend = vIndices.end(); vit != vend; vit++) {
       const size_t idx = *vit;
 
-      if (F.mFeatData[Ftype].mvpMapPoints[idx])
-        if (F.mFeatData[Ftype].mvpMapPoints[idx]->Observations() > 0)
+      if (F.Channels[Ftype].mvpMapPoints[idx])
+        if (F.Channels[Ftype].mvpMapPoints[idx]->Observations() > 0)
           continue;
 
-      if (F.mFeatData[Ftype].mvuRight[idx] > 0) {
-        const float er = fabs(pMP->mTrackProjXR - F.mFeatData[Ftype].mvuRight[idx]);
+      if (F.Channels[Ftype].mvuRight[idx] > 0) {
+        const float er = fabs(pMP->mTrackProjXR - F.Channels[Ftype].mvuRight[idx]);
         if (er > r * F.mvScaleFactors[nPredictedLevel])
           continue;
       }
 
-      const cv::Mat &d = F.mFeatData[Ftype].mDescriptors.row(idx);
+      const cv::Mat &d = F.Channels[Ftype].mDescriptors.row(idx);
 
       const int dist = DescriptorDistance(MPdescriptor, d);
 
@@ -222,10 +222,10 @@ int Associater::SearchByProjection(Frame &F, const vector<MapPoint*> &vpMapPoint
         bestDist2 = bestDist;
         bestDist = dist;
         bestLevel2 = bestLevel;
-        bestLevel = F.mFeatData[Ftype].mvKeysUn[idx].octave;
+        bestLevel = F.Channels[Ftype].mvKeysUn[idx].octave;
         bestIdx = idx;
       } else if (dist < bestDist2) {
-        bestLevel2 = F.mFeatData[Ftype].mvKeysUn[idx].octave;
+        bestLevel2 = F.Channels[Ftype].mvKeysUn[idx].octave;
         bestDist2 = dist;
       }
     }
@@ -236,7 +236,7 @@ int Associater::SearchByProjection(Frame &F, const vector<MapPoint*> &vpMapPoint
       if (bestLevel == bestLevel2 && bestDist > mfNNratio * bestDist2)
         continue;
 
-      F.mFeatData[Ftype].mvpMapPoints[bestIdx] = pMP;
+      F.Channels[Ftype].mvpMapPoints[bestIdx] = pMP;
       nmatches++;
     }
   }
@@ -252,10 +252,10 @@ int Associater::SearchByProjection(Frame &F, const vector<MapPoint*> &vpMapPoint
 int Associater::SearchByBoW(KeyFrame *pKF, Frame &F, vector<MapPoint *> &vpMapPointMatches, const int Ftype) {
   const vector<MapPoint *> vpMapPointsKF = pKF->GetMapPointMatches(Ftype);
 
-  vpMapPointMatches = vector<MapPoint *>(F.mFeatData[Ftype].N, static_cast<MapPoint *>(NULL));
+  vpMapPointMatches = vector<MapPoint *>(F.Channels[Ftype].N, static_cast<MapPoint *>(NULL));
 
   // suppose the featvec equals the featvec in frame.featdata, mybe it was not updated
-  const DBoW2::FeatureVector &vFeatVecKF = pKF->mFeatData[Ftype].mFeatVec;
+  const DBoW2::FeatureVector &vFeatVecKF = pKF->Channels[Ftype].mFeatVec;
 
   int nmatches = 0;
 
@@ -265,9 +265,9 @@ int Associater::SearchByBoW(KeyFrame *pKF, Frame &F, vector<MapPoint *> &vpMapPo
   const float factor = 1.0f / HISTO_LENGTH;
 
   DBoW2::FeatureVector::const_iterator KFit = vFeatVecKF.begin();
-  DBoW2::FeatureVector::const_iterator Fit = F.mFeatData[Ftype].mFeatVec.begin();
+  DBoW2::FeatureVector::const_iterator Fit = F.Channels[Ftype].mFeatVec.begin();
   DBoW2::FeatureVector::const_iterator KFend = vFeatVecKF.end();
-  DBoW2::FeatureVector::const_iterator Fend = F.mFeatData[Ftype].mFeatVec.end();
+  DBoW2::FeatureVector::const_iterator Fend = F.Channels[Ftype].mFeatVec.end();
 
   while (KFit != KFend && Fit != Fend) {
     if (KFit->first == Fit->first) {
@@ -285,7 +285,7 @@ int Associater::SearchByBoW(KeyFrame *pKF, Frame &F, vector<MapPoint *> &vpMapPo
         if (pMP->isBad())
           continue;
 
-        const cv::Mat &dKF = pKF->mFeatData[Ftype].mDescriptors.row(realIdxKF);
+        const cv::Mat &dKF = pKF->Channels[Ftype].mDescriptors.row(realIdxKF);
 
         int bestDist1 = 256;
         int bestIdxF = -1;
@@ -297,7 +297,7 @@ int Associater::SearchByBoW(KeyFrame *pKF, Frame &F, vector<MapPoint *> &vpMapPo
           if (vpMapPointMatches[realIdxF])
             continue;
 
-          const cv::Mat &dF = F.mFeatData[Ftype].mDescriptors.row(realIdxF);
+          const cv::Mat &dF = F.Channels[Ftype].mDescriptors.row(realIdxF);
 
           const int dist = DescriptorDistance(dKF, dF);
 
@@ -315,10 +315,10 @@ int Associater::SearchByBoW(KeyFrame *pKF, Frame &F, vector<MapPoint *> &vpMapPo
               mfNNratio * static_cast<float>(bestDist2)) {
             vpMapPointMatches[bestIdxF] = pMP;
 
-            const cv::KeyPoint &kp = pKF->mFeatData[Ftype].mvKeysUn[realIdxKF];
+            const cv::KeyPoint &kp = pKF->Channels[Ftype].mvKeysUn[realIdxKF];
 
             if (mbCheckOrientation) {
-              float rot = kp.angle - F.mFeatData[Ftype].mvKeys[bestIdxF].angle;
+              float rot = kp.angle - F.Channels[Ftype].mvKeys[bestIdxF].angle;
               if (rot < 0.0)
                 rot += 360.0f;
               int bin = round(rot * factor);
@@ -337,7 +337,7 @@ int Associater::SearchByBoW(KeyFrame *pKF, Frame &F, vector<MapPoint *> &vpMapPo
     } else if (KFit->first < Fit->first) {
       KFit = vFeatVecKF.lower_bound(Fit->first);
     } else {
-      Fit = F.mFeatData[Ftype].mFeatVec.lower_bound(KFit->first);
+      Fit = F.Channels[Ftype].mFeatVec.lower_bound(KFit->first);
     }
   }
 
@@ -366,7 +366,7 @@ int Associater::SearchByNN(Frame &CurrentFrame, const Frame &LastFrame, const in
   
   std::vector<cv::DMatch> matches;
   cv::BFMatcher desc_matcher(cv::NORM_HAMMING, true);
-  desc_matcher.match(LastFrame.mFeatData[Ftype].mDescriptors, CurrentFrame.mFeatData[Ftype].mDescriptors, matches, cv::Mat());
+  desc_matcher.match(LastFrame.Channels[Ftype].mDescriptors, CurrentFrame.Channels[Ftype].mDescriptors, matches, cv::Mat());
 
   int nmatches = 0;
   for (int i = 0; i < static_cast<int>(matches.size()); ++i) {
@@ -376,15 +376,15 @@ int Associater::SearchByNN(Frame &CurrentFrame, const Frame &LastFrame, const in
     if (matches[i].distance > TH_LOW)
       continue;
     
-    MapPoint *pMP = LastFrame.mFeatData[Ftype].mvpMapPoints[realIdxKF];
+    MapPoint *pMP = LastFrame.Channels[Ftype].mvpMapPoints[realIdxKF];
     if (!pMP)
       continue;
 
     if (pMP->isBad())
       continue;
 
-    if (!LastFrame.mFeatData[Ftype].mvbOutlier[realIdxKF])
-      CurrentFrame.mFeatData[Ftype].mvpMapPoints[bestIdxF] = pMP;
+    if (!LastFrame.Channels[Ftype].mvbOutlier[realIdxKF])
+      CurrentFrame.Channels[Ftype].mvpMapPoints[bestIdxF] = pMP;
 
     nmatches++;
 
@@ -401,11 +401,11 @@ int Associater::SearchByNN(KeyFrame *pKF, Frame &F, std::vector<MapPoint *> &vpM
   // std::cout << F.mDescriptors.rows << std::endl;
 
   const vector<MapPoint *> vpMapPointsKF = pKF->GetMapPointMatches(FType);
-  vpMapPointMatches = vector<MapPoint *>(F.mFeatData[FType].N, static_cast<MapPoint *>(NULL));
+  vpMapPointMatches = vector<MapPoint *>(F.Channels[FType].N, static_cast<MapPoint *>(NULL));
 
   std::vector<cv::DMatch> matches;
   cv::BFMatcher desc_matcher(cv::NORM_HAMMING, true);
-  desc_matcher.match(pKF->mFeatData[FType].mDescriptors, F.mFeatData[FType].mDescriptors, matches, cv::Mat());
+  desc_matcher.match(pKF->Channels[FType].mDescriptors, F.Channels[FType].mDescriptors, matches, cv::Mat());
 
   int nmatches = 0;
   for (int i = 0; i < static_cast<int>(matches.size()); ++i) {
@@ -434,7 +434,7 @@ int Associater::SearchByNN(KeyFrame *pKF, Frame &F, std::vector<MapPoint *> &vpM
 int Associater::SearchByNN(Frame &F, const vector<MapPoint *> &vpMapPoints) {
   // std::cout << "Matching Localmap" << std::endl;
   // std::cout << vpMapPoints.size() << std::endl;
-  // std::cout << F.mFeatData[0].mDescriptors.rows << std::endl;
+  // std::cout << F.Channels[0].mDescriptors.rows << std::endl;
 
   vector<vector<cv::Mat>> MPdescriptorAll;
   vector<vector<int>> select_indice;
@@ -479,7 +479,7 @@ int Associater::SearchByNN(Frame &F, const vector<MapPoint *> &vpMapPoints) {
   matches.resize(F.Ntype);
   cv::BFMatcher desc_matcher(cv::NORM_HAMMING, true);
   for (int Ftype = 0; Ftype < F.Ntype; Ftype++) {
-    desc_matcher.match(MPdescriptors[Ftype], F.mFeatData[Ftype].mDescriptors, matches[Ftype], cv::Mat());
+    desc_matcher.match(MPdescriptors[Ftype], F.Channels[Ftype].mDescriptors, matches[Ftype], cv::Mat());
   }
   
   int nmatches = 0;
@@ -491,12 +491,12 @@ int Associater::SearchByNN(Frame &F, const vector<MapPoint *> &vpMapPoints) {
       if (matches[Ftype][i].distance > TH_HIGH)
         continue;
 
-      if (F.mFeatData[Ftype].mvpMapPoints[bestIdxF])
-        if (F.mFeatData[Ftype].mvpMapPoints[bestIdxF]->Observations() > 0)
+      if (F.Channels[Ftype].mvpMapPoints[bestIdxF])
+        if (F.Channels[Ftype].mvpMapPoints[bestIdxF]->Observations() > 0)
           continue;
 
       MapPoint *pMP = vpMapPoints[realIdxMap];
-      F.mFeatData[Ftype].mvpMapPoints[bestIdxF] = pMP;
+      F.Channels[Ftype].mvpMapPoints[bestIdxF] = pMP;
 
       nmatches++;
     }

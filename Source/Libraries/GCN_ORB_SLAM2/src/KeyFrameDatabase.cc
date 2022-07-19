@@ -318,13 +318,10 @@ KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F, const int Ftype) {
   {
     unique_lock<mutex> lock(mMutex);
 
-    for (DBoW2::BowVector::const_iterator vit = F->mFeatData[Ftype].mBowVec.begin(),
-                                          vend = F->mFeatData[Ftype].mBowVec.end();
-         vit != vend; vit++) {
+    for (DBoW2::BowVector::const_iterator vit = F->Channels[Ftype].mBowVec.begin(), vend = F->Channels[Ftype].mBowVec.end(); vit != vend; vit++) {
       std::list<KeyFrame *> &lKFs = mvInvertedFile[vit->first];
 
-      for (std::list<KeyFrame *>::iterator lit = lKFs.begin(),
-                                           lend = lKFs.end();
+      for (std::list<KeyFrame *>::iterator lit = lKFs.begin(), lend = lKFs.end();
            lit != lend; lit++) {
         KeyFrame *pKFi = *lit;
         if (pKFi->mnRelocQuery != F->mnId) {
@@ -341,9 +338,7 @@ KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F, const int Ftype) {
 
   // Only compare against those keyframes that share enough words
   int maxCommonWords = 0;
-  for (std::list<KeyFrame *>::iterator lit = lKFsSharingWords.begin(),
-                                       lend = lKFsSharingWords.end();
-       lit != lend; lit++) {
+  for (std::list<KeyFrame *>::iterator lit = lKFsSharingWords.begin(), lend = lKFsSharingWords.end(); lit != lend; lit++) {
     if ((*lit)->mnRelocWords > maxCommonWords)
       maxCommonWords = (*lit)->mnRelocWords;
   }
@@ -355,14 +350,12 @@ KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F, const int Ftype) {
   int nscores = 0;
 
   // Compute similarity score.
-  for (std::list<KeyFrame *>::iterator lit = lKFsSharingWords.begin(),
-                                       lend = lKFsSharingWords.end();
-       lit != lend; lit++) {
+  for (std::list<KeyFrame *>::iterator lit = lKFsSharingWords.begin(), lend = lKFsSharingWords.end(); lit != lend; lit++) {
     KeyFrame *pKFi = *lit;
 
     if (pKFi->mnRelocWords > minCommonWords) {
       nscores++;
-      float si = mpVoc->score(F->mFeatData[Ftype].mBowVec, pKFi->mFeatData[Ftype].mBowVec);
+      float si = mpVoc->score(F->Channels[Ftype].mBowVec, pKFi->Channels[Ftype].mBowVec);
       pKFi->mRelocScore = si;
       lScoreAndMatch.push_back(make_pair(si, pKFi));
     }
@@ -375,19 +368,14 @@ KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F, const int Ftype) {
   float bestAccScore = 0;
 
   // Lets now accumulate score by covisibility
-  for (std::list<pair<float, KeyFrame *>>::iterator
-           it = lScoreAndMatch.begin(),
-           itend = lScoreAndMatch.end();
-       it != itend; it++) {
+  for (std::list<pair<float, KeyFrame *>>::iterator it = lScoreAndMatch.begin(), itend = lScoreAndMatch.end(); it != itend; it++) {
     KeyFrame *pKFi = it->second;
     std::vector<KeyFrame *> vpNeighs = pKFi->GetBestCovisibilityKeyFrames(10);
 
     float bestScore = it->first;
     float accScore = bestScore;
     KeyFrame *pBestKF = pKFi;
-    for (std::vector<KeyFrame *>::iterator vit = vpNeighs.begin(),
-                                           vend = vpNeighs.end();
-         vit != vend; vit++) {
+    for (std::vector<KeyFrame *>::iterator vit = vpNeighs.begin(), vend = vpNeighs.end(); vit != vend; vit++) {
       KeyFrame *pKF2 = *vit;
       if (pKF2->mnRelocQuery != F->mnId)
         continue;

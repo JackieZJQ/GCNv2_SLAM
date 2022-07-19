@@ -109,14 +109,14 @@ MapPoint::MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame,
 
   cv::Mat PC = Pos - Ow;
   const float dist = cv::norm(PC);
-  const int level = pFrame->mFeatData[mFtype].mvKeysUn[idxF].octave;
+  const int level = pFrame->Channels[mFtype].mvKeysUn[idxF].octave;
   const float levelScaleFactor = pFrame->mvScaleFactors[level];
   const int nLevels = pFrame->mnScaleLevels;
 
   mfMaxDistance = dist * levelScaleFactor;
   mfMinDistance = mfMaxDistance / pFrame->mvScaleFactors[nLevels - 1];
 
-  pFrame->mFeatData[mFtype].mDescriptors.row(idxF).copyTo(mDescriptor);
+  pFrame->Channels[mFtype].mDescriptors.row(idxF).copyTo(mDescriptor);
 
   // MapPoints can be created from Tracking and Local Mapping. This mutex avoid
   // conflicts with id.
@@ -152,7 +152,7 @@ void MapPoint::AddObservation(KeyFrame *pKF, std::size_t idx) {
     return;
   mObservations[pKF] = idx;
 
-  if (pKF->mFeatData[mFtype].mvuRight[idx] >= 0)
+  if (pKF->Channels[mFtype].mvuRight[idx] >= 0)
     nObs += 2;
   else
     nObs++;
@@ -164,7 +164,7 @@ void MapPoint::EraseObservation(KeyFrame *pKF) {
     unique_lock<mutex> lock(mMutexFeatures);
     if (mObservations.count(pKF)) {
       int idx = mObservations[pKF];
-      if (pKF->mFeatData[mFtype].mvuRight[idx] >= 0)
+      if (pKF->Channels[mFtype].mvuRight[idx] >= 0)
         nObs -= 2;
       else
         nObs--;
@@ -300,7 +300,7 @@ void MapPoint::ComputeDistinctiveDescriptors() {
     KeyFrame *pKF = mit->first;
 
     if (!pKF->isBad())
-      vDescriptors.push_back(pKF->mFeatData[mFtype].mDescriptors.row(mit->second));
+      vDescriptors.push_back(pKF->Channels[mFtype].mDescriptors.row(mit->second));
   }
 
   if (vDescriptors.empty())
@@ -363,7 +363,7 @@ void MapPoint::ComputeDistinctiveDescriptors(const int Ftype) {
     KeyFrame *pKF = mit->first;
 
     if (!pKF->isBad())
-      vDescriptors.push_back(pKF->mFeatData[Ftype].mDescriptors.row(mit->second));
+      vDescriptors.push_back(pKF->Channels[Ftype].mDescriptors.row(mit->second));
   }
 
   if (vDescriptors.empty())
@@ -454,7 +454,7 @@ void MapPoint::UpdateNormalAndDepth() {
 
   cv::Mat PC = Pos - pRefKF->GetCameraCenter();
   const float dist = cv::norm(PC);
-  const int level = pRefKF->mFeatData[mFtype].mvKeysUn[observations[pRefKF]].octave;
+  const int level = pRefKF->Channels[mFtype].mvKeysUn[observations[pRefKF]].octave;
   const float levelScaleFactor = pRefKF->mvScaleFactors[level];
   const int nLevels = pRefKF->mnScaleLevels;
 

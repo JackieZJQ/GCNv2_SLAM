@@ -45,7 +45,7 @@ Frame::Frame(const Frame &frame)
       mTimeStamp(frame.mTimeStamp), mK(frame.mK.clone()),
       mDistCoef(frame.mDistCoef.clone()), mbf(frame.mbf), mb(frame.mb),
       mThDepth(frame.mThDepth), mBowVec(frame.mBowVec), mFeatVec(frame.mFeatVec),
-      mFeatData(frame.mFeatData), 
+      Channels(frame.Channels), 
       N(frame.N),                                                // N
       mvKeys(frame.mvKeys),                                      // mvKeys
       mvKeysRight(frame.mvKeysRight),                            // mvKeysRight
@@ -315,18 +315,18 @@ void Frame::AssignFeaturesToGrid(const int &refN, const vector<cv::KeyPoint> &Ke
 void Frame::ExtractFeatures(const int Ftype, int imageFlag, const cv::Mat &im) {
   if (Ftype == 0) {
     if (imageFlag == 0) {
-      (*mpORBExtractorLeft)(im, cv::Mat(), mFeatData[Ftype].mvKeys, mFeatData[Ftype].mDescriptors);
+      (*mpORBExtractorLeft)(im, cv::Mat(), Channels[Ftype].mvKeys, Channels[Ftype].mDescriptors);
     }
     else {
-      (*mpORBExtractorRight)(im, cv::Mat(), mFeatData[Ftype].mvKeysRight, mFeatData[Ftype].mDescriptorsRight);
+      (*mpORBExtractorRight)(im, cv::Mat(), Channels[Ftype].mvKeysRight, Channels[Ftype].mDescriptorsRight);
     }
   }
   else {
     if (imageFlag == 0) {
-      (*mpGCNExtractorLeft)(im, cv::Mat(), mFeatData[Ftype].mvKeys, mFeatData[Ftype].mDescriptors);
+      (*mpGCNExtractorLeft)(im, cv::Mat(), Channels[Ftype].mvKeys, Channels[Ftype].mDescriptors);
     }
     else {
-      (*mpGCNExtractorRight)(im, cv::Mat(), mFeatData[Ftype].mvKeysRight, mFeatData[Ftype].mDescriptorsRight);
+      (*mpGCNExtractorRight)(im, cv::Mat(), Channels[Ftype].mvKeysRight, Channels[Ftype].mDescriptorsRight);
     }
   }
 }
@@ -463,7 +463,7 @@ vector<size_t> Frame::GetFeaturesInArea(const int Ftype, const float &x, const f
                                       const float &r, const int minLevel,
                                       const int maxLevel) const {
   vector<size_t> vIndices;
-  vIndices.reserve(mFeatData[Ftype].N);
+  vIndices.reserve(Channels[Ftype].N);
 
   const int nMinCellX =
       max(0, (int)floor((x - mnMinX - r) * mfGridElementWidthInv));
@@ -491,12 +491,12 @@ vector<size_t> Frame::GetFeaturesInArea(const int Ftype, const float &x, const f
 
   for (int ix = nMinCellX; ix <= nMaxCellX; ix++) {
     for (int iy = nMinCellY; iy <= nMaxCellY; iy++) {
-      const vector<size_t> vCell = mFeatData[Ftype].mGrid[ix][iy];
+      const vector<size_t> vCell = Channels[Ftype].mGrid[ix][iy];
       if (vCell.empty())
         continue;
 
       for (size_t j = 0, jend = vCell.size(); j < jend; j++) {
-        const cv::KeyPoint &kpUn = mFeatData[Ftype].mvKeysUn[vCell[j]];
+        const cv::KeyPoint &kpUn = Channels[Ftype].mvKeysUn[vCell[j]];
         if (bCheckLevels) {
           if (kpUn.octave < minLevel)
             continue;
@@ -521,8 +521,7 @@ bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY) {
   posX = round((kp.pt.x - mnMinX) * mfGridElementWidthInv);
   posY = round((kp.pt.y - mnMinY) * mfGridElementHeightInv);
 
-  // Keypoint's coordinates are undistorted, which could cause to go out of the
-  // image
+  // Keypoint's coordinates are undistorted, which could cause to go out of the image
   if (posX < 0 || posX >= FRAME_GRID_COLS || posY < 0 ||
       posY >= FRAME_GRID_ROWS)
     return false;
@@ -545,9 +544,9 @@ void Frame::ComputeBoW() {
 }
 
 void Frame::ComputeBoW(const int Ftype) {
-  if (mFeatData[Ftype].mBowVec.empty()) {
-    vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mFeatData[Ftype].mDescriptors);
-    mpvocabulary[Ftype]->transform(vCurrentDesc, mFeatData[Ftype].mBowVec, mFeatData[Ftype].mFeatVec, 4);
+  if (Channels[Ftype].mBowVec.empty()) {
+    vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(Channels[Ftype].mDescriptors);
+    mpvocabulary[Ftype]->transform(vCurrentDesc, Channels[Ftype].mBowVec, Channels[Ftype].mFeatVec, 4);
   }
 }
 
@@ -884,51 +883,51 @@ cv::Mat Frame::UnprojectStereo(const int &i, const vector<float> &Depth, const v
 
 void Frame::ChooseFeature(const int Ftype) {
 
-  N = mFeatData[Ftype].N;
-  mvKeys = mFeatData[Ftype].mvKeys;
-  mvKeysUn = mFeatData[Ftype].mvKeysUn;
-  mDescriptors = mFeatData[Ftype].mDescriptors;
-  mvKeysRight = mFeatData[Ftype].mvKeysRight;
-  mDescriptorsRight = mFeatData[Ftype].mDescriptorsRight;
-  mvuRight = mFeatData[Ftype].mvuRight;
-  mvDepth = mFeatData[Ftype].mvDepth;
-  mvpMapPoints = mFeatData[Ftype].mvpMapPoints;
-  mvbOutlier = mFeatData[Ftype].mvbOutlier;
-  mGrid = mFeatData[Ftype].mGrid;
-  mBowVec = mFeatData[Ftype].mBowVec;
-  mFeatVec = mFeatData[Ftype].mFeatVec;
+  N = Channels[Ftype].N;
+  mvKeys = Channels[Ftype].mvKeys;
+  mvKeysUn = Channels[Ftype].mvKeysUn;
+  mDescriptors = Channels[Ftype].mDescriptors;
+  mvKeysRight = Channels[Ftype].mvKeysRight;
+  mDescriptorsRight = Channels[Ftype].mDescriptorsRight;
+  mvuRight = Channels[Ftype].mvuRight;
+  mvDepth = Channels[Ftype].mvDepth;
+  mvpMapPoints = Channels[Ftype].mvpMapPoints;
+  mvbOutlier = Channels[Ftype].mvbOutlier;
+  mGrid = Channels[Ftype].mGrid;
+  mBowVec = Channels[Ftype].mBowVec;
+  mFeatVec = Channels[Ftype].mFeatVec;
 }
 
 void Frame::ComputeFeatures(const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth) {
   // Feature extraction
   ExtractFeatures(Ftype, 0, imGray);
 
-  mFeatData[Ftype].N = mFeatData[Ftype].mvKeys.size();
+  Channels[Ftype].N = Channels[Ftype].mvKeys.size();
   
-  if (mFeatData[Ftype].mvKeys.empty())
+  if (Channels[Ftype].mvKeys.empty())
     return;
 
   // mvKeysUn, Left image
   // UndistortKeyPoints();
   // UndistortKeyPoints(mvKeys, mvKeysUn, N);
-  UndistortKeyPoints(mFeatData[Ftype].mvKeys, mFeatData[Ftype].mvKeysUn, mFeatData[Ftype].N);
+  UndistortKeyPoints(Channels[Ftype].mvKeys, Channels[Ftype].mvKeysUn, Channels[Ftype].N);
 
   // compute mvuRight and mvDepth
   // ComputeStereoFromRGBD(imDepth);
   // ComputeStereoFromRGBD(imDepth, mvuRight, mvDepth, N, mvKeys, mvKeysUn); 
-  ComputeStereoFromRGBD(imDepth, mFeatData[Ftype].mvuRight, mFeatData[Ftype].mvDepth, mFeatData[Ftype].N, mFeatData[Ftype].mvKeys, mFeatData[Ftype].mvKeysUn);  
+  ComputeStereoFromRGBD(imDepth, Channels[Ftype].mvuRight, Channels[Ftype].mvDepth, Channels[Ftype].N, Channels[Ftype].mvKeys, Channels[Ftype].mvKeysUn);  
 
   // map points
   // mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
-  mFeatData[Ftype].mvpMapPoints = vector<MapPoint *>(mFeatData[Ftype].N, static_cast<MapPoint *>(NULL));
+  Channels[Ftype].mvpMapPoints = vector<MapPoint *>(Channels[Ftype].N, static_cast<MapPoint *>(NULL));
 
   // outliers
   // mvbOutlier = vector<bool>(N, false);
-  mFeatData[Ftype].mvbOutlier = vector<bool>(mFeatData[Ftype].N, false);
+  Channels[Ftype].mvbOutlier = vector<bool>(Channels[Ftype].N, false);
 
   // AssignFeaturesToGrid();
   // AssignFeaturesToGrid(N, mvKeysUn, mGrid);
-  AssignFeaturesToGrid(mFeatData[Ftype].N, mFeatData[Ftype].mvKeysUn, mFeatData[Ftype].mGrid);
+  AssignFeaturesToGrid(Channels[Ftype].N, Channels[Ftype].mvKeysUn, Channels[Ftype].mGrid);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -936,15 +935,15 @@ void Frame::ComputeFeatures(const int Ftype, const cv::Mat &imGray, const cv::Ma
 // void Frame::ComputeBoW() {
 
 //   for (int i = 0; i < Ntype; i++) {
-//     if (mFeatData[i].mBowVec.empty()) {
-//       vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mFeatData[i].mDescriptors);
-//       mpvocabulary[i]->transform(vCurrentDesc, mFeatData[i].mBowVec, mFeatData[i].mFeatVec, 4);
+//     if (Channels[i].mBowVec.empty()) {
+//       vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(Channels[i].mDescriptors);
+//       mpvocabulary[i]->transform(vCurrentDesc, Channels[i].mBowVec, Channels[i].mFeatVec, 4);
 //     }
 //   }
 
 //   // only orb works
-//   mBowVec = mFeatData[0].mBowVec;
-//   mFeatVec = mFeatData[0].mFeatVec;
+//   mBowVec = Channels[0].mBowVec;
+//   mFeatVec = Channels[0].mFeatVec;
 // }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////

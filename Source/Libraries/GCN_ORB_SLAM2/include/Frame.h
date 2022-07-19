@@ -113,15 +113,13 @@ public:
   // coordinate associated to the left keypoint is stored.
   void ComputeStereoMatches();
 
-  // Associate a "right" coordinate to a keypoint if there is valid depth in the
-  // depthmap.
+  // Associate a "right" coordinate to a keypoint if there is valid depth in the depthmap.
   void ComputeStereoFromRGBD(const cv::Mat &imDepth);
 
   void ComputeStereoFromRGBD(const cv::Mat &imDepth, std::vector<float> &uRight, std::vector<float> &Depth, const int &refN, 
                              const std::vector<cv::KeyPoint> &Keys, const std::vector<cv::KeyPoint> &KeysUn);
 
-  // Backprojects a keypoint (if stereo/depth info available) into 3D world
-  // coordinates.
+  // Backprojects a keypoint (if stereo/depth info available) into 3D world coordinates.
   cv::Mat UnprojectStereo(const int &i);
 
   cv::Mat UnprojectStereo(const int &i, const std::vector<float> &Depth, const std::vector<cv::KeyPoint> &KeysUn);
@@ -163,7 +161,7 @@ public:
   float mThDepth;
 
   // Feature data used to store feature points
-  FeaturePoint mFeatData[Ntype];
+  FeaturePoint Channels[Ntype];
 
   // Number of KeyPoints.
   int N;

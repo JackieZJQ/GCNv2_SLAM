@@ -1268,8 +1268,8 @@ int Optimizer::PoseOptimizationMultiChannels(Frame *pFrame) {
   vpEdgesMono.resize(pFrame->Ntype);
   vnIndexEdgeMono.resize(pFrame->Ntype);
   for (int i = 0; i < pFrame->Ntype; i++) {
-    vpEdgesMono[i].reserve(pFrame->mFeatData[i].N);
-    vnIndexEdgeMono[i].reserve(pFrame->mFeatData[i].N);
+    vpEdgesMono[i].reserve(pFrame->Channels[i].N);
+    vnIndexEdgeMono[i].reserve(pFrame->Channels[i].N);
   }
   
   std::vector<std::vector<g2o::EdgeStereoSE3ProjectXYZOnlyPose *>> vpEdgesStereo;
@@ -1277,8 +1277,8 @@ int Optimizer::PoseOptimizationMultiChannels(Frame *pFrame) {
   vpEdgesStereo.resize(pFrame->Ntype);
   vnIndexEdgeStereo.resize(pFrame->Ntype);
   for (int i = 0; i < pFrame->Ntype; i++) {
-    vpEdgesStereo[i].reserve(pFrame->mFeatData[i].N);
-    vnIndexEdgeStereo[i].reserve(pFrame->mFeatData[i].N);
+    vpEdgesStereo[i].reserve(pFrame->Channels[i].N);
+    vnIndexEdgeStereo[i].reserve(pFrame->Channels[i].N);
   }
   
   const float deltaMono = sqrt(5.991);
@@ -1288,16 +1288,16 @@ int Optimizer::PoseOptimizationMultiChannels(Frame *pFrame) {
     unique_lock<mutex> lock(MapPoint::mGlobalMutex);
 
     for (int Ftype = 0; Ftype < pFrame->Ntype; Ftype++) {
-      for (int i = 0; i < pFrame->mFeatData[Ftype].N; i++) {
-        MapPoint *pMP = pFrame->mFeatData[Ftype].mvpMapPoints[i];
+      for (int i = 0; i < pFrame->Channels[Ftype].N; i++) {
+        MapPoint *pMP = pFrame->Channels[Ftype].mvpMapPoints[i];
         if (pMP) {
           // Monocular observation
-          if (pFrame->mFeatData[Ftype].mvuRight[i] < 0) {
+          if (pFrame->Channels[Ftype].mvuRight[i] < 0) {
             nInitialCorrespondences++;
-            pFrame->mFeatData[Ftype].mvbOutlier[i] = false;
+            pFrame->Channels[Ftype].mvbOutlier[i] = false;
 
             Eigen::Matrix<double, 2, 1> obs;
-            const cv::KeyPoint &kpUn = pFrame->mFeatData[Ftype].mvKeysUn[i];
+            const cv::KeyPoint &kpUn = pFrame->Channels[Ftype].mvKeysUn[i];
             obs << kpUn.pt.x, kpUn.pt.y;
 
             g2o::EdgeSE3ProjectXYZOnlyPose *e =
@@ -1329,12 +1329,12 @@ int Optimizer::PoseOptimizationMultiChannels(Frame *pFrame) {
           } else // Stereo observation
           {
             nInitialCorrespondences++;
-            pFrame->mFeatData[Ftype].mvbOutlier[i] = false;
+            pFrame->Channels[Ftype].mvbOutlier[i] = false;
 
             // SET EDGE
             Eigen::Matrix<double, 3, 1> obs;
-            const cv::KeyPoint &kpUn = pFrame->mFeatData[Ftype].mvKeysUn[i];
-            const float &kp_ur = pFrame->mFeatData[Ftype].mvuRight[i];
+            const cv::KeyPoint &kpUn = pFrame->Channels[Ftype].mvKeysUn[i];
+            const float &kp_ur = pFrame->Channels[Ftype].mvuRight[i];
             obs << kpUn.pt.x, kpUn.pt.y, kp_ur;
 
             g2o::EdgeStereoSE3ProjectXYZOnlyPose *e =
@@ -1395,18 +1395,18 @@ int Optimizer::PoseOptimizationMultiChannels(Frame *pFrame) {
 
         const std::size_t idx = vnIndexEdgeMono[Ftype][i];
 
-        if (pFrame->mFeatData[Ftype].mvbOutlier[idx]) {
+        if (pFrame->Channels[Ftype].mvbOutlier[idx]) {
           e->computeError();
         }
 
         const float chi2 = e->chi2();
 
         if (chi2 > chi2Mono[it]) {
-          pFrame->mFeatData[Ftype].mvbOutlier[idx] = true;
+          pFrame->Channels[Ftype].mvbOutlier[idx] = true;
           e->setLevel(1);
           nBad++;
         } else {
-          pFrame->mFeatData[Ftype].mvbOutlier[idx] = false;
+          pFrame->Channels[Ftype].mvbOutlier[idx] = false;
           e->setLevel(0);
         }
 
@@ -1421,19 +1421,19 @@ int Optimizer::PoseOptimizationMultiChannels(Frame *pFrame) {
 
         const std::size_t idx = vnIndexEdgeStereo[Ftype][i];
 
-        if (pFrame->mFeatData[Ftype].mvbOutlier[idx]) {
+        if (pFrame->Channels[Ftype].mvbOutlier[idx]) {
           e->computeError();
         }
 
         const float chi2 = e->chi2();
 
         if (chi2 > chi2Stereo[it]) {
-          pFrame->mFeatData[Ftype].mvbOutlier[idx] = true;
+          pFrame->Channels[Ftype].mvbOutlier[idx] = true;
           e->setLevel(1);
           nBad++;
         } else {
           e->setLevel(0);
-          pFrame->mFeatData[Ftype].mvbOutlier[idx] = false;
+          pFrame->Channels[Ftype].mvbOutlier[idx] = false;
         }
 
         if (it == 2)

@@ -320,7 +320,7 @@ void Tracking::Track() {
         CheckReplacedInLastFrame();
         // CheckReplacedInLastFrame(0);
         // CheckReplacedInLastFrame(1);
-        // mLastFrame.mvpMapPoints = mLastFrame.mFeatData[0].mvpMapPoints;
+        // mLastFrame.mvpMapPoints = mLastFrame.Channels[0].mvpMapPoints;
 
         // NN only keyframe tracking
         // bOK = TrackReferenceKeyFrame();
@@ -871,14 +871,14 @@ bool Tracking::TrackWithMotionModel() {
   UpdateLastFrame();
   // UpdateLastFrame(0);
   // UpdateLastFrame(1);
-  // mLastFrame.mvpMapPoints = mLastFrame.mFeatData[0].mvpMapPoints;
+  // mLastFrame.mvpMapPoints = mLastFrame.Channels[0].mvpMapPoints;
 
   mCurrentFrame.SetPose(mVelocity * mLastFrame.mTcw);
 
   fill(mCurrentFrame.mvpMapPoints.begin(), mCurrentFrame.mvpMapPoints.end(),
        static_cast<MapPoint *>(NULL));
 
-  // fill(mCurrentFrame.mFeatData[1].mvpMapPoints.begin(), mCurrentFrame.mFeatData[1].mvpMapPoints.end(),
+  // fill(mCurrentFrame.Channels[1].mvpMapPoints.begin(), mCurrentFrame.Channels[1].mvpMapPoints.end(),
   //      static_cast<MapPoint *>(NULL));
 
   // Project points seen in previous frame
@@ -902,13 +902,13 @@ bool Tracking::TrackWithMotionModel() {
     nmatches = matcher.SearchByProjection(mCurrentFrame, mLastFrame, 2 * th,
                                           mSensor == System::MONOCULAR);
     
-    // fill(mCurrentFrame.mFeatData[1].mvpMapPoints.begin(), mCurrentFrame.mFeatData[1].mvpMapPoints.end(),
+    // fill(mCurrentFrame.Channels[1].mvpMapPoints.begin(), mCurrentFrame.Channels[1].mvpMapPoints.end(),
     //      static_cast<MapPoint *>(NULL));
     // nmatches = Associater.SearchByProjection(mCurrentFrame, mLastFrame, th,
     //                                           mSensor == System::MONOCULAR, 1);
   }
 
-  // mCurrentFrame.mvpMapPoints = mCurrentFrame.mFeatData[1].mvpMapPoints;
+  // mCurrentFrame.mvpMapPoints = mCurrentFrame.Channels[1].mvpMapPoints;
 
   // int nmatches = matcher.SearchByNN(mCurrentFrame,mLastFrame);
 
@@ -919,8 +919,8 @@ bool Tracking::TrackWithMotionModel() {
   Optimizer::PoseOptimization(&mCurrentFrame);
 
   // Optimizer::PoseOptimizationMultiChannels(&mCurrentFrame);
-  // mCurrentFrame.mvpMapPoints = mCurrentFrame.mFeatData[1].mvpMapPoints;
-  // mCurrentFrame.mvbOutlier = mCurrentFrame.mFeatData[1].mvbOutlier;
+  // mCurrentFrame.mvpMapPoints = mCurrentFrame.Channels[1].mvpMapPoints;
+  // mCurrentFrame.mvbOutlier = mCurrentFrame.Channels[1].mvbOutlier;
 
 
 
@@ -944,8 +944,8 @@ bool Tracking::TrackWithMotionModel() {
 
 // DiscardOutliers(0, nmatches, nmatchesMap);
 // DiscardOutliers(1, nmatches, nmatchesMap);
-// mCurrentFrame.mvpMapPoints = mCurrentFrame.mFeatData[0].mvpMapPoints;
-// mCurrentFrame.mvbOutlier = mCurrentFrame.mFeatData[0].mvbOutlier;
+// mCurrentFrame.mvpMapPoints = mCurrentFrame.Channels[0].mvpMapPoints;
+// mCurrentFrame.mvbOutlier = mCurrentFrame.Channels[0].mvbOutlier;
 
   if (mbOnlyTracking) {
     mbVO = nmatchesMap < 10;
@@ -1568,8 +1568,8 @@ void Tracking::InformOnlyTracking(const bool &flag) { mbOnlyTracking = flag; }
 
 //   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
 //     int nGood = 0;
-//     for (int i = 0; i < mCurrentFrame.mFeatData[Ftype].N; i++) {
-//       float z = mCurrentFrame.mFeatData[Ftype].mvDepth[i];
+//     for (int i = 0; i < mCurrentFrame.Channels[Ftype].N; i++) {
+//       float z = mCurrentFrame.Channels[Ftype].mvDepth[i];
 //       if (z > 0) {
 //         nGood++;
 //       }
@@ -1592,10 +1592,10 @@ void Tracking::InformOnlyTracking(const bool &flag) { mbOnlyTracking = flag; }
 
 //   // Create MapPoints and asscoiate to KeyFrame
 //   for (int Ftype = 0; Ftype < 1; Ftype++) {               // TO-DO
-//     for (int i = 0; i < mCurrentFrame.mFeatData[Ftype].N; i++) {
-//       float z = mCurrentFrame.mFeatData[Ftype].mvDepth[i];
+//     for (int i = 0; i < mCurrentFrame.Channels[Ftype].N; i++) {
+//       float z = mCurrentFrame.Channels[Ftype].mvDepth[i];
 //       if (z > 0) {
-//         cv::Mat x3D = mCurrentFrame.UnprojectStereo(i, mCurrentFrame.mFeatData[Ftype].mvDepth, mCurrentFrame.mFeatData[Ftype].mvKeysUn);
+//         cv::Mat x3D = mCurrentFrame.UnprojectStereo(i, mCurrentFrame.Channels[Ftype].mvDepth, mCurrentFrame.Channels[Ftype].mvKeysUn);
 //         MapPoint *pNewMP = new MapPoint(x3D, pKFini, mpMap, Ftype);
 //         pNewMP->AddObservation(pKFini, i);
 //         pKFini->AddMapPoint(pNewMP, i);
@@ -1603,13 +1603,13 @@ void Tracking::InformOnlyTracking(const bool &flag) { mbOnlyTracking = flag; }
 //         pNewMP->UpdateNormalAndDepth();
 //         mpMap->AddMapPoint(pNewMP);
 
-//         mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i] = pNewMP;
+//         mCurrentFrame.Channels[Ftype].mvpMapPoints[i] = pNewMP;
 //       }
 //     }
 //   }
   
 //   // copy data to the default variable
-//   mCurrentFrame.mvpMapPoints = mCurrentFrame.mFeatData[0].mvpMapPoints;
+//   mCurrentFrame.mvpMapPoints = mCurrentFrame.Channels[0].mvpMapPoints;
 
 //   cout << "New map created with " << mpMap->MapPointsInMap() << " points"
 //        << endl;
@@ -1636,35 +1636,35 @@ void Tracking::InformOnlyTracking(const bool &flag) { mbOnlyTracking = flag; }
 
 void Tracking::CheckReplacedInLastFrame(const int Ftype) {
 
-  for (int i = 0; i < mLastFrame.mFeatData[Ftype].N; i++) {
-    MapPoint *pMP = mLastFrame.mFeatData[Ftype].mvpMapPoints[i];
+  for (int i = 0; i < mLastFrame.Channels[Ftype].N; i++) {
+    MapPoint *pMP = mLastFrame.Channels[Ftype].mvpMapPoints[i];
 
     if (pMP) {
       MapPoint *pRep = pMP->GetReplaced();
       if (pRep) {
-        mLastFrame.mFeatData[Ftype].mvpMapPoints[i] = pRep;
+        mLastFrame.Channels[Ftype].mvpMapPoints[i] = pRep;
       }
     }
   }
   // copy data to the defatule variable
-  // mLastFrame.mvpMapPoints = mLastFrame.mFeatData[Ftype].mvpMapPoints;
+  // mLastFrame.mvpMapPoints = mLastFrame.Channels[Ftype].mvpMapPoints;
 }
 
 // void Tracking::CheckReplacedInLastFrame() {
 //   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-//     for (int i = 0; i < mLastFrame.mFeatData[Ftype].N; i++) {
-//       MapPoint *pMP = mLastFrame.mFeatData[Ftype].mvpMapPoints[i];
+//     for (int i = 0; i < mLastFrame.Channels[Ftype].N; i++) {
+//       MapPoint *pMP = mLastFrame.Channels[Ftype].mvpMapPoints[i];
 
 //       if (pMP) {
 //         MapPoint *pRep = pMP->GetReplaced();
 //         if (pRep) {
-//           mLastFrame.mFeatData[Ftype].mvpMapPoints[i] = pRep;
+//           mLastFrame.Channels[Ftype].mvpMapPoints[i] = pRep;
 //         }
 //       }
 //     }
 //   }
 //   // copy data to the defatule variable
-//   mLastFrame.mvpMapPoints = mLastFrame.mFeatData[0].mvpMapPoints;
+//   mLastFrame.mvpMapPoints = mLastFrame.Channels[0].mvpMapPoints;
 // }
 
 void Tracking::UpdateLastFrame(const int Ftype) {
@@ -1681,9 +1681,9 @@ void Tracking::UpdateLastFrame(const int Ftype) {
   // Create "visual odometry" MapPoints
   // We sort points according to their measured depth by the stereo/RGB-D sensor
   vector<pair<float, int>> vDepthIdx;
-  vDepthIdx.reserve(mLastFrame.mFeatData[Ftype].N);
-  for (int i = 0; i < mLastFrame.mFeatData[Ftype].N; i++) {
-    float z = mLastFrame.mFeatData[Ftype].mvDepth[i];
+  vDepthIdx.reserve(mLastFrame.Channels[Ftype].N);
+  for (int i = 0; i < mLastFrame.Channels[Ftype].N; i++) {
+    float z = mLastFrame.Channels[Ftype].mvDepth[i];
     if (z > 0) {
       vDepthIdx.push_back(make_pair(z, i));
     }
@@ -1702,7 +1702,7 @@ void Tracking::UpdateLastFrame(const int Ftype) {
 
     bool bCreateNew = false;
 
-    MapPoint *pMP = mLastFrame.mFeatData[Ftype].mvpMapPoints[i];
+    MapPoint *pMP = mLastFrame.Channels[Ftype].mvpMapPoints[i];
     if (!pMP)
       bCreateNew = true;
     else if (pMP->Observations() < 1) {
@@ -1710,10 +1710,10 @@ void Tracking::UpdateLastFrame(const int Ftype) {
     }
 
     if (bCreateNew) {
-      cv::Mat x3D = mLastFrame.UnprojectStereo(i, mLastFrame.mFeatData[Ftype].mvDepth, mLastFrame.mFeatData[Ftype].mvKeysUn);
+      cv::Mat x3D = mLastFrame.UnprojectStereo(i, mLastFrame.Channels[Ftype].mvDepth, mLastFrame.Channels[Ftype].mvKeysUn);
       MapPoint *pNewMP = new MapPoint(x3D, mpMap, &mLastFrame, i, Ftype);
 
-      mLastFrame.mFeatData[Ftype].mvpMapPoints[i] = pNewMP;
+      mLastFrame.Channels[Ftype].mvpMapPoints[i] = pNewMP;
 
       mlpTemporalPoints.push_back(pNewMP);
       nPoints++;
@@ -1737,7 +1737,7 @@ bool Tracking::TrackWithMotionModelMultiChannels() {
   mCurrentFrame.SetPose(mVelocity * mLastFrame.mTcw);
 
   for (int Ftype = 0; Ftype < Ntype; Ftype++)
-    fill(mCurrentFrame.mFeatData[Ftype].mvpMapPoints.begin(), mCurrentFrame.mFeatData[Ftype].mvpMapPoints.end(), static_cast<MapPoint *>(NULL));
+    fill(mCurrentFrame.Channels[Ftype].mvpMapPoints.begin(), mCurrentFrame.Channels[Ftype].mvpMapPoints.end(), static_cast<MapPoint *>(NULL));
 
   // Project points seen in previous frame
   // int th;
@@ -1760,7 +1760,7 @@ bool Tracking::TrackWithMotionModelMultiChannels() {
 
   if (nmatchesSum < 20) {
     for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-      fill(mCurrentFrame.mFeatData[Ftype].mvpMapPoints.begin(), mCurrentFrame.mFeatData[Ftype].mvpMapPoints.end(), static_cast<MapPoint *>(NULL));
+      fill(mCurrentFrame.Channels[Ftype].mvpMapPoints.begin(), mCurrentFrame.Channels[Ftype].mvpMapPoints.end(), static_cast<MapPoint *>(NULL));
       nmatches[Ftype] = associater.SearchByProjection(mCurrentFrame, mLastFrame, th, mSensor == System::MONOCULAR, Ftype);
 
       // nmatches[Ftype] = associater.SearchByNN(mCurrentFrame,mLastFrame, Ftype);
@@ -1781,17 +1781,17 @@ bool Tracking::TrackWithMotionModelMultiChannels() {
   // Discard outliers
   int nmatchesMap = 0;
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-    for (int i = 0; i < mCurrentFrame.mFeatData[Ftype].N; i++) {
-      if (mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i]) {
-        if (mCurrentFrame.mFeatData[Ftype].mvbOutlier[i]) {
-          MapPoint *pMP = mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i];
+    for (int i = 0; i < mCurrentFrame.Channels[Ftype].N; i++) {
+      if (mCurrentFrame.Channels[Ftype].mvpMapPoints[i]) {
+        if (mCurrentFrame.Channels[Ftype].mvbOutlier[i]) {
+          MapPoint *pMP = mCurrentFrame.Channels[Ftype].mvpMapPoints[i];
 
-          mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i] = static_cast<MapPoint *>(NULL);
-          mCurrentFrame.mFeatData[Ftype].mvbOutlier[i] = false;
+          mCurrentFrame.Channels[Ftype].mvpMapPoints[i] = static_cast<MapPoint *>(NULL);
+          mCurrentFrame.Channels[Ftype].mvbOutlier[i] = false;
           pMP->mbTrackInView = false;
           pMP->mnLastFrameSeen = mCurrentFrame.mnId;
           nmatchesSum--;
-        } else if (mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i]->Observations() > 0)
+        } else if (mCurrentFrame.Channels[Ftype].mvpMapPoints[i]->Observations() > 0)
           nmatchesMap++;
       }
     }
@@ -1830,7 +1830,7 @@ bool Tracking::TrackReferenceKeyFrameMultiChannels() {
     return false;
 
   for (int Ftype = 0; Ftype < Ntype; Ftype++) 
-    mCurrentFrame.mFeatData[Ftype].mvpMapPoints = vvpMapPointMatches[Ftype];
+    mCurrentFrame.Channels[Ftype].mvpMapPoints = vvpMapPointMatches[Ftype];
   
   mCurrentFrame.SetPose(mLastFrame.mTcw);
 
@@ -1839,17 +1839,17 @@ bool Tracking::TrackReferenceKeyFrameMultiChannels() {
   // Discard outliers
   int nmatchesMap = 0;
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-    for (int i = 0; i < mCurrentFrame.mFeatData[Ftype].N; i++) {
-      if (mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i]) {
-        if (mCurrentFrame.mFeatData[Ftype].mvbOutlier[i]) {
-          MapPoint *pMP = mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i];
+    for (int i = 0; i < mCurrentFrame.Channels[Ftype].N; i++) {
+      if (mCurrentFrame.Channels[Ftype].mvpMapPoints[i]) {
+        if (mCurrentFrame.Channels[Ftype].mvbOutlier[i]) {
+          MapPoint *pMP = mCurrentFrame.Channels[Ftype].mvpMapPoints[i];
 
-          mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i] = static_cast<MapPoint *>(NULL);
-          mCurrentFrame.mFeatData[Ftype].mvbOutlier[i] = false;
+          mCurrentFrame.Channels[Ftype].mvpMapPoints[i] = static_cast<MapPoint *>(NULL);
+          mCurrentFrame.Channels[Ftype].mvbOutlier[i] = false;
           pMP->mbTrackInView = false;
           pMP->mnLastFrameSeen = mCurrentFrame.mnId;
           nmatchesSum--;
-        } else if (mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i]->Observations() > 0)
+        } else if (mCurrentFrame.Channels[Ftype].mvpMapPoints[i]->Observations() > 0)
           nmatchesMap++;
       }
     }
@@ -1871,15 +1871,15 @@ void Tracking::UpdateLocalKeyFramesMultiChannels() {
   // Each map point vote for the keyframes in which it has been observed
   map<KeyFrame *, int> keyframeCounter;
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-    for (int i = 0; i < mCurrentFrame.mFeatData[Ftype].N; i++) {
-      if (mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i]) {
-        MapPoint *pMP = mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i];
+    for (int i = 0; i < mCurrentFrame.Channels[Ftype].N; i++) {
+      if (mCurrentFrame.Channels[Ftype].mvpMapPoints[i]) {
+        MapPoint *pMP = mCurrentFrame.Channels[Ftype].mvpMapPoints[i];
         if (!pMP->isBad()) {
           const map<KeyFrame *, size_t> observations = pMP->GetObservations();
           for (map<KeyFrame *, size_t>::const_iterator it = observations.begin(), itend = observations.end(); it != itend; it++)
             keyframeCounter[it->first]++;
         } else {
-          mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i] = NULL;
+          mCurrentFrame.Channels[Ftype].mvpMapPoints[i] = NULL;
         }
       }
     }
@@ -1987,7 +1987,7 @@ void Tracking::UpdateLocalPointsMultiChannels() {
 void Tracking::SearchLocalPointsMultiChannels() {
   // Do not search map points already matched
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-    for (vector<MapPoint *>::iterator vit = mCurrentFrame.mFeatData[Ftype].mvpMapPoints.begin(), vend = mCurrentFrame.mFeatData[Ftype].mvpMapPoints.end(); vit != vend; vit++) {
+    for (vector<MapPoint *>::iterator vit = mCurrentFrame.Channels[Ftype].mvpMapPoints.begin(), vend = mCurrentFrame.Channels[Ftype].mvpMapPoints.end(); vit != vend; vit++) {
       MapPoint *pMP = *vit;
       if (pMP->isBad()) {
         *vit = static_cast<MapPoint *>(NULL);
@@ -2051,17 +2051,17 @@ bool Tracking::TrackLocalMapMultiChannels() {
   mnMatchesInliers = 0;
 
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-    for (int i = 0; i < mCurrentFrame.mFeatData[Ftype].N; i++) {
-      if (mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i]) {
-        if (!mCurrentFrame.mFeatData[Ftype].mvbOutlier[i]) {
-          mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i]->IncreaseFound();
+    for (int i = 0; i < mCurrentFrame.Channels[Ftype].N; i++) {
+      if (mCurrentFrame.Channels[Ftype].mvpMapPoints[i]) {
+        if (!mCurrentFrame.Channels[Ftype].mvbOutlier[i]) {
+          mCurrentFrame.Channels[Ftype].mvpMapPoints[i]->IncreaseFound();
           if (!mbOnlyTracking) {
-            if (mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i]->Observations() > 0)
+            if (mCurrentFrame.Channels[Ftype].mvpMapPoints[i]->Observations() > 0)
               mnMatchesInliers++;
           } else
             mnMatchesInliers++;
         } else if (mSensor == System::STEREO)
-          mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i] = static_cast<MapPoint *>(NULL);
+          mCurrentFrame.Channels[Ftype].mvpMapPoints[i] = static_cast<MapPoint *>(NULL);
       }
     }
   }
@@ -2110,9 +2110,9 @@ bool Tracking::NeedNewKeyFrameMultiChannels() {
   int nTrackedClose = 0;
   if (mSensor != System::MONOCULAR) {
     for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-      for (int i = 0; i < mCurrentFrame.mFeatData[Ftype].N; i++) {
-        if (mCurrentFrame.mFeatData[Ftype].mvDepth[i] > 0 && mCurrentFrame.mFeatData[Ftype].mvDepth[i] < mThDepth) {
-          if (mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i] && !mCurrentFrame.mFeatData[Ftype].mvbOutlier[i])
+      for (int i = 0; i < mCurrentFrame.Channels[Ftype].N; i++) {
+        if (mCurrentFrame.Channels[Ftype].mvDepth[i] > 0 && mCurrentFrame.Channels[Ftype].mvDepth[i] < mThDepth) {
+          if (mCurrentFrame.Channels[Ftype].mvpMapPoints[i] && !mCurrentFrame.Channels[Ftype].mvbOutlier[i])
             nTrackedClose++;
           else
             nNonTrackedClose++;
@@ -2184,11 +2184,11 @@ void Tracking::CreateNewKeyFrameMultiChannels() {
     vector<vector<pair<float, int>>> vDepthIdx;
     vDepthIdx.resize(Ntype);
     for (int Ftype = 0; Ftype < Ntype; Ftype++) 
-      vDepthIdx[Ftype].reserve(mCurrentFrame.mFeatData[Ftype].N);
+      vDepthIdx[Ftype].reserve(mCurrentFrame.Channels[Ftype].N);
 
     for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-      for (int i = 0; i < mCurrentFrame.mFeatData[Ftype].N; i++) {
-        float z = mCurrentFrame.mFeatData[Ftype].mvDepth[i];
+      for (int i = 0; i < mCurrentFrame.Channels[Ftype].N; i++) {
+        float z = mCurrentFrame.Channels[Ftype].mvDepth[i];
         if (z > 0) {
           vDepthIdx[Ftype].push_back(make_pair(z, i));
         }
@@ -2205,16 +2205,16 @@ void Tracking::CreateNewKeyFrameMultiChannels() {
 
           bool bCreateNew = false;
 
-          MapPoint *pMP = mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i];
+          MapPoint *pMP = mCurrentFrame.Channels[Ftype].mvpMapPoints[i];
           if (!pMP)
             bCreateNew = true;
           else if (pMP->Observations() < 1) {
             bCreateNew = true;
-            mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i] = static_cast<MapPoint *>(NULL);
+            mCurrentFrame.Channels[Ftype].mvpMapPoints[i] = static_cast<MapPoint *>(NULL);
           }
 
           if (bCreateNew) {
-            cv::Mat x3D = mCurrentFrame.UnprojectStereo(i, mCurrentFrame.mFeatData[Ftype].mvDepth, mCurrentFrame.mFeatData[Ftype].mvKeysUn);
+            cv::Mat x3D = mCurrentFrame.UnprojectStereo(i, mCurrentFrame.Channels[Ftype].mvDepth, mCurrentFrame.Channels[Ftype].mvKeysUn);
             MapPoint *pNewMP = new MapPoint(x3D, pKF, mpMap, Ftype);
             pNewMP->AddObservation(pKF, i);
             pKF->AddMapPoint(pNewMP, i, Ftype);
@@ -2222,7 +2222,7 @@ void Tracking::CreateNewKeyFrameMultiChannels() {
             pNewMP->UpdateNormalAndDepth();
             mpMap->AddMapPoint(pNewMP);
 
-            mCurrentFrame.mFeatData[Ftype].mvpMapPoints[i] = pNewMP;
+            mCurrentFrame.Channels[Ftype].mvpMapPoints[i] = pNewMP;
             nPoints++;
           } else {
             nPoints++;
@@ -2245,12 +2245,12 @@ void Tracking::CreateNewKeyFrameMultiChannels() {
 
 void Tracking::DiscardUnobservedMappoints(Frame &F, const int Ftype) {
 
-  for(int i = 0; i < F.mFeatData[Ftype].N; i++) {
-    MapPoint* pMP = F.mFeatData[Ftype].mvpMapPoints[i];
+  for(int i = 0; i < F.Channels[Ftype].N; i++) {
+    MapPoint* pMP = F.Channels[Ftype].mvpMapPoints[i];
     if(pMP) {
       if(pMP->Observations()<1) {
-        F.mFeatData[Ftype].mvbOutlier[i] = false;
-        F.mFeatData[Ftype].mvpMapPoints[i] = static_cast<MapPoint*>(NULL); 
+        F.Channels[Ftype].mvbOutlier[i] = false;
+        F.Channels[Ftype].mvpMapPoints[i] = static_cast<MapPoint*>(NULL); 
       }
     }
   }
@@ -2258,9 +2258,9 @@ void Tracking::DiscardUnobservedMappoints(Frame &F, const int Ftype) {
 
 void Tracking::DiscardOutliersMappoints(Frame &F, const int Ftype) {
 
-  for (int i = 0; i < F.mFeatData[Ftype].N; i++) {
-    if (F.mFeatData[Ftype].mvpMapPoints[i] && F.mFeatData[Ftype].mvbOutlier[i]) {
-      F.mFeatData[Ftype].mvpMapPoints[i] = static_cast<MapPoint*>(NULL);
+  for (int i = 0; i < F.Channels[Ftype].N; i++) {
+    if (F.Channels[Ftype].mvpMapPoints[i] && F.Channels[Ftype].mvbOutlier[i]) {
+      F.Channels[Ftype].mvpMapPoints[i] = static_cast<MapPoint*>(NULL);
     }
   }
 }

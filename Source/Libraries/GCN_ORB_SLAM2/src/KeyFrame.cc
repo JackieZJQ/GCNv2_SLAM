@@ -39,7 +39,7 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB)
       mnRelocWords(0), mnBAGlobalForKF(0), fx(F.fx), fy(F.fy), cx(F.cx),
       cy(F.cy), invfx(F.invfx), invfy(F.invfy), mbf(F.mbf), mb(F.mb),
       mThDepth(F.mThDepth),
-      mFeatData(F.mFeatData), 
+      Channels(F.Channels), 
       N(F.N), 
       mvKeys(F.mvKeys), 
       mvKeysUn(F.mvKeysUn), 
@@ -91,10 +91,10 @@ void KeyFrame::ComputeBoW() {
 }
 
 void KeyFrame::ComputeBoW(const int Ftype) {
-  if (mFeatData[Ftype].mBowVec.empty() || mFeatData[Ftype].mFeatVec.empty()) {
+  if (Channels[Ftype].mBowVec.empty() || Channels[Ftype].mFeatVec.empty()) {
     std::vector<cv::Mat> vCurrentDesc =
-        Converter::toDescriptorVector(mFeatData[Ftype].mDescriptors);
-    mpvocabulary[Ftype]->transform(vCurrentDesc, mFeatData[Ftype].mBowVec, mFeatData[Ftype].mFeatVec, 4);
+        Converter::toDescriptorVector(Channels[Ftype].mDescriptors);
+    mpvocabulary[Ftype]->transform(vCurrentDesc, Channels[Ftype].mBowVec, Channels[Ftype].mFeatVec, 4);
   }
 }
 
@@ -235,7 +235,7 @@ void KeyFrame::AddMapPoint(MapPoint *pMP, const std::size_t &idx) {
 
 void KeyFrame::AddMapPoint(MapPoint *pMP, const std::size_t &idx, const int Ftype) {
   unique_lock<mutex> lock(mMutexFeatures);
-  mFeatData[Ftype].mvpMapPoints[idx] = pMP;
+  Channels[Ftype].mvpMapPoints[idx] = pMP;
 }
 
 void KeyFrame::EraseMapPointMatch(const std::size_t &idx) {
@@ -245,7 +245,7 @@ void KeyFrame::EraseMapPointMatch(const std::size_t &idx) {
 
 void KeyFrame::EraseMapPointMatch(const std::size_t &idx, const int Ftype) {
   unique_lock<mutex> lock(mMutexFeatures);
-  mFeatData[Ftype].mvpMapPoints[idx] = static_cast<MapPoint *>(NULL);
+  Channels[Ftype].mvpMapPoints[idx] = static_cast<MapPoint *>(NULL);
 }
 
 void KeyFrame::EraseMapPointMatch(MapPoint *pMP) {
@@ -257,7 +257,7 @@ void KeyFrame::EraseMapPointMatch(MapPoint *pMP) {
 void KeyFrame::EraseMapPointMatch(MapPoint *pMP, const int Ftype) {
   int idx = pMP->GetIndexInKeyFrame(this);
   if (idx >= 0)
-    mFeatData[Ftype].mvpMapPoints[idx] = static_cast<MapPoint *>(NULL);
+    Channels[Ftype].mvpMapPoints[idx] = static_cast<MapPoint *>(NULL);
 }
 
 void KeyFrame::ReplaceMapPointMatch(const std::size_t &idx, MapPoint *pMP) {
@@ -265,7 +265,7 @@ void KeyFrame::ReplaceMapPointMatch(const std::size_t &idx, MapPoint *pMP) {
 }
 
 void KeyFrame::ReplaceMapPointMatch(const std::size_t &idx, MapPoint *pMP, const int Ftype) {
-  mFeatData[Ftype].mvpMapPoints[idx] = pMP;
+  Channels[Ftype].mvpMapPoints[idx] = pMP;
 }
 
 set<MapPoint *> KeyFrame::GetMapPoints() {
@@ -284,10 +284,10 @@ set<MapPoint *> KeyFrame::GetMapPoints() {
 set<MapPoint *> KeyFrame::GetMapPoints(const int Ftype) {
   unique_lock<mutex> lock(mMutexFeatures);
   set<MapPoint *> s;
-  for (std::size_t i = 0, iend = mFeatData[Ftype].mvpMapPoints.size(); i < iend; i++) {
-    if (!mFeatData[Ftype].mvpMapPoints[i])
+  for (std::size_t i = 0, iend = Channels[Ftype].mvpMapPoints.size(); i < iend; i++) {
+    if (!Channels[Ftype].mvpMapPoints[i])
       continue;
-    MapPoint *pMP = mFeatData[Ftype].mvpMapPoints[i];
+    MapPoint *pMP = Channels[Ftype].mvpMapPoints[i];
     if (!pMP->isBad())
       s.insert(pMP);
   }
@@ -320,12 +320,12 @@ int KeyFrame::TrackedMapPoints(const int &minObs, const int Ftype) {
 
   int nPoints = 0;
   const bool bCheckObs = minObs > 0;
-  for (int i = 0; i < mFeatData[Ftype].N; i++) {
-    MapPoint *pMP = mFeatData[Ftype].mvpMapPoints[i];
+  for (int i = 0; i < Channels[Ftype].N; i++) {
+    MapPoint *pMP = Channels[Ftype].mvpMapPoints[i];
     if (pMP) {
       if (!pMP->isBad()) {
         if (bCheckObs) {
-          if (mFeatData[Ftype].mvpMapPoints[i]->Observations() >= minObs)
+          if (Channels[Ftype].mvpMapPoints[i]->Observations() >= minObs)
             nPoints++;
         } else
           nPoints++;
@@ -343,7 +343,7 @@ std::vector<MapPoint *> KeyFrame::GetMapPointMatches() {
 
 std::vector<MapPoint *> KeyFrame::GetMapPointMatches(const int Ftype) {
   unique_lock<mutex> lock(mMutexFeatures);
-  return mFeatData[Ftype].mvpMapPoints;
+  return Channels[Ftype].mvpMapPoints;
 }
 
 MapPoint *KeyFrame::GetMapPoint(const std::size_t &idx) {
@@ -353,7 +353,7 @@ MapPoint *KeyFrame::GetMapPoint(const std::size_t &idx) {
 
 MapPoint *KeyFrame::GetMapPoint(const std::size_t &idx, const int Ftype) {
   unique_lock<mutex> lock(mMutexFeatures);
-  return mFeatData[Ftype].mvpMapPoints[idx];
+  return Channels[Ftype].mvpMapPoints[idx];
 }
 
 //TO-DO, need rewrite, use orb or gcn or both
@@ -525,9 +525,9 @@ void KeyFrame::SetBadFlag() {
   // erase observation of every kind of map points (one keyframe, two kinds of mappoints)
 
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-    for (std::size_t i = 0; i < mFeatData[Ftype].mvpMapPoints.size(); i++)
-      if (mFeatData[Ftype].mvpMapPoints[i])
-        mFeatData[Ftype].mvpMapPoints[i]->EraseObservation(this);
+    for (std::size_t i = 0; i < Channels[Ftype].mvpMapPoints.size(); i++)
+      if (Channels[Ftype].mvpMapPoints[i])
+        Channels[Ftype].mvpMapPoints[i]->EraseObservation(this);
   }
   
   for (std::size_t i = 0; i < mvpMapPoints.size(); i++)
@@ -674,7 +674,7 @@ std::vector<std::size_t> KeyFrame::GetFeaturesInArea(const float &x,
                                                      const float &y,
                                                      const float &r, const int Ftype) const {
   std::vector<std::size_t> vIndices;
-  vIndices.reserve(mFeatData[Ftype].N);
+  vIndices.reserve(Channels[Ftype].N);
 
   const int nMinCellX =
       max(0, (int)floor((x - mnMinX - r) * mfGridElementWidthInv));
@@ -699,9 +699,9 @@ std::vector<std::size_t> KeyFrame::GetFeaturesInArea(const float &x,
 
   for (int ix = nMinCellX; ix <= nMaxCellX; ix++) {
     for (int iy = nMinCellY; iy <= nMaxCellY; iy++) {
-      const std::vector<std::size_t> vCell = mFeatData[Ftype].mGrid[ix][iy];
+      const std::vector<std::size_t> vCell = Channels[Ftype].mGrid[ix][iy];
       for (std::size_t j = 0, jend = vCell.size(); j < jend; j++) {
-        const cv::KeyPoint &kpUn = mFeatData[Ftype].mvKeysUn[vCell[j]];
+        const cv::KeyPoint &kpUn = Channels[Ftype].mvKeysUn[vCell[j]];
         const float distx = kpUn.pt.x - x;
         const float disty = kpUn.pt.y - y;
 
@@ -734,10 +734,10 @@ cv::Mat KeyFrame::UnprojectStereo(int i) {
 }
 
 cv::Mat KeyFrame::UnprojectStereo(int i, const int Ftype) {
-  const float z = mFeatData[Ftype].mvDepth[i];
+  const float z = Channels[Ftype].mvDepth[i];
   if (z > 0) {
-    const float u = mFeatData[Ftype].mvKeys[i].pt.x;
-    const float v = mFeatData[Ftype].mvKeys[i].pt.y;
+    const float u = Channels[Ftype].mvKeys[i].pt.x;
+    const float v = Channels[Ftype].mvKeys[i].pt.y;
     const float x = (u - cx) * z * invfx;
     const float y = (v - cy) * z * invfy;
     cv::Mat x3Dc = (cv::Mat_<float>(3, 1) << x, y, z);
@@ -783,18 +783,18 @@ float KeyFrame::ComputeSceneMedianDepth(const int q, const int Ftype) {
   {
     unique_lock<mutex> lock(mMutexFeatures);
     unique_lock<mutex> lock2(mMutexPose);
-    vpMapPoints = mFeatData[Ftype].mvpMapPoints;
+    vpMapPoints = Channels[Ftype].mvpMapPoints;
     Tcw_ = Tcw.clone();
   }
 
   std::vector<float> vDepths;
-  vDepths.reserve(mFeatData[Ftype].N);
+  vDepths.reserve(Channels[Ftype].N);
   cv::Mat Rcw2 = Tcw_.row(2).colRange(0, 3);
   Rcw2 = Rcw2.t();
   float zcw = Tcw_.at<float>(2, 3);
-  for (int i = 0; i < mFeatData[Ftype].N; i++) {
-    if (mFeatData[Ftype].mvpMapPoints[i]) {
-      MapPoint *pMP = mFeatData[Ftype].mvpMapPoints[i];
+  for (int i = 0; i < Channels[Ftype].N; i++) {
+    if (Channels[Ftype].mvpMapPoints[i]) {
+      MapPoint *pMP = Channels[Ftype].mvpMapPoints[i];
       cv::Mat x3Dw = pMP->GetWorldPos();
       float z = Rcw2.dot(x3Dw) + zcw;
       vDepths.push_back(z);
@@ -810,15 +810,15 @@ float KeyFrame::ComputeSceneMedianDepth(const int q, const int Ftype) {
 
 // void KeyFrame::ComputeBoW() {
 //   for (int i = 0; i < Ntype; i++) {
-//     if (mFeatData[i].mBowVec.empty() || mFeatData[i].mFeatVec.empty()) {
-//       std::vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mFeatData[i].mDescriptors);
-//       mpvocabulary[i]->transform(vCurrentDesc, mFeatData[i].mBowVec, mFeatData[i].mFeatVec, 4);
+//     if (Channels[i].mBowVec.empty() || Channels[i].mFeatVec.empty()) {
+//       std::vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(Channels[i].mDescriptors);
+//       mpvocabulary[i]->transform(vCurrentDesc, Channels[i].mBowVec, Channels[i].mFeatVec, 4);
 //     }
 //   }
 
 //   // use featdata to store data, in this stage, copy data to the default variable
-//   mBowVec = mFeatData[0].mBowVec;
-//   mFeatVec = mFeatData[0].mFeatVec;
+//   mBowVec = Channels[0].mBowVec;
+//   mFeatVec = Channels[0].mFeatVec;
 // }
 
 
