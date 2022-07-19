@@ -69,6 +69,7 @@ public:
   inline int GetFound() { return mnFound; }
 
   void ComputeDistinctiveDescriptors();
+  void ComputeDistinctiveDescriptors(const int Ftype); //TO-DO Maybe deleted laterly
 
   cv::Mat GetDescriptor();
 
@@ -89,7 +90,7 @@ public:
   int nObs;
 
   // Define Flag, ORB:0, GCN:1
-  const int mFType;
+  const int mFtype;
 
   // Number of feature types
   const static int Ntype = 2;

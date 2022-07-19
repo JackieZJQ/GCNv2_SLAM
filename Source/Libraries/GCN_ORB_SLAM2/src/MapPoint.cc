@@ -37,7 +37,7 @@ MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap)
       mnCorrectedReference(0), mnBAGlobalForKF(0), mpRefKF(pRefKF),
       mnVisible(1), mnFound(1), mbBad(false),
       mpReplaced(static_cast<MapPoint *>(NULL)), mfMinDistance(0),
-      mfMaxDistance(0), mpMap(pMap), mFType(-1) {
+      mfMaxDistance(0), mpMap(pMap), mFtype(-1) {
   Pos.copyTo(mWorldPos);
   mNormalVector = cv::Mat::zeros(3, 1, CV_32F);
 
@@ -54,7 +54,7 @@ MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap, const int Ft
       mnCorrectedReference(0), mnBAGlobalForKF(0), mpRefKF(pRefKF),
       mnVisible(1), mnFound(1), mbBad(false),
       mpReplaced(static_cast<MapPoint *>(NULL)), mfMinDistance(0),
-      mfMaxDistance(0), mpMap(pMap), mFType(Ftype) {
+      mfMaxDistance(0), mpMap(pMap), mFtype(Ftype) {
   Pos.copyTo(mWorldPos);
   mNormalVector = cv::Mat::zeros(3, 1, CV_32F);
 
@@ -71,7 +71,7 @@ MapPoint::MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame,
       mnFuseCandidateForKF(0), mnLoopPointForKF(0), mnCorrectedByKF(0),
       mnCorrectedReference(0), mnBAGlobalForKF(0),
       mpRefKF(static_cast<KeyFrame *>(NULL)), mnVisible(1), mnFound(1),
-      mbBad(false), mpReplaced(NULL), mpMap(pMap), mFType(-1) {
+      mbBad(false), mpReplaced(NULL), mpMap(pMap), mFtype(-1) {
   Pos.copyTo(mWorldPos);
   cv::Mat Ow = pFrame->GetCameraCenter();
   mNormalVector = mWorldPos - Ow;
@@ -101,7 +101,7 @@ MapPoint::MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame,
       mnFuseCandidateForKF(0), mnLoopPointForKF(0), mnCorrectedByKF(0),
       mnCorrectedReference(0), mnBAGlobalForKF(0),
       mpRefKF(static_cast<KeyFrame *>(NULL)), mnVisible(1), mnFound(1),
-      mbBad(false), mpReplaced(NULL), mpMap(pMap), mFType(Ftype) {
+      mbBad(false), mpReplaced(NULL), mpMap(pMap), mFtype(Ftype) {
   Pos.copyTo(mWorldPos);
   cv::Mat Ow = pFrame->GetCameraCenter();
   mNormalVector = mWorldPos - Ow;
@@ -109,14 +109,14 @@ MapPoint::MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame,
 
   cv::Mat PC = Pos - Ow;
   const float dist = cv::norm(PC);
-  const int level = pFrame->mFeatData[mFType].mvKeysUn[idxF].octave;
+  const int level = pFrame->mFeatData[mFtype].mvKeysUn[idxF].octave;
   const float levelScaleFactor = pFrame->mvScaleFactors[level];
   const int nLevels = pFrame->mnScaleLevels;
 
   mfMaxDistance = dist * levelScaleFactor;
   mfMinDistance = mfMaxDistance / pFrame->mvScaleFactors[nLevels - 1];
 
-  pFrame->mFeatData[mFType].mDescriptors.row(idxF).copyTo(mDescriptor);
+  pFrame->mFeatData[mFtype].mDescriptors.row(idxF).copyTo(mDescriptor);
 
   // MapPoints can be created from Tracking and Local Mapping. This mutex avoid
   // conflicts with id.
@@ -341,6 +341,69 @@ void MapPoint::ComputeDistinctiveDescriptors() {
   }
 }
 
+// Maybe the (const int Ftype) will be deleted, because we already have mFtype
+void MapPoint::ComputeDistinctiveDescriptors(const int Ftype) {
+  // Retrieve all observed descriptors
+  std::vector<cv::Mat> vDescriptors;
+
+  map<KeyFrame *, std::size_t> observations;
+
+  {
+    unique_lock<mutex> lock1(mMutexFeatures);
+    if (mbBad)
+      return;
+    observations = mObservations;
+  }
+
+  if (observations.empty())
+    return;
+
+  vDescriptors.reserve(observations.size());
+
+  for (map<KeyFrame *, std::size_t>::iterator mit = observations.begin(), mend = observations.end(); mit != mend; mit++) {
+    KeyFrame *pKF = mit->first;
+
+    if (!pKF->isBad())
+      vDescriptors.push_back(pKF->mFeatData[Ftype].mDescriptors.row(mit->second));
+  }
+
+  if (vDescriptors.empty())
+    return;
+
+  // Compute distances between them
+  const std::size_t N = vDescriptors.size();
+
+  float Distances[N][N];
+  for (std::size_t i = 0; i < N; i++) {
+    Distances[i][i] = 0;
+    for (std::size_t j = i + 1; j < N; j++) {
+      int distij =
+          ORBmatcher::DescriptorDistance(vDescriptors[i], vDescriptors[j]);
+      Distances[i][j] = distij;
+      Distances[j][i] = distij;
+    }
+  }
+
+  // Take the descriptor with least median distance to the rest
+  int BestMedian = INT_MAX;
+  int BestIdx = 0;
+  for (std::size_t i = 0; i < N; i++) {
+    std::vector<int> vDists(Distances[i], Distances[i] + N);
+    sort(vDists.begin(), vDists.end());
+    int median = vDists[0.5 * (N - 1)];
+
+    if (median < BestMedian) {
+      BestMedian = median;
+      BestIdx = i;
+    }
+  }
+
+  {
+    unique_lock<mutex> lock(mMutexFeatures);
+    mDescriptor = vDescriptors[BestIdx].clone();
+  }
+}
+
 cv::Mat MapPoint::GetDescriptor() {
   unique_lock<mutex> lock(mMutexFeatures);
   return mDescriptor.clone();
@@ -352,6 +415,10 @@ int MapPoint::GetIndexInKeyFrame(KeyFrame *pKF) {
     return mObservations[pKF];
   else
     return -1;
+}
+
+int MapPoint::GetFeatureType() {
+  return mFtype;
 }
 
 bool MapPoint::IsInKeyFrame(KeyFrame *pKF) {
@@ -442,10 +509,6 @@ int MapPoint::PredictScale(const float &currentDist, Frame *pF) {
     nScale = pF->mnScaleLevels - 1;
 
   return nScale;
-}
-
-int MapPoint::GetFeatureType() {
-  return mFType;
 }
 
 } // namespace ORB_SLAM2
