@@ -37,9 +37,7 @@ class Map;
 
 class LocalMapping {
 public:
-  
-  // Numbers of feature types
-  const static int Ntype = 2;
+  const static int Ntype = 2; // Number of channels
 
 public:
   LocalMapping(Map *pMap, const float bMonocular);

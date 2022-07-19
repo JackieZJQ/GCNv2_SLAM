@@ -2218,7 +2218,7 @@ void Tracking::CreateNewKeyFrameMultiChannels() {
             MapPoint *pNewMP = new MapPoint(x3D, pKF, mpMap, Ftype);
             pNewMP->AddObservation(pKF, i);
             pKF->AddMapPoint(pNewMP, i, Ftype);
-            pNewMP->ComputeDistinctiveDescriptors(); //TO-DO compute desc should be in the corresponding channels
+            pNewMP->ComputeDistinctiveDescriptors(Ftype);
             pNewMP->UpdateNormalAndDepth();
             mpMap->AddMapPoint(pNewMP);
 

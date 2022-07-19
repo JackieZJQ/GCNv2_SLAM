@@ -45,9 +45,7 @@ class KeyFrame;
 
 class Frame {
 public:
-
-  // Numbers of feature types
-  const static int Ntype = 2;
+  const static int Ntype = 2; // Number of channels
 
 public:
   Frame();
@@ -119,17 +117,14 @@ public:
   // depthmap.
   void ComputeStereoFromRGBD(const cv::Mat &imDepth);
 
-  void ComputeStereoFromRGBD(const cv::Mat &imDepth, std::vector<float> &uRight, 
-                              std::vector<float> &Depth, const int &refN, 
-                              const std::vector<cv::KeyPoint> &Keys, 
-                              const std::vector<cv::KeyPoint> &KeysUn);
+  void ComputeStereoFromRGBD(const cv::Mat &imDepth, std::vector<float> &uRight, std::vector<float> &Depth, const int &refN, 
+                             const std::vector<cv::KeyPoint> &Keys, const std::vector<cv::KeyPoint> &KeysUn);
 
   // Backprojects a keypoint (if stereo/depth info available) into 3D world
   // coordinates.
   cv::Mat UnprojectStereo(const int &i);
 
-  cv::Mat UnprojectStereo(const int &i, const std::vector<float> &Depth, 
-                                const std::vector<cv::KeyPoint> &KeysUn);
+  cv::Mat UnprojectStereo(const int &i, const std::vector<float> &Depth, const std::vector<cv::KeyPoint> &KeysUn);
 
 public:
   // Vocabulary vector used for relocalization
@@ -238,8 +233,7 @@ private:
   // (called in the constructor).
   void UndistortKeyPoints();
 
-  void UndistortKeyPoints(const std::vector<cv::KeyPoint> &Keys, 
-                            std::vector<cv::KeyPoint> &KeysUn, const int &refN);
+  void UndistortKeyPoints(const std::vector<cv::KeyPoint> &Keys, std::vector<cv::KeyPoint> &KeysUn, const int &refN);
 
   // Computes image bounds for the undistorted image (called in the
   // constructor).
@@ -249,8 +243,7 @@ private:
   // constructor).
   void AssignFeaturesToGrid();
 
-  void AssignFeaturesToGrid(const int &refN, const std::vector<cv::KeyPoint> &KeysUn, 
-                              std::vector<std::vector<std::vector<std::size_t>>> &Grid);
+  void AssignFeaturesToGrid(const int &refN, const std::vector<cv::KeyPoint> &KeysUn, std::vector<std::vector<std::vector<std::size_t>>> &Grid);
 
   void ChooseFeature(const int Ftype);
 

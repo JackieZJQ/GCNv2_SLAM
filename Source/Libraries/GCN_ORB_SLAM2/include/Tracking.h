@@ -50,20 +50,18 @@ class System;
 
 class Tracking {
 public:
-
-  const static int Ntype = 2;
+  const static int Ntype = 2; // Number of channels
 
 public:
   Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], FrameDrawer *pFrameDrawer,
            MapDrawer *pMapDrawer, Map *pMap, KeyFrameDatabase *pKFDB, KeyFrameDatabase *pKFDBtest[Ntype],
            const std::string &strSettingPath, const int sensor);
 
-  // Preprocess the input and call Track(). Extract features and performs stereo
-  // matching.
-  cv::Mat GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRectRight,
-                          const double &timestamp);
-  cv::Mat GrabImageRGBD(const cv::Mat &imRGB, const cv::Mat &imD,
-                        const double &timestamp);
+  // Preprocess the input and call Track(). Extract features and performs stereo matching.
+  cv::Mat GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRectRight, const double &timestamp);
+
+  cv::Mat GrabImageRGBD(const cv::Mat &imRGB, const cv::Mat &imD, const double &timestamp);
+
   cv::Mat GrabImageMonocular(const cv::Mat &im, const double &timestamp);
 
   void SetLocalMapper(LocalMapping *pLocalMapper);
@@ -71,13 +69,11 @@ public:
   void SetViewer(Viewer *pViewer);
 
   // Load new settings
-  // The focal lenght should be similar or scale prediction will fail when
-  // projecting points
+  // The focal lenght should be similar or scale prediction will fail when projecting points
   // TODO: Modify MapPoint::PredictScale to take into account focal lenght
   void ChangeCalibration(const std::string &strSettingPath);
 
-  // Use this function if you have deactivated local mapping and you only want
-  // to localize the camera.
+  // Use this function if you have deactivated local mapping and you only want to localize the camera.
   void InformOnlyTracking(const bool &flag);
 
 public:
@@ -107,16 +103,14 @@ public:
   std::vector<cv::Point3f> mvIniP3D;
   Frame mInitialFrame;
 
-  // Lists used to recover the full camera trajectory at the end of the
-  // execution. Basically we store the reference keyframe for each frame and its
+  // Lists used to recover the full camera trajectory at the end of the execution. Basically we store the reference keyframe for each frame and its
   // relative transformation
   std::list<cv::Mat> mlRelativeFramePoses;
   std::list<KeyFrame *> mlpReferences;
   std::list<double> mlFrameTimes;
   std::list<bool> mlbLost;
 
-  // True if local mapping is deactivated and we are performing only
-  // localization
+  // True if local mapping is deactivated and we are performing only localization
   bool mbOnlyTracking;
 
   void Reset();
@@ -238,8 +232,7 @@ protected:
   // keyframes.
   float mThDepth;
 
-  // For RGB-D inputs only. For some datasets (e.g. TUM) the depthmap values are
-  // scaled.
+  // For RGB-D inputs only. For some datasets (e.g. TUM) the depthmap values are scaled.
   float mDepthMapFactor;
 
   // Current matches in frame
