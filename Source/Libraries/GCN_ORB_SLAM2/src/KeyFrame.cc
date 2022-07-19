@@ -501,7 +501,7 @@ void KeyFrame::UpdateConnectionsMultiChannels() {
       nmax = mit->second;
       pKFmax = mit->first;
     }
-    
+
     if (mit->second >= th) {
       vPairs.push_back(make_pair(mit->second, mit->first));
       (mit->first)->AddConnection(this, mit->second);
@@ -612,13 +612,13 @@ void KeyFrame::SetBadFlag() {
     mit->first->EraseConnection(this);
 
   // erase observation of every kind of map points (one keyframe, two kinds of mappoints)
-
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
     for (std::size_t i = 0; i < Channels[Ftype].mvpMapPoints.size(); i++)
       if (Channels[Ftype].mvpMapPoints[i])
         Channels[Ftype].mvpMapPoints[i]->EraseObservation(this);
   }
   
+  // May delete ? 
   for (std::size_t i = 0; i < mvpMapPoints.size(); i++)
     if (mvpMapPoints[i])
       mvpMapPoints[i]->EraseObservation(this);

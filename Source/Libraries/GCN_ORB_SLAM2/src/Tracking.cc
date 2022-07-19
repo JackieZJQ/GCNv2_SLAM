@@ -645,6 +645,7 @@ void Tracking::MonocularInitialization() {
   }
 }
 
+// ComputeSceneMedianDepth should have ftype
 void Tracking::CreateInitialMapMonocular() {
   // Create KeyFrames
   KeyFrame *pKFini = new KeyFrame(mInitialFrame, mpMap, mpKeyFrameDB);
