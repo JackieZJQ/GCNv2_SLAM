@@ -152,7 +152,7 @@ void MapPoint::AddObservation(KeyFrame *pKF, std::size_t idx) {
     return;
   mObservations[pKF] = idx;
 
-  if (pKF->mvuRight[idx] >= 0)
+  if (pKF->mFeatData[mFtype].mvuRight[idx] >= 0)
     nObs += 2;
   else
     nObs++;
@@ -164,7 +164,7 @@ void MapPoint::EraseObservation(KeyFrame *pKF) {
     unique_lock<mutex> lock(mMutexFeatures);
     if (mObservations.count(pKF)) {
       int idx = mObservations[pKF];
-      if (pKF->mvuRight[idx] >= 0)
+      if (pKF->mFeatData[mFtype].mvuRight[idx] >= 0)
         nObs -= 2;
       else
         nObs--;
@@ -196,6 +196,7 @@ int MapPoint::Observations() {
 
 void MapPoint::SetBadFlag() {
   map<KeyFrame *, std::size_t> obs;
+  int Ftype = mFtype;
   {
     unique_lock<mutex> lock1(mMutexFeatures);
     unique_lock<mutex> lock2(mMutexPos);
@@ -207,7 +208,7 @@ void MapPoint::SetBadFlag() {
                                               mend = obs.end();
        mit != mend; mit++) {
     KeyFrame *pKF = mit->first;
-    pKF->EraseMapPointMatch(mit->second);
+    pKF->EraseMapPointMatch(mit->second, Ftype);
   }
 
   mpMap->EraseMapPoint(this);
@@ -219,11 +220,12 @@ MapPoint *MapPoint::GetReplaced() {
   return mpReplaced;
 }
 
+// TO-DO need ftype ?
 void MapPoint::Replace(MapPoint *pMP) {
   if (pMP->mnId == this->mnId)
     return;
 
-  int nvisible, nfound;
+  int nvisible, nfound, Ftype;
   map<KeyFrame *, std::size_t> obs;
   {
     unique_lock<mutex> lock1(mMutexFeatures);
@@ -233,25 +235,24 @@ void MapPoint::Replace(MapPoint *pMP) {
     mbBad = true;
     nvisible = mnVisible;
     nfound = mnFound;
+    Ftype = mFtype;
     mpReplaced = pMP;
   }
 
-  for (map<KeyFrame *, std::size_t>::iterator mit = obs.begin(),
-                                              mend = obs.end();
-       mit != mend; mit++) {
+  for (map<KeyFrame *, std::size_t>::iterator mit = obs.begin(), mend = obs.end(); mit != mend; mit++) {
     // Replace measurement in keyframe
     KeyFrame *pKF = mit->first;
 
     if (!pMP->IsInKeyFrame(pKF)) {
-      pKF->ReplaceMapPointMatch(mit->second, pMP);
+      pKF->ReplaceMapPointMatch(mit->second, pMP, Ftype);
       pMP->AddObservation(pKF, mit->second);
     } else {
-      pKF->EraseMapPointMatch(mit->second);
+      pKF->EraseMapPointMatch(mit->second, Ftype);
     }
   }
   pMP->IncreaseFound(nfound);
   pMP->IncreaseVisible(nvisible);
-  pMP->ComputeDistinctiveDescriptors();
+  pMP->ComputeDistinctiveDescriptors(Ftype);
 
   mpMap->EraseMapPoint(this);
 }
@@ -295,13 +296,11 @@ void MapPoint::ComputeDistinctiveDescriptors() {
 
   vDescriptors.reserve(observations.size());
 
-  for (map<KeyFrame *, std::size_t>::iterator mit = observations.begin(),
-                                              mend = observations.end();
-       mit != mend; mit++) {
+  for (map<KeyFrame *, std::size_t>::iterator mit = observations.begin(), mend = observations.end(); mit != mend; mit++) {
     KeyFrame *pKF = mit->first;
 
     if (!pKF->isBad())
-      vDescriptors.push_back(pKF->mDescriptors.row(mit->second));
+      vDescriptors.push_back(pKF->mFeatData[mFtype].mDescriptors.row(mit->second));
   }
 
   if (vDescriptors.empty())
@@ -445,9 +444,7 @@ void MapPoint::UpdateNormalAndDepth() {
 
   cv::Mat normal = cv::Mat::zeros(3, 1, CV_32F);
   int n = 0;
-  for (map<KeyFrame *, std::size_t>::iterator mit = observations.begin(),
-                                              mend = observations.end();
-       mit != mend; mit++) {
+  for (map<KeyFrame *, std::size_t>::iterator mit = observations.begin(), mend = observations.end(); mit != mend; mit++) {
     KeyFrame *pKF = mit->first;
     cv::Mat Owi = pKF->GetCameraCenter();
     cv::Mat normali = mWorldPos - Owi;
@@ -457,7 +454,7 @@ void MapPoint::UpdateNormalAndDepth() {
 
   cv::Mat PC = Pos - pRefKF->GetCameraCenter();
   const float dist = cv::norm(PC);
-  const int level = pRefKF->mvKeysUn[observations[pRefKF]].octave;
+  const int level = pRefKF->mFeatData[mFtype].mvKeysUn[observations[pRefKF]].octave;
   const float levelScaleFactor = pRefKF->mvScaleFactors[level];
   const int nLevels = pRefKF->mnScaleLevels;
 
