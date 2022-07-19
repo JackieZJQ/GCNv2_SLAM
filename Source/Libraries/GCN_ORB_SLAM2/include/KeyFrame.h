@@ -62,6 +62,7 @@ public:
   void AddConnection(KeyFrame *pKF, const int &weight);
   void EraseConnection(KeyFrame *pKF);
   void UpdateConnections();
+  void UpdateConnectionsMultiChannels();
   void UpdateBestCovisibles();
   std::set<KeyFrame *> GetConnectedKeyFrames();
   std::vector<KeyFrame *> GetVectorCovisibleKeyFrames();
