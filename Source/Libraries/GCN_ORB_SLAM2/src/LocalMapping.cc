@@ -710,4 +710,45 @@ bool LocalMapping::isFinished() {
   return mbFinished;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void LocalMapping::ProcessNewKeyFrameMultiChannels() {
+  {
+    unique_lock<mutex> lock(mMutexNewKFs);
+    mpCurrentKeyFrame = mlNewKeyFrames.front();
+    mlNewKeyFrames.pop_front();
+  }
+
+  // Compute Bags of Words structures
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    mpCurrentKeyFrame->ComputeBoW(Ftype);
+  
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+      
+    // Associate MapPoints to the new keyframe and update normal and descriptor
+    const std::vector<MapPoint *> vpMapPointMatches = mpCurrentKeyFrame->GetMapPointMatches(Ftype);
+
+    for (std::size_t i = 0; i < vpMapPointMatches.size(); i++) {
+      MapPoint *pMP = vpMapPointMatches[i];
+      if (pMP) {
+        if (!pMP->isBad()) {
+          if (!pMP->IsInKeyFrame(mpCurrentKeyFrame)) {
+            pMP->AddObservation(mpCurrentKeyFrame, i);
+            pMP->UpdateNormalAndDepth();
+            pMP->ComputeDistinctiveDescriptors(Ftype);
+          } else { // this can only happen for new stereo points inserted by the Tracking 
+            mlpRecentAddedMapPoints.push_back(pMP);
+          }
+        }
+      }
+    }
+  }
+
+  // Update links in the Covisibility Graph
+  mpCurrentKeyFrame->UpdateConnections();
+
+  // Insert Keyframe in Map
+  mpMap->AddKeyFrame(mpCurrentKeyFrame);
+}
+
 } // namespace ORB_SLAM2

@@ -37,6 +37,11 @@ class Map;
 
 class LocalMapping {
 public:
+  
+  // Numbers of feature types
+  const static int Ntype = 2;
+
+public:
   LocalMapping(Map *pMap, const float bMonocular);
 
   void SetLoopCloser(LoopClosing *pLoopCloser);
@@ -70,6 +75,14 @@ public:
   }
 
 protected:
+
+///////////////////////////////////////////////////////////////////
+void ProcessNewKeyFrameMultiChannels();
+
+
+///////////////////////////////////////////////////////////////////
+
+
   bool CheckNewKeyFrames();
   void ProcessNewKeyFrame();
   void CreateNewMapPoints();
