@@ -511,6 +511,47 @@ void MapPoint::UpdateNormalAndDepth() {
   }
 }
 
+void MapPoint::UpdateNormalAndDepth(const int Ftype) {
+  map<KeyFrame *, std::size_t> observations;
+  KeyFrame *pRefKF;
+  cv::Mat Pos;
+  {
+    unique_lock<mutex> lock1(mMutexFeatures);
+    unique_lock<mutex> lock2(mMutexPos);
+    if (mbBad)
+      return;
+    observations = mObservations;
+    pRefKF = mpRefKF;
+    Pos = mWorldPos.clone();
+  }
+
+  if (observations.empty())
+    return;
+
+  cv::Mat normal = cv::Mat::zeros(3, 1, CV_32F);
+  int n = 0;
+  for (map<KeyFrame *, std::size_t>::iterator mit = observations.begin(), mend = observations.end(); mit != mend; mit++) {
+    KeyFrame *pKF = mit->first;
+    cv::Mat Owi = pKF->GetCameraCenter();
+    cv::Mat normali = mWorldPos - Owi;
+    normal = normal + normali / cv::norm(normali);
+    n++;
+  }
+
+  cv::Mat PC = Pos - pRefKF->GetCameraCenter();
+  const float dist = cv::norm(PC);
+  const int level = pRefKF->Channels[Ftype].mvKeysUn[observations[pRefKF]].octave;
+  const float levelScaleFactor = pRefKF->mvScaleFactors[level];
+  const int nLevels = pRefKF->mnScaleLevels;
+
+  {
+    unique_lock<mutex> lock3(mMutexPos);
+    mfMaxDistance = dist * levelScaleFactor;
+    mfMinDistance = mfMaxDistance / pRefKF->mvScaleFactors[nLevels - 1];
+    mNormalVector = normal / n;
+  }
+}
+
 float MapPoint::GetMinDistanceInvariance() {
   unique_lock<mutex> lock(mMutexPos);
   return 0.8f * mfMinDistance;

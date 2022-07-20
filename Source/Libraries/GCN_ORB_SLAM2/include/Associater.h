@@ -34,6 +34,10 @@ public:
 
   int SearchByNN(Frame &F, const std::vector<MapPoint *> &vpMapPoints);
 
+  int SearchForTriangulation(KeyFrame *pKF1, KeyFrame *pKF2, cv::Mat F12, 
+                             std::vector<std::pair<size_t, size_t>> &vMatchedPairs, 
+                             const bool bOnlyStereo, const int Ftype);
+
 public:
   static const int TH_LOW;
   static const int TH_HIGH;
@@ -46,6 +50,8 @@ protected:
   void ComputeThreeMaxima(std::vector<int> *histo, const int L, int &ind1, int &ind2, int &ind3);
 
   float RadiusByViewingCos(const float &viewCos);
+
+  bool CheckDistEpipolarLine(const cv::KeyPoint &kp1, const cv::KeyPoint &kp2, const cv::Mat &F12, const KeyFrame *pKF);
 
 };
 

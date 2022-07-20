@@ -36,6 +36,9 @@ class Frame;
 
 class MapPoint {
 public:
+  const static int Ntype = 2; // Number of channels 
+
+public:
   MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap);
   MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap, const int Ftype);
 
@@ -69,11 +72,12 @@ public:
   inline int GetFound() { return mnFound; }
 
   void ComputeDistinctiveDescriptors();
-  void ComputeDistinctiveDescriptors(const int Ftype); //TO-DO Maybe deleted laterly
+  void ComputeDistinctiveDescriptors(const int Ftype); // TO-DO Maybe deleted laterly
 
   cv::Mat GetDescriptor();
 
   void UpdateNormalAndDepth();
+  void UpdateNormalAndDepth(const int Ftype); // TO-DO Msybe deleted laterly
 
   float GetMinDistanceInvariance();
   float GetMaxDistanceInvariance();
@@ -92,9 +96,6 @@ public:
 
   // Define Flag, ORB:0, GCN:1
   const int mFtype;
-
-  // Number of feature types
-  const static int Ntype = 2;
 
   // Variables used by the tracking
   float mTrackProjX;
