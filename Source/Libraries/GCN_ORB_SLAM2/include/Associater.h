@@ -38,6 +38,9 @@ public:
                              std::vector<std::pair<size_t, size_t>> &vMatchedPairs, 
                              const bool bOnlyStereo, const int Ftype);
 
+  // Project MapPoints into KeyFrame and search for duplicated MapPoints.
+  int Fuse(const int Ftype, KeyFrame *pKF, const std::vector<MapPoint *> &vpMapPoints, const float th = 3.0);
+
 public:
   static const int TH_LOW;
   static const int TH_HIGH;

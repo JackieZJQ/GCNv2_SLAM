@@ -658,6 +658,146 @@ int Associater::SearchForTriangulation(KeyFrame *pKF1, KeyFrame *pKF2, cv::Mat F
   return nmatches;         
 }
 
+int Associater::Fuse(const int Ftype, KeyFrame *pKF, const vector<MapPoint *> &vpMapPoints, const float th) {
+  cv::Mat Rcw = pKF->GetRotation();
+  cv::Mat tcw = pKF->GetTranslation();
+
+  const float &fx = pKF->fx;
+  const float &fy = pKF->fy;
+  const float &cx = pKF->cx;
+  const float &cy = pKF->cy;
+  const float &bf = pKF->mbf;
+
+  cv::Mat Ow = pKF->GetCameraCenter();
+
+  int nFused = 0;
+
+  const int nMPs = vpMapPoints.size();
+
+  for (int i = 0; i < nMPs; i++) {
+    MapPoint *pMP = vpMapPoints[i];
+
+    if (!pMP)
+      continue;
+
+    if (pMP->isBad() || pMP->IsInKeyFrame(pKF))
+      continue;
+
+    cv::Mat p3Dw = pMP->GetWorldPos();
+    cv::Mat p3Dc = Rcw * p3Dw + tcw;
+
+    // Depth must be positive
+    if (p3Dc.at<float>(2) < 0.0f)
+      continue;
+
+    const float invz = 1 / p3Dc.at<float>(2);
+    const float x = p3Dc.at<float>(0) * invz;
+    const float y = p3Dc.at<float>(1) * invz;
+
+    const float u = fx * x + cx;
+    const float v = fy * y + cy;
+
+    // Point must be inside the image
+    if (!pKF->IsInImage(u, v))
+      continue;
+
+    const float ur = u - bf * invz;
+
+    const float maxDistance = pMP->GetMaxDistanceInvariance();
+    const float minDistance = pMP->GetMinDistanceInvariance();
+    cv::Mat PO = p3Dw - Ow;
+    const float dist3D = cv::norm(PO);
+
+    // Depth must be inside the scale pyramid of the image
+    if (dist3D < minDistance || dist3D > maxDistance)
+      continue;
+
+    // Viewing angle must be less than 60 deg
+    cv::Mat Pn = pMP->GetNormal();
+
+    if (PO.dot(Pn) < 0.5 * dist3D)
+      continue;
+
+    int nPredictedLevel = pMP->PredictScale(dist3D, pKF);
+
+    // Search in a radius
+    const float radius = th * pKF->mvScaleFactors[nPredictedLevel];
+
+    const vector<size_t> vIndices = pKF->GetFeaturesInArea(Ftype, u, v, radius);
+
+    if (vIndices.empty())
+      continue;
+
+    // Match to the most similar keypoint in the radius
+
+    const cv::Mat dMP = pMP->GetDescriptor();
+
+    int bestDist = 256;
+    int bestIdx = -1;
+    for (vector<size_t>::const_iterator vit = vIndices.begin(), vend = vIndices.end(); vit != vend; vit++) {
+      const size_t idx = *vit;
+
+      const cv::KeyPoint &kp = pKF->Channels[Ftype].mvKeysUn[idx];
+
+      const int &kpLevel = kp.octave;
+
+      if (kpLevel < nPredictedLevel - 1 || kpLevel > nPredictedLevel)
+        continue;
+
+      if (pKF->Channels[Ftype].mvuRight[idx] >= 0) {
+        // Check reprojection error in stereo
+        const float &kpx = kp.pt.x;
+        const float &kpy = kp.pt.y;
+        const float &kpr = pKF->Channels[Ftype].mvuRight[idx];
+        const float ex = u - kpx;
+        const float ey = v - kpy;
+        const float er = ur - kpr;
+        const float e2 = ex * ex + ey * ey + er * er;
+
+        if (e2 * pKF->mvInvLevelSigma2[kpLevel] > 7.8)
+          continue;
+      } else {
+        const float &kpx = kp.pt.x;
+        const float &kpy = kp.pt.y;
+        const float ex = u - kpx;
+        const float ey = v - kpy;
+        const float e2 = ex * ex + ey * ey;
+
+        if (e2 * pKF->mvInvLevelSigma2[kpLevel] > 5.99)
+          continue;
+      }
+
+      const cv::Mat &dKF = pKF->Channels[Ftype].mDescriptors.row(idx);
+
+      const int dist = DescriptorDistance(dMP, dKF);
+
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestIdx = idx;
+      }
+    }
+
+    // If there is already a MapPoint replace otherwise add new measurement
+    if (bestDist <= TH_LOW) {
+      MapPoint *pMPinKF = pKF->GetMapPoint(bestIdx, Ftype);
+      if (pMPinKF) {
+        if (!pMPinKF->isBad()) {
+          if (pMPinKF->Observations() > pMP->Observations())
+            pMP->Replace(pMPinKF);
+          else
+            pMPinKF->Replace(pMP);
+        }
+      } else {
+        pMP->AddObservation(pKF, bestIdx);
+        pKF->AddMapPoint(pMP, bestIdx, Ftype);
+      }
+      nFused++;
+    }
+  }
+
+  return nFused;
+}
+
 // compute three maxima
 void Associater::ComputeThreeMaxima(vector<int> *histo, const int L, int &ind1, int &ind2, int &ind3) {
   int max1 = 0;
