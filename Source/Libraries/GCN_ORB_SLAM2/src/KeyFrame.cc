@@ -271,6 +271,7 @@ void KeyFrame::EraseMapPointMatch(MapPoint *pMP) {
 
 void KeyFrame::EraseMapPointMatch(MapPoint *pMP, const int Ftype) {
   int idx = pMP->GetIndexInKeyFrame(this);
+  int _Ftype = pMP->GetFeatureType();
   if (idx >= 0)
     Channels[Ftype].mvpMapPoints[idx] = static_cast<MapPoint *>(NULL);
 }
@@ -280,6 +281,7 @@ void KeyFrame::ReplaceMapPointMatch(const std::size_t &idx, MapPoint *pMP) {
 }
 
 void KeyFrame::ReplaceMapPointMatch(const std::size_t &idx, MapPoint *pMP, const int Ftype) {
+  int _Ftype = pMP->GetFeatureType();
   Channels[Ftype].mvpMapPoints[idx] = pMP;
 }
 

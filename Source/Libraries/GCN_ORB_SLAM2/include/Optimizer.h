@@ -35,6 +35,9 @@ class LoopClosing;
 
 class Optimizer {
 public:
+  const static int Ntype = 2; // Number of Channels
+  
+public:
   void static BundleAdjustment(const std::vector<KeyFrame *> &vpKF,
                                const std::vector<MapPoint *> &vpMP,
                                int nIterations = 5, bool *pbStopFlag = NULL,
@@ -47,6 +50,8 @@ public:
                                      const bool bRobust = true);
   
   void static LocalBundleAdjustment(KeyFrame *pKF, bool *pbStopFlag, Map *pMap);
+
+  void static LocalBundleAdjustmentMultiChannels(KeyFrame *pKF, bool *pbStopFlag, Map *pMap);
   
   int static PoseOptimization(Frame *pFrame);
 
