@@ -78,9 +78,12 @@ protected:
 
 void ProcessNewKeyFrameMultiChannels();
 
+void KeyFrameCullingMultiChannels();
+
 void CreateNewMapPoints(const int Ftype);
 
 void SearchInNeighbors(const int Ftype);
+
 
 
 ///////////////////////////////////////////////////////////////////

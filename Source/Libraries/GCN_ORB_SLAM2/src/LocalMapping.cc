@@ -1057,4 +1057,83 @@ void LocalMapping::SearchInNeighbors(const int Ftype) {
   mpCurrentKeyFrame->UpdateConnectionsMultiChannels();
 }
 
+void LocalMapping::KeyFrameCullingMultiChannels() {
+  // Check redundant keyframes (only local keyframes)
+  // A keyframe is considered redundant if the 90% of the MapPoints it sees, are
+  // seen in at least other 3 keyframes (in the same or finer scale) We only
+  // consider close stereo points
+  std::vector<KeyFrame *> vpLocalKeyFrames = mpCurrentKeyFrame->GetVectorCovisibleKeyFrames();
+
+  for (std::vector<KeyFrame *>::iterator vit = vpLocalKeyFrames.begin(), vend = vpLocalKeyFrames.end(); vit != vend; vit++) {
+    KeyFrame *pKF = *vit;
+    if (pKF->mnId == 0)
+      continue;
+
+    int nObs = 3;
+    const int thObs = nObs;            // threshold
+
+    int nRedundantObservations[Ntype]; // Number of redundant map points
+    int nMPs[Ntype];                   // NUmber of valid map points
+    
+    for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+      nRedundantObservations[Ftype] = 0;
+      nMPs[Ftype] = 0;
+    }
+    
+    for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+      const std::vector<MapPoint *> vpMapPoints = pKF->GetMapPointMatches(Ftype);
+
+      for (std::size_t i = 0, iend = vpMapPoints.size(); i < iend; i++) {
+        MapPoint *pMP = vpMapPoints[i];
+
+        if (pMP) {
+          if (!pMP->isBad()) {
+            if (!mbMonocular) {
+              if (pKF->Channels[Ftype].mvDepth[i] > pKF->mThDepth || pKF->Channels[Ftype].mvDepth[i] < 0)
+                continue;
+            }
+
+            nMPs[Ftype]++;
+
+            if (pMP->Observations() > thObs) {
+              const int &scaleLevel = pKF->Channels[Ftype].mvKeysUn[i].octave;
+              const map<KeyFrame *, std::size_t> observations = pMP->GetObservations();
+              int nObs = 0;
+              for (map<KeyFrame *, std::size_t>::const_iterator mit = observations.begin(), mend = observations.end(); mit != mend; mit++) {
+                KeyFrame *pKFi = mit->first;
+                if (pKFi == pKF)
+                  continue;
+                const int &scaleLeveli = pKFi->Channels[Ftype].mvKeysUn[mit->second].octave;
+
+                if (scaleLeveli <= scaleLevel + 1) {
+                  nObs++;
+                  if (nObs >= thObs)
+                    break;
+                }
+              }
+
+              if (nObs >= thObs) {
+                nRedundantObservations[Ftype]++;
+              }
+            }
+          }
+        }
+      }
+    }
+
+
+    // All channels should satisfy the requirements
+    bool KFBadFlag = true;
+    for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+      if (nRedundantObservations[Ftype] <= 0.9 * nMPs[Ftype]) {
+        KFBadFlag = false;
+        break;
+      } 
+    }
+
+    if (KFBadFlag)
+      pKF->SetBadFlag();
+  }
+}
+
 } // namespace ORB_SLAM2
