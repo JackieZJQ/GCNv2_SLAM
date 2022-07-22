@@ -161,12 +161,12 @@ public:
   long unsigned int mnBAFixedForKF;
 
   // Variables used by the keyframe database
-  long unsigned int mnLoopQuery;
-  int mnLoopWords;
-  float mLoopScore;
-  long unsigned int mnRelocQuery;
-  int mnRelocWords;
-  float mRelocScore;
+  long unsigned int mnLoopQuery[Ntype];
+  int mnLoopWords[Ntype];
+  float mLoopScore[Ntype];
+  long unsigned int mnRelocQuery[Ntype];
+  int mnRelocWords[Ntype];
+  float mRelocScore[Ntype];
 
   // Variables used by loop closing
   cv::Mat mTcwGBA;

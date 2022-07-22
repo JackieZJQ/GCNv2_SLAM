@@ -47,10 +47,9 @@ public:
   void clear();
 
   // Loop Detection
-  std::vector<KeyFrame *> DetectLoopCandidates(KeyFrame *pKF, float minScore);
+  std::vector<KeyFrame *> DetectLoopCandidates(KeyFrame *pKF, float minScore, const int Ftype);
 
   // Relocalization
-  std::vector<KeyFrame *> DetectRelocalizationCandidates(Frame *F);
   std::vector<KeyFrame *> DetectRelocalizationCandidates(Frame *F, const int Ftype);
 
 protected:

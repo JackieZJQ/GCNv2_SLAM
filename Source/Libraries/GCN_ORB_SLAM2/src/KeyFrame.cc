@@ -40,10 +40,6 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB)
       mnFuseTargetForKF(0),
       mnBALocalForKF(0),
       mnBAFixedForKF(0),
-      mnLoopQuery(0), 
-      mnLoopWords(0), 
-      mnRelocQuery(0),
-      mnRelocWords(0), 
       mnBAGlobalForKF(0), 
       fx(F.fx), 
       fy(F.fy), 
@@ -52,7 +48,7 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB)
       invfx(F.invfx), 
       invfy(F.invfy), 
       mbf(F.mbf),
-       mb(F.mb),
+      mb(F.mb),
       mThDepth(F.mThDepth),
       Channels(F.Channels), 
       N(F.N), 
@@ -86,6 +82,7 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB)
       mpMap(pMap) {
   mnId = nNextId++;
 
+  // Initlizer for mGrid
   mGrid.resize(mnGridCols);
   for (int i = 0; i < mnGridCols; i++) {
     mGrid[i].resize(mnGridRows);
@@ -93,6 +90,14 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB)
       mGrid[i][j] = F.mGrid[i][j];
     }
   }
+
+  // Initlizer for Reloc
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    mnRelocQuery[Ftype] = 0;
+    mnRelocWords[Ftype] = 0;
+    mnLoopQuery[Ftype] = 0; 
+    mnLoopWords[Ftype] = 0; 
+  } 
 
   SetPose(F.mTcw);
 }
