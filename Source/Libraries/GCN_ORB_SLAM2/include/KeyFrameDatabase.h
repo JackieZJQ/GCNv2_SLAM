@@ -40,9 +40,9 @@ class KeyFrameDatabase {
 public:
   KeyFrameDatabase(const ORBVocabulary &voc);
 
-  void add(KeyFrame *pKF);
+  void add(KeyFrame *pKF, const int Ftype);
 
-  void erase(KeyFrame *pKF);
+  void erase(KeyFrame *pKF, const int Ftype);
 
   void clear();
 

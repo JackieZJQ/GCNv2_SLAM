@@ -104,7 +104,7 @@ bool LoopClosing::DetectLoop() {
   // If the map contains less than 10 KF or less than 10 KF have passed from
   // last loop detection
   if (mpCurrentKF->mnId < mLastLoopKFid + 10) {
-    mpKeyFrameDB->add(mpCurrentKF);
+    mpKeyFrameDB->add(mpCurrentKF, 0);
     mpCurrentKF->SetErase();
     return false;
   }
@@ -134,7 +134,7 @@ bool LoopClosing::DetectLoop() {
 
   // If there are no loop candidates, just add new keyframe and return false
   if (vpCandidateKFs.empty()) {
-    mpKeyFrameDB->add(mpCurrentKF);
+    mpKeyFrameDB->add(mpCurrentKF, 0);
     mvConsistentGroups.clear();
     mpCurrentKF->SetErase();
     return false;
@@ -202,7 +202,7 @@ bool LoopClosing::DetectLoop() {
   mvConsistentGroups = vCurrentConsistentGroups;
 
   // Add Current Keyframe to database
-  mpKeyFrameDB->add(mpCurrentKF);
+  mpKeyFrameDB->add(mpCurrentKF, 0);
 
   if (mvpEnoughConsistentCandidates.empty()) {
     mpCurrentKF->SetErase();

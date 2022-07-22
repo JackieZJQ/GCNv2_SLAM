@@ -43,7 +43,7 @@ public:
   const static int Ntype = 2; // Number of channels
   
 public:
-  KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB);
+  KeyFrame(Frame &F, Map *pMap, std::vector<KeyFrameDatabase *> pKFDB);
 
   // Pose functions
   void SetPose(const cv::Mat &Tcw);
@@ -228,10 +228,8 @@ protected:
   std::vector<MapPoint *> mvpMapPoints;
 
   // BoW
-  KeyFrameDatabase *mpKeyFrameDB;
-
-  //
-  std::vector<ORBVocabulary *> mpvocabulary;
+  std::vector<KeyFrameDatabase *> mpKeyFrameDB;
+  std::vector<ORBVocabulary *> mpVocabulary;
 
   // Grid over the image to speed up feature matching
   std::vector<std::vector<std::vector<std::size_t>>> mGrid;

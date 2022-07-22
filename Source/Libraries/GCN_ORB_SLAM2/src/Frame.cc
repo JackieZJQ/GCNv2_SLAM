@@ -37,7 +37,7 @@ Frame::Frame() {}
 
 // Copy Constructor
 Frame::Frame(const Frame &frame)
-    : mpvocabulary(frame.mpvocabulary),
+    : mpVocabulary(frame.mpVocabulary),
       mpGCNExtractorLeft(frame.mpGCNExtractorLeft),
       mpGCNExtractorRight(frame.mpGCNExtractorRight),
       mpORBExtractorLeft(frame.mpORBExtractorLeft),         
@@ -82,7 +82,7 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
              FeatureExtractor *ORBextractorLeft, FeatureExtractor *ORBextractorRight, 
              vector<ORBVocabulary *> voc, cv::Mat &K,
              cv::Mat &distCoef, const float &bf, const float &thDepth)
-    : mpvocabulary(voc),
+    : mpVocabulary(voc),
       mpGCNExtractorLeft(GCNextractorLeft), 
       mpGCNExtractorRight(GCNextractorRight), 
       mpORBExtractorLeft(ORBextractorLeft), 
@@ -158,7 +158,7 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
              FeatureExtractor *GCNextractor, FeatureExtractor *ORBextractor,
              vector<ORBVocabulary *> voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
              const float &thDepth)
-    : mpvocabulary(voc),
+    : mpVocabulary(voc),
       mpGCNExtractorLeft(GCNextractor),
       mpGCNExtractorRight(static_cast<FeatureExtractor *>(NULL)),
       mpORBExtractorLeft(ORBextractor),
@@ -224,7 +224,7 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
              FeatureExtractor *GCNextractor, FeatureExtractor *ORBextractor, 
              vector<ORBVocabulary *> voc, cv::Mat &K,
              cv::Mat &distCoef, const float &bf, const float &thDepth)
-    : mpvocabulary(voc),
+    : mpVocabulary(voc),
       mpGCNExtractorLeft(GCNextractor),
       mpGCNExtractorRight(static_cast<FeatureExtractor *>(NULL)),
       mpORBExtractorLeft(ORBextractor),
@@ -551,14 +551,14 @@ void Frame::ComputeBoW() {
 
   if (mBowVec.empty()) {
     vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);
-    mpvocabulary[Ftype]->transform(vCurrentDesc, mBowVec, mFeatVec, 4);
+    mpVocabulary[Ftype]->transform(vCurrentDesc, mBowVec, mFeatVec, 4);
   }
 }
 
 void Frame::ComputeBoW(const int Ftype) {
   if (Channels[Ftype].mBowVec.empty()) {
     vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(Channels[Ftype].mDescriptors);
-    mpvocabulary[Ftype]->transform(vCurrentDesc, Channels[Ftype].mBowVec, Channels[Ftype].mFeatVec, 4);
+    mpVocabulary[Ftype]->transform(vCurrentDesc, Channels[Ftype].mBowVec, Channels[Ftype].mFeatVec, 4);
   }
 }
 
@@ -949,7 +949,7 @@ void Frame::ComputeFeatures(const int Ftype, const cv::Mat &imGray, const cv::Ma
 //   for (int i = 0; i < Ntype; i++) {
 //     if (Channels[i].mBowVec.empty()) {
 //       vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(Channels[i].mDescriptors);
-//       mpvocabulary[i]->transform(vCurrentDesc, Channels[i].mBowVec, Channels[i].mFeatVec, 4);
+//       mpVocabulary[i]->transform(vCurrentDesc, Channels[i].mBowVec, Channels[i].mFeatVec, 4);
 //     }
 //   }
 

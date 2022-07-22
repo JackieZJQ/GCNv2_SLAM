@@ -35,23 +35,24 @@ KeyFrameDatabase::KeyFrameDatabase(const ORBVocabulary &voc) : mpVoc(&voc) {
   mvInvertedFile.resize(voc.size());
 }
 
-void KeyFrameDatabase::add(KeyFrame *pKF) {
+//TO-DO add Ftype
+void KeyFrameDatabase::add(KeyFrame *pKF, const int Ftype) {
   unique_lock<mutex> lock(mMutex);
 
-  for (DBoW2::BowVector::const_iterator vit = pKF->mBowVec.begin(), vend = pKF->mBowVec.end(); vit != vend; vit++)
+  for (DBoW2::BowVector::const_iterator vit = pKF->Channels[Ftype].mBowVec.begin(), vend = pKF->Channels[Ftype].mBowVec.end(); vit != vend; vit++)
     mvInvertedFile[vit->first].push_back(pKF);
 }
 
-void KeyFrameDatabase::erase(KeyFrame *pKF) {
+//TO-DO add Ftype
+void KeyFrameDatabase::erase(KeyFrame *pKF, const int Ftype) {
   unique_lock<mutex> lock(mMutex);
 
   // Erase elements in the Inverse File for the entry
-  for (DBoW2::BowVector::const_iterator vit = pKF->mBowVec.begin(), vend = pKF->mBowVec.end(); vit != vend; vit++) {
+  for (DBoW2::BowVector::const_iterator vit = pKF->Channels[Ftype].mBowVec.begin(), vend = pKF->Channels[Ftype].mBowVec.end(); vit != vend; vit++) {
     // List of keyframes that share the word
     std::list<KeyFrame *> &lKFs = mvInvertedFile[vit->first];
 
-    for (std::list<KeyFrame *>::iterator lit = lKFs.begin(), lend = lKFs.end();
-         lit != lend; lit++) {
+    for (std::list<KeyFrame *>::iterator lit = lKFs.begin(), lend = lKFs.end(); lit != lend; lit++) {
       if (pKF == *lit) {
         lKFs.erase(lit);
         break;

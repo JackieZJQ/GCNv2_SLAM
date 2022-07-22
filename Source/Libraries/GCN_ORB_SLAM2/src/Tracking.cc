@@ -44,10 +44,10 @@ using namespace ::std;
 namespace ORB_SLAM2 {
 
 Tracking::Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], FrameDrawer *pFrameDrawer,
-                   MapDrawer *pMapDrawer, Map *pMap, KeyFrameDatabase *pKFDB, KeyFrameDatabase *pKFDBtest[Ntype],
+                   MapDrawer *pMapDrawer, Map *pMap, KeyFrameDatabase *pKFDB[Ntype],
                    const string &strSettingPath, const int sensor)
     : mState(NO_IMAGES_YET), mSensor(sensor), mbOnlyTracking(false),
-      mbVO(false), mpKeyFrameDB(pKFDB),
+      mbVO(false),
       mpInitializer(static_cast<Initializer *>(NULL)), mpSystem(pSys),
       mpViewer(NULL), mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer),
       mpMap(pMap), mnLastRelocFrameId(0) {
@@ -55,8 +55,10 @@ Tracking::Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], FrameDrawer *pFrame
 
   // Initlize vocabulary vector
   mpVocabulary.resize(Ntype);
+  mpKeyFrameDB.resize(Ntype);
   for (int i = 0; i < Ntype; i++) {
     mpVocabulary[i] = pVoc[i];
+    mpKeyFrameDB[i] = pKFDB[i];
   }
 
   cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
@@ -1345,7 +1347,7 @@ bool Tracking::Relocalization() {
   // Track Lost: Query KeyFrame Database for keyframe candidates for
   // relocalisation
   vector<KeyFrame *> vpCandidateKFs =
-      mpKeyFrameDB->DetectRelocalizationCandidates(&mCurrentFrame, 0);
+      mpKeyFrameDB[0]->DetectRelocalizationCandidates(&mCurrentFrame, 0);
 
   if (vpCandidateKFs.empty())
     return false;
@@ -1506,7 +1508,8 @@ void Tracking::Reset() {
 
   // Clear BoW Database
   cout << "Reseting Database...";
-  mpKeyFrameDB->clear();
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    mpKeyFrameDB[Ftype]->clear();
   cout << " done" << endl;
 
   // Clear Map (this erase MapPoints and KeyFrames)

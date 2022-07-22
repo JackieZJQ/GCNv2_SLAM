@@ -29,7 +29,7 @@ namespace ORB_SLAM2 {
 
 long unsigned int KeyFrame::nNextId = 0;
 
-KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB)
+KeyFrame::KeyFrame(Frame &F, Map *pMap, vector<KeyFrameDatabase *> pKFDB)
     : mnFrameId(F.mnId), 
       mTimeStamp(F.mTimeStamp), 
       mnGridCols(FRAME_GRID_COLS),
@@ -72,7 +72,7 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB)
       mnMaxY(F.mnMaxY), 
       mK(F.mK),
       mpKeyFrameDB(pKFDB),
-      mpvocabulary(F.mpvocabulary), 
+      mpVocabulary(F.mpVocabulary), 
       mbFirstConnection(true),
       mpParent(NULL), 
       mbNotErase(false), 
@@ -113,14 +113,14 @@ void KeyFrame::ComputeBoW() {
 
   if (mBowVec.empty() || mFeatVec.empty()) {
     std::vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);
-    mpvocabulary[Ftype]->transform(vCurrentDesc, mBowVec, mFeatVec, 4);
+    mpVocabulary[Ftype]->transform(vCurrentDesc, mBowVec, mFeatVec, 4);
   }
 }
 
 void KeyFrame::ComputeBoW(const int Ftype) {
   if (Channels[Ftype].mBowVec.empty() || Channels[Ftype].mFeatVec.empty()) {
     std::vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(Channels[Ftype].mDescriptors);
-    mpvocabulary[Ftype]->transform(vCurrentDesc, Channels[Ftype].mBowVec, Channels[Ftype].mFeatVec, 4);
+    mpVocabulary[Ftype]->transform(vCurrentDesc, Channels[Ftype].mBowVec, Channels[Ftype].mFeatVec, 4);
   }
 }
 
@@ -694,7 +694,8 @@ void KeyFrame::SetBadFlag() {
   }
 
   mpMap->EraseKeyFrame(this);
-  mpKeyFrameDB->erase(this);
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    mpKeyFrameDB[Ftype]->erase(this, Ftype);
 }
 
 bool KeyFrame::isBad() {
@@ -900,7 +901,7 @@ float KeyFrame::ComputeSceneMedianDepth(const int q, const int Ftype) {
 //   for (int i = 0; i < Ntype; i++) {
 //     if (Channels[i].mBowVec.empty() || Channels[i].mFeatVec.empty()) {
 //       std::vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(Channels[i].mDescriptors);
-//       mpvocabulary[i]->transform(vCurrentDesc, Channels[i].mBowVec, Channels[i].mFeatVec, 4);
+//       mpVocabulary[i]->transform(vCurrentDesc, Channels[i].mBowVec, Channels[i].mFeatVec, 4);
 //     }
 //   }
 

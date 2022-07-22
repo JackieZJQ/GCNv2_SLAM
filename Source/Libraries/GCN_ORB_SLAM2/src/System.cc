@@ -114,7 +114,7 @@ System::System(const string (&strVocFile)[Ntype], const string &strSettingsFile,
   //(it will live in the main thread of execution, the one that called this
   //constructor)
   mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer,
-                           mpMap, mpKeyFrameDatabase[1], mpKeyFrameDatabase, strSettingsFile, mSensor);
+                           mpMap, mpKeyFrameDatabase, strSettingsFile, mSensor);
 
   // Initialize the Local Mapping thread and launch
   mpLocalMapper = new LocalMapping(mpMap, mSensor == MONOCULAR);
