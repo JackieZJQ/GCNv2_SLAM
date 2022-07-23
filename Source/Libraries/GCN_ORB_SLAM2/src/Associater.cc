@@ -798,6 +798,123 @@ int Associater::Fuse(const int Ftype, KeyFrame *pKF, const vector<MapPoint *> &v
   return nFused;
 }
 
+int Associater::Fuse(const int Ftype, KeyFrame *pKF, cv::Mat Scw, const vector<MapPoint *> &vpPoints, float th, vector<MapPoint *> &vpReplacePoint) {
+  // Get Calibration Parameters for later projection
+  const float &fx = pKF->fx;
+  const float &fy = pKF->fy;
+  const float &cx = pKF->cx;
+  const float &cy = pKF->cy;
+
+  // Decompose Scw
+  cv::Mat sRcw = Scw.rowRange(0, 3).colRange(0, 3);
+  const float scw = sqrt(sRcw.row(0).dot(sRcw.row(0)));
+  cv::Mat Rcw = sRcw / scw;
+  cv::Mat tcw = Scw.rowRange(0, 3).col(3) / scw;
+  cv::Mat Ow = -Rcw.t() * tcw;
+
+  // Set of MapPoints already found in the KeyFrame
+  const set<MapPoint *> spAlreadyFound = pKF->GetMapPoints(Ftype);
+
+  int nFused = 0;
+
+  const int nPoints = vpPoints.size();
+
+  // For each candidate MapPoint project and match
+  for (int iMP = 0; iMP < nPoints; iMP++) {
+    MapPoint *pMP = vpPoints[iMP];
+
+    // Discard Bad MapPoints and already found
+    if (pMP->isBad() || spAlreadyFound.count(pMP))
+      continue;
+
+    // Get 3D Coords.
+    cv::Mat p3Dw = pMP->GetWorldPos();
+
+    // Transform into Camera Coords.
+    cv::Mat p3Dc = Rcw * p3Dw + tcw;
+
+    // Depth must be positive
+    if (p3Dc.at<float>(2) < 0.0f)
+      continue;
+
+    // Project into Image
+    const float invz = 1.0 / p3Dc.at<float>(2);
+    const float x = p3Dc.at<float>(0) * invz;
+    const float y = p3Dc.at<float>(1) * invz;
+
+    const float u = fx * x + cx;
+    const float v = fy * y + cy;
+
+    // Point must be inside the image
+    if (!pKF->IsInImage(u, v))
+      continue;
+
+    // Depth must be inside the scale pyramid of the image
+    const float maxDistance = pMP->GetMaxDistanceInvariance();
+    const float minDistance = pMP->GetMinDistanceInvariance();
+    cv::Mat PO = p3Dw - Ow;
+    const float dist3D = cv::norm(PO);
+
+    if (dist3D < minDistance || dist3D > maxDistance)
+      continue;
+
+    // Viewing angle must be less than 60 deg
+    cv::Mat Pn = pMP->GetNormal();
+
+    if (PO.dot(Pn) < 0.5 * dist3D)
+      continue;
+
+    // Compute predicted scale level
+    const int nPredictedLevel = pMP->PredictScale(dist3D, pKF);
+
+    // Search in a radius
+    const float radius = th * pKF->mvScaleFactors[nPredictedLevel];
+
+    const vector<size_t> vIndices = pKF->GetFeaturesInArea(u, v, radius, Ftype);
+
+    if (vIndices.empty())
+      continue;
+
+    // Match to the most similar keypoint in the radius
+
+    const cv::Mat dMP = pMP->GetDescriptor();
+
+    int bestDist = INT_MAX;
+    int bestIdx = -1;
+    for (vector<size_t>::const_iterator vit = vIndices.begin(); vit != vIndices.end(); vit++) {
+      const size_t idx = *vit;
+      const int &kpLevel = pKF->Channels[Ftype].mvKeysUn[idx].octave;
+
+      if (kpLevel < nPredictedLevel - 1 || kpLevel > nPredictedLevel)
+        continue;
+
+      const cv::Mat &dKF = pKF->Channels[Ftype].mDescriptors.row(idx);
+
+      int dist = DescriptorDistance(dMP, dKF);
+
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestIdx = idx;
+      }
+    }
+
+    // If there is already a MapPoint replace otherwise add new measurement
+    if (bestDist <= TH_LOW) {
+      MapPoint *pMPinKF = pKF->GetMapPoint(bestIdx, Ftype);
+      if (pMPinKF) {
+        if (!pMPinKF->isBad())
+          vpReplacePoint[iMP] = pMPinKF;
+      } else {
+        pMP->AddObservation(pKF, bestIdx);
+        pKF->AddMapPoint(pMP, bestIdx, Ftype);
+      }
+      nFused++;
+    }
+  }
+
+  return nFused;
+}
+
 // compute three maxima
 void Associater::ComputeThreeMaxima(vector<int> *histo, const int L, int &ind1, int &ind2, int &ind3) {
   int max1 = 0;

@@ -18,12 +18,10 @@ public:
   // Computes the Hamming distance between two ORB descriptors
   static int DescriptorDistance(const cv::Mat &a, const cv::Mat &b);
 
-  // Project MapPoints tracked in last frame into the current frame and search
-  // matches. Used to track from previous frame (Tracking)
+  // Project MapPoints tracked in last frame into the current frame and search matches. Used to track from previous frame (Tracking)
   int SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, const float th, const bool bMono, const int Ftype);
 
-  // Search matches between Frame keypoints and projected MapPoints. Returns
-  // number of matches Used to track the local map (Tracking)
+  // Search matches between Frame keypoints and projected MapPoints. Returns number of matches Used to track the local map (Tracking)
   int SearchByProjection(Frame &F, const std::vector<MapPoint*> &vpMapPoints, const float th);
 
   int SearchByBoW(KeyFrame *pKF, Frame &F, std::vector<MapPoint *> &vpMapPointMatches, const int Ftype);
@@ -40,6 +38,8 @@ public:
 
   // Project MapPoints into KeyFrame and search for duplicated MapPoints.
   int Fuse(const int Ftype, KeyFrame *pKF, const std::vector<MapPoint *> &vpMapPoints, const float th = 3.0);
+
+  int Fuse(const int Ftype, KeyFrame *pKF, cv::Mat Scw, const std::vector<MapPoint *> &vpPoints, float th, std::vector<MapPoint *> &vpReplacePoint);
 
 public:
   static const int TH_LOW;
