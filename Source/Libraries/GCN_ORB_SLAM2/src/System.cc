@@ -111,24 +111,20 @@ System::System(const string (&strVocFile)[Ntype], const string &strSettingsFile,
   mpMapDrawer = new MapDrawer(mpMap, strSettingsFile);
 
   // Initialize the Tracking thread
-  //(it will live in the main thread of execution, the one that called this
-  //constructor)
-  mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer,
-                           mpMap, mpKeyFrameDatabase, strSettingsFile, mSensor);
+  //(it will live in the main thread of execution, the one that called this constructor)
+  mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer, mpMap, mpKeyFrameDatabase, strSettingsFile, mSensor);
 
   // Initialize the Local Mapping thread and launch
   mpLocalMapper = new LocalMapping(mpMap, mSensor == MONOCULAR);
   mptLocalMapping = new thread(&ORB_SLAM2::LocalMapping::Run, mpLocalMapper);
 
   // Initialize the Loop Closing thread and launch
-  mpLoopCloser = new LoopClosing(mpMap, mpKeyFrameDatabase[1], mpVocabulary[1],
-                                 mSensor != MONOCULAR);
+  mpLoopCloser = new LoopClosing(mpMap, mpKeyFrameDatabase, mpVocabulary, mSensor != MONOCULAR);
   mptLoopClosing = new thread(&ORB_SLAM2::LoopClosing::Run, mpLoopCloser);
 
   // Initialize the Viewer thread and launch
   if (bUseViewer) {
-    mpViewer = new Viewer(this, mpFrameDrawer, mpMapDrawer, mpTracker,
-                          strSettingsFile);
+    mpViewer = new Viewer(this, mpFrameDrawer, mpMapDrawer, mpTracker, strSettingsFile);
     // mptViewer = new thread(&Viewer::Run, mpViewer);
     mpTracker->SetViewer(mpViewer);
   }

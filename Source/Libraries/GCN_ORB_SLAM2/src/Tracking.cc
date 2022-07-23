@@ -51,16 +51,16 @@ Tracking::Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], FrameDrawer *pFrame
       mpInitializer(static_cast<Initializer *>(NULL)), mpSystem(pSys),
       mpViewer(NULL), mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer),
       mpMap(pMap), mnLastRelocFrameId(0) {
-  // Load camera parameters from settings file
-
+  
   // Initlize vocabulary vector
   mpVocabulary.resize(Ntype);
   mpKeyFrameDB.resize(Ntype);
-  for (int i = 0; i < Ntype; i++) {
-    mpVocabulary[i] = pVoc[i];
-    mpKeyFrameDB[i] = pKFDB[i];
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    mpVocabulary[Ftype] = pVoc[Ftype];
+    mpKeyFrameDB[Ftype] = pKFDB[Ftype];
   }
-
+  
+  // Load camera parameters from settings file
   cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
   float fx = fSettings["Camera.fx"];
   float fy = fSettings["Camera.fy"];

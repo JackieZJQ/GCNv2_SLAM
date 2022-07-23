@@ -41,6 +41,9 @@ class KeyFrameDatabase;
 
 class LoopClosing {
 public:
+  const static int Ntype = 2;
+
+public:
   typedef std::pair<std::set<KeyFrame *>, int> ConsistentGroup;
   typedef std::map<
       KeyFrame *, g2o::Sim3, std::less<KeyFrame *>,
@@ -48,7 +51,7 @@ public:
       KeyFrameAndPose;
 
 public:
-  LoopClosing(Map *pMap, KeyFrameDatabase *pDB, ORBVocabulary *pVoc, const bool bFixScale);
+  LoopClosing(Map *pMap, KeyFrameDatabase *pDB[Ntype], ORBVocabulary *pVoc[Ntype], const bool bFixScale);
 
   void SetTracker(Tracking *pTracker);
 
@@ -103,9 +106,7 @@ protected:
   Map *mpMap;
   Tracking *mpTracker;
 
-  KeyFrameDatabase *mpKeyFrameDB;
-  ORBVocabulary *mpORBVocabulary;
-
+  std::vector<KeyFrameDatabase *> mpKeyFrameDB;
   std::vector<ORBVocabulary *> mpVocabulary;
 
   LocalMapping *mpLocalMapper;

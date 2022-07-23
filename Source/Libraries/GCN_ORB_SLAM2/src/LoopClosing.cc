@@ -35,14 +35,21 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
-LoopClosing::LoopClosing(Map *pMap, KeyFrameDatabase *pDB, ORBVocabulary *pVoc,
-                         const bool bFixScale)
+LoopClosing::LoopClosing(Map *pMap, KeyFrameDatabase *pDB[Ntype], ORBVocabulary *pVoc[Ntype], const bool bFixScale)
     : mbResetRequested(false), mbFinishRequested(false), mbFinished(true),
-      mpMap(pMap), mpKeyFrameDB(pDB), mpORBVocabulary(pVoc), mpMatchedKF(NULL),
+      mpMap(pMap), mpMatchedKF(NULL),
       mLastLoopKFid(0), mbRunningGBA(false), mbFinishedGBA(true),
       mbStopGBA(false), mpThreadGBA(NULL), mbFixScale(bFixScale),
       mnFullBAIdx(0) {
   mnCovisibilityConsistencyTh = 3;
+
+  mpKeyFrameDB.resize(Ntype);
+  mpVocabulary.resize(Ntype);
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    mpKeyFrameDB[Ftype] = pDB[Ftype];
+    mpVocabulary[Ftype] = pVoc[Ftype];
+  }
+
 }
 
 void LoopClosing::SetTracker(Tracking *pTracker) { mpTracker = pTracker; }
@@ -104,7 +111,7 @@ bool LoopClosing::DetectLoop() {
   // If the map contains less than 10 KF or less than 10 KF have passed from
   // last loop detection
   if (mpCurrentKF->mnId < mLastLoopKFid + 10) {
-    mpKeyFrameDB->add(mpCurrentKF, 0);
+    mpKeyFrameDB[0]->add(mpCurrentKF, 0);
     mpCurrentKF->SetErase();
     return false;
   }
@@ -122,7 +129,7 @@ bool LoopClosing::DetectLoop() {
       continue;
     const DBoW2::BowVector &BowVec = pKF->mBowVec;
 
-    float score = mpORBVocabulary->score(CurrentBowVec, BowVec);
+    float score = mpVocabulary[0]->score(CurrentBowVec, BowVec);
 
     if (score < minScore)
       minScore = score;
@@ -130,11 +137,11 @@ bool LoopClosing::DetectLoop() {
 
   // Query the database imposing the minimum score
   std::vector<KeyFrame *> vpCandidateKFs =
-      mpKeyFrameDB->DetectLoopCandidates(mpCurrentKF, minScore, 0);
+      mpKeyFrameDB[0]->DetectLoopCandidates(mpCurrentKF, minScore, 0);
 
   // If there are no loop candidates, just add new keyframe and return false
   if (vpCandidateKFs.empty()) {
-    mpKeyFrameDB->add(mpCurrentKF, 0);
+    mpKeyFrameDB[0]->add(mpCurrentKF, 0);
     mvConsistentGroups.clear();
     mpCurrentKF->SetErase();
     return false;
@@ -202,7 +209,7 @@ bool LoopClosing::DetectLoop() {
   mvConsistentGroups = vCurrentConsistentGroups;
 
   // Add Current Keyframe to database
-  mpKeyFrameDB->add(mpCurrentKF, 0);
+  mpKeyFrameDB[0]->add(mpCurrentKF, 0);
 
   if (mvpEnoughConsistentCandidates.empty()) {
     mpCurrentKF->SetErase();
