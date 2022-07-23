@@ -248,6 +248,115 @@ int Associater::SearchByProjection(Frame &F, const vector<MapPoint*> &vpMapPoint
 
 }
 
+int Associater::SearchByProjection(KeyFrame *pKF, cv::Mat Scw, const vector<MapPoint *> &vpPoints, vector<MapPoint *> &vpMatched, int th, const int Ftype) {
+  // Get Calibration Parameters for later projection
+  const float &fx = pKF->fx;
+  const float &fy = pKF->fy;
+  const float &cx = pKF->cx;
+  const float &cy = pKF->cy;
+
+  // Decompose Scw
+  cv::Mat sRcw = Scw.rowRange(0, 3).colRange(0, 3);
+  const float scw = sqrt(sRcw.row(0).dot(sRcw.row(0)));
+  cv::Mat Rcw = sRcw / scw;
+  cv::Mat tcw = Scw.rowRange(0, 3).col(3) / scw;
+  cv::Mat Ow = -Rcw.t() * tcw;
+
+  // Set of MapPoints already found in the KeyFrame
+  set<MapPoint *> spAlreadyFound(vpMatched.begin(), vpMatched.end());
+  spAlreadyFound.erase(static_cast<MapPoint *>(NULL));
+
+  int nmatches = 0;
+
+  // For each Candidate MapPoint Project and Match
+  for (int iMP = 0, iendMP = vpPoints.size(); iMP < iendMP; iMP++) {
+    MapPoint *pMP = vpPoints[iMP];
+
+    // Discard Bad MapPoints and already found
+    if (pMP->isBad() || spAlreadyFound.count(pMP))
+      continue;
+
+    // Get 3D Coords.
+    cv::Mat p3Dw = pMP->GetWorldPos();
+
+    // Transform into Camera Coords.
+    cv::Mat p3Dc = Rcw * p3Dw + tcw;
+
+    // Depth must be positive
+    if (p3Dc.at<float>(2) < 0.0)
+      continue;
+
+    // Project into Image
+    const float invz = 1 / p3Dc.at<float>(2);
+    const float x = p3Dc.at<float>(0) * invz;
+    const float y = p3Dc.at<float>(1) * invz;
+
+    const float u = fx * x + cx;
+    const float v = fy * y + cy;
+
+    // Point must be inside the image
+    if (!pKF->IsInImage(u, v))
+      continue;
+
+    // Depth must be inside the scale invariance region of the point
+    const float maxDistance = pMP->GetMaxDistanceInvariance();
+    const float minDistance = pMP->GetMinDistanceInvariance();
+    cv::Mat PO = p3Dw - Ow;
+    const float dist = cv::norm(PO);
+
+    if (dist < minDistance || dist > maxDistance)
+      continue;
+
+    // Viewing angle must be less than 60 deg
+    cv::Mat Pn = pMP->GetNormal();
+
+    if (PO.dot(Pn) < 0.5 * dist)
+      continue;
+
+    int nPredictedLevel = pMP->PredictScale(dist, pKF);
+
+    // Search in a radius
+    const float radius = th * pKF->mvScaleFactors[nPredictedLevel];
+
+    const vector<size_t> vIndices = pKF->GetFeaturesInArea(u, v, radius, Ftype);
+
+    if (vIndices.empty())
+      continue;
+
+    // Match to the most similar keypoint in the radius
+    const cv::Mat dMP = pMP->GetDescriptor();
+
+    int bestDist = 256;
+    int bestIdx = -1;
+    for (vector<size_t>::const_iterator vit = vIndices.begin(), vend = vIndices.end(); vit != vend; vit++) {
+      const size_t idx = *vit;
+      if (vpMatched[idx])
+        continue;
+
+      const int &kpLevel = pKF->Channels[Ftype].mvKeysUn[idx].octave;
+
+      if (kpLevel < nPredictedLevel - 1 || kpLevel > nPredictedLevel)
+        continue;
+
+      const cv::Mat &dKF = pKF->Channels[Ftype].mDescriptors.row(idx);
+
+      const int dist = DescriptorDistance(dMP, dKF);
+
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestIdx = idx;
+      }
+    }
+
+    if (bestDist <= TH_LOW) {
+      vpMatched[bestIdx] = pMP;
+      nmatches++;
+    }
+  }
+
+  return nmatches;
+}
+
 // used in trackwithkeyframe
 int Associater::SearchByBoW(KeyFrame *pKF, Frame &F, vector<MapPoint *> &vpMapPointMatches, const int Ftype) {
   const vector<MapPoint *> vpMapPointsKF = pKF->GetMapPointMatches(Ftype);
