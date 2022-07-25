@@ -86,6 +86,7 @@ protected:
   bool CheckNewKeyFrames();
 
   bool DetectLoop();
+  bool DetectLoopChannels(const int Ftype);
 
   bool ComputeSim3();
 

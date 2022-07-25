@@ -29,6 +29,8 @@ public:
 
   int SearchByBoW(KeyFrame *pKF, Frame &F, std::vector<MapPoint *> &vpMapPointMatches, const int Ftype);
 
+  int SearchByBoW(KeyFrame *pKF1, KeyFrame *pKF2, std::vector<MapPoint *> &vpMatches12, const int Ftype);
+
   int SearchByNN(Frame &CurrentFrame, const Frame &LastFrame, const int Ftype);
   
   int SearchByNN(KeyFrame *pKF, Frame &F, std::vector<MapPoint *> &vpMapPointMatches, const int Ftype);

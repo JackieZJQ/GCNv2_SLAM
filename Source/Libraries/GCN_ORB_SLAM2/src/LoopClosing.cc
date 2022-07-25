@@ -744,4 +744,121 @@ bool LoopClosing::isFinished() {
   return mbFinished;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool LoopClosing::DetectLoopChannels(const int Ftype) {
+  
+  // step 1 : get one keyframe from queue
+  {
+    unique_lock<mutex> lock(mMutexLoopQueue);
+    mpCurrentKF = mlpLoopKeyFrameQueue.front();
+    mlpLoopKeyFrameQueue.pop_front();
+    // Avoid that a keyframe can be erased while it is being process by this thread
+    mpCurrentKF->SetNotErase();
+  }
+
+  // step 2 : If the map contains less than 10 KF or less than 10 KF have passed from last loop detection
+  if (mpCurrentKF->mnId < mLastLoopKFid + 10) {
+    mpKeyFrameDB[Ftype]->add(mpCurrentKF, Ftype); // TO-DO need add keyframe in multi channels
+    mpCurrentKF->SetErase();
+    return false;
+  }
+
+  // step 3 : Compute reference BoW similarity score. This is the lowest score to a connected keyframe in the covisibility graph
+  // We will impose loop candidates to have a higher similarity than this
+  const std::vector<KeyFrame *> vpConnectedKeyFrames = mpCurrentKF->GetVectorCovisibleKeyFrames();
+  const DBoW2::BowVector &CurrentBowVec = mpCurrentKF->Channels[Ftype].mBowVec;
+  float minScore = 1;
+  for (std::size_t i = 0; i < vpConnectedKeyFrames.size(); i++) {
+    KeyFrame *pKF = vpConnectedKeyFrames[i];
+    if (pKF->isBad())
+      continue;
+    const DBoW2::BowVector &BowVec = pKF->Channels[Ftype].mBowVec;
+
+    float score = mpVocabulary[Ftype]->score(CurrentBowVec, BowVec);
+
+    if (score < minScore)
+      minScore = score;
+  }
+
+  // step 4 : Query the database imposing the minimum score
+  std::vector<KeyFrame *> vpCandidateKFs = mpKeyFrameDB[Ftype]->DetectLoopCandidates(mpCurrentKF, minScore, Ftype);
+
+  // If there are no loop candidates, just add new keyframe and return false
+  if (vpCandidateKFs.empty()) {
+    mpKeyFrameDB[Ftype]->add(mpCurrentKF, Ftype); //  TO-DO need add keyframes in multi channels
+    mvConsistentGroups.clear();
+    mpCurrentKF->SetErase();
+    return false;
+  }
+
+  // For each loop candidate check consistency with previous loop candidates
+  // Each candidate expands a covisibility group (keyframes connected to the
+  // loop candidate in the covisibility graph) A group is consistent with a
+  // previous group if they share at least a keyframe We must detect a
+  // consistent loop in several consecutive keyframes to accept it
+  mvpEnoughConsistentCandidates.clear();
+
+  std::vector<ConsistentGroup> vCurrentConsistentGroups;
+  std::vector<bool> vbConsistentGroup(mvConsistentGroups.size(), false);
+  for (std::size_t i = 0, iend = vpCandidateKFs.size(); i < iend; i++) {
+    KeyFrame *pCandidateKF = vpCandidateKFs[i];
+
+    set<KeyFrame *> spCandidateGroup = pCandidateKF->GetConnectedKeyFrames();
+    spCandidateGroup.insert(pCandidateKF);
+
+    bool bEnoughConsistent = false;
+    bool bConsistentForSomeGroup = false;
+    for (std::size_t iG = 0, iendG = mvConsistentGroups.size(); iG < iendG; iG++) {
+      set<KeyFrame *> sPreviousGroup = mvConsistentGroups[iG].first;
+
+      bool bConsistent = false;
+      for (set<KeyFrame *>::iterator sit = spCandidateGroup.begin(), send = spCandidateGroup.end(); sit != send; sit++) {
+        if (sPreviousGroup.count(*sit)) {
+          bConsistent = true;
+          bConsistentForSomeGroup = true;
+          break;
+        }
+      }
+
+      if (bConsistent) {
+        int nPreviousConsistency = mvConsistentGroups[iG].second;
+        int nCurrentConsistency = nPreviousConsistency + 1;
+        if (!vbConsistentGroup[iG]) {
+          ConsistentGroup cg = make_pair(spCandidateGroup, nCurrentConsistency);
+          vCurrentConsistentGroups.push_back(cg);
+          vbConsistentGroup[iG] = true; // this avoid to include the same group more than once
+        }
+        if (nCurrentConsistency >= mnCovisibilityConsistencyTh && !bEnoughConsistent) {
+          mvpEnoughConsistentCandidates.push_back(pCandidateKF);
+          bEnoughConsistent = true; // this avoid to insert the same candidate more than once
+        }
+      }
+    }
+
+    // If the group is not consistent with any previous group insert with
+    // consistency counter set to zero
+    if (!bConsistentForSomeGroup) {
+      ConsistentGroup cg = make_pair(spCandidateGroup, 0);
+      vCurrentConsistentGroups.push_back(cg);
+    }
+  }
+
+  // Update Covisibility Consistent Groups
+  mvConsistentGroups = vCurrentConsistentGroups;
+
+  // Add Current Keyframe to database
+  mpKeyFrameDB[Ftype]->add(mpCurrentKF, Ftype); // TO-DO need add multi channels in the multi channels
+
+  if (mvpEnoughConsistentCandidates.empty()) {
+    mpCurrentKF->SetErase();
+    return false;
+  } else {
+    return true;
+  }
+
+  mpCurrentKF->SetErase();
+  return false;
+}
+
 } // namespace ORB_SLAM2
