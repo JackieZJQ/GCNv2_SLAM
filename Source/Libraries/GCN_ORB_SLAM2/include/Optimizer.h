@@ -57,8 +57,7 @@ public:
 
   int static PoseOptimizationMultiChannels(Frame *pFrame);
 
-  // if bFixScale is true, 6DoF optimization (stereo,rgbd), 7DoF otherwise
-  // (mono)
+  // if bFixScale is true, 6DoF optimization (stereo,rgbd), 7DoF otherwise (mono)
   void static OptimizeEssentialGraph(
       Map *pMap, KeyFrame *pLoopKF, KeyFrame *pCurKF,
       const LoopClosing::KeyFrameAndPose &NonCorrectedSim3,
@@ -66,11 +65,24 @@ public:
       const std::map<KeyFrame *, std::set<KeyFrame *>> &LoopConnections,
       const bool &bFixScale);
 
+  void static OptimizeEssentialGraph(
+      Map *pMap, KeyFrame *pLoopKF, KeyFrame *pCurKF,
+      const LoopClosing::KeyFrameAndPose &NonCorrectedSim3,
+      const LoopClosing::KeyFrameAndPose &CorrectedSim3,
+      const std::map<KeyFrame *, std::set<KeyFrame *>> &LoopConnections,
+      const bool &bFixScale, const int Ftype);
+
   // if bFixScale is true, optimize SE3 (stereo,rgbd), Sim3 otherwise (mono)
   static int OptimizeSim3(KeyFrame *pKF1, KeyFrame *pKF2,
                           std::vector<MapPoint *> &vpMatches1,
                           g2o::Sim3 &g2oS12, const float th2,
                           const bool bFixScale);
+
+  static int OptimizeSim3(KeyFrame *pKF1, KeyFrame *pKF2,
+                          std::vector<MapPoint *> &vpMatches1,
+                          g2o::Sim3 &g2oS12, const float th2,
+                          const bool bFixScale, const int Ftype);
+
 };
 
 } // namespace ORB_SLAM2

@@ -34,11 +34,16 @@ class KeyFrame;
 
 class Map {
 public:
+  const static int Ntype = 2;
+
+public:
   Map();
 
   void AddKeyFrame(KeyFrame *pKF);
   void AddMapPoint(MapPoint *pMP);
+  void AddMapPoint(MapPoint *pMP, const int Ftype);
   void EraseMapPoint(MapPoint *pMP);
+  void EraseMapPoint(MapPoint *pMP, const int Ftype);
   void EraseKeyFrame(KeyFrame *pKF);
   void SetReferenceMapPoints(const std::vector<MapPoint *> &vpMPs);
   void InformNewBigChange();
@@ -46,6 +51,7 @@ public:
 
   std::vector<KeyFrame *> GetAllKeyFrames();
   std::vector<MapPoint *> GetAllMapPoints();
+  std::vector<MapPoint *> GetAllMapPoints(const int Ftype);
   std::vector<MapPoint *> GetReferenceMapPoints();
 
   long unsigned int MapPointsInMap();
@@ -65,6 +71,7 @@ public:
 
 protected:
   std::set<MapPoint *> mspMapPoints;
+  std::set<MapPoint *> _mspMapPoints[Ntype];
   std::set<KeyFrame *> mspKeyFrames;
 
   std::vector<MapPoint *> mvpReferenceMapPoints;

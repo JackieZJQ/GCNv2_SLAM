@@ -40,9 +40,22 @@ void Map::AddMapPoint(MapPoint *pMP) {
   mspMapPoints.insert(pMP);
 }
 
+void Map::AddMapPoint(MapPoint *pMP, const int Ftype) {
+  unique_lock<mutex> lock(mMutexMap);
+  _mspMapPoints[Ftype].insert(pMP);
+}
+
 void Map::EraseMapPoint(MapPoint *pMP) {
   unique_lock<mutex> lock(mMutexMap);
   mspMapPoints.erase(pMP);
+
+  // TODO: This only erase the pointer.
+  // Delete the MapPoint
+}
+
+void Map::EraseMapPoint(MapPoint *pMP, const int Ftype) {
+  unique_lock<mutex> lock(mMutexMap);
+  _mspMapPoints[Ftype].erase(pMP);
 
   // TODO: This only erase the pointer.
   // Delete the MapPoint
@@ -81,6 +94,20 @@ std::vector<MapPoint *> Map::GetAllMapPoints() {
   return std::vector<MapPoint *>(mspMapPoints.begin(), mspMapPoints.end());
 }
 
+//TO-DO rewrite, use mspMapPoints array
+std::vector<MapPoint *> Map::GetAllMapPoints(const int Ftype) {
+  unique_lock<mutex> lock(mMutexMap);
+  std::vector<MapPoint *> s;
+  for (set<MapPoint *>::iterator sit = mspMapPoints.begin(), send = mspMapPoints.end(); sit != send; sit++) {
+    MapPoint *pMp = *sit;
+    int mFtype = pMp->GetFeatureType();
+    if(mFtype == Ftype)
+      s.push_back(pMp);
+  }
+
+  return s;
+}
+
 long unsigned int Map::MapPointsInMap() {
   unique_lock<mutex> lock(mMutexMap);
   return mspMapPoints.size();
@@ -102,14 +129,10 @@ long unsigned int Map::GetMaxKFid() {
 }
 
 void Map::clear() {
-  for (set<MapPoint *>::iterator sit = mspMapPoints.begin(),
-                                 send = mspMapPoints.end();
-       sit != send; sit++)
+  for (set<MapPoint *>::iterator sit = mspMapPoints.begin(), send = mspMapPoints.end(); sit != send; sit++)
     delete *sit;
 
-  for (set<KeyFrame *>::iterator sit = mspKeyFrames.begin(),
-                                 send = mspKeyFrames.end();
-       sit != send; sit++)
+  for (set<KeyFrame *>::iterator sit = mspKeyFrames.begin(), send = mspKeyFrames.end(); sit != send; sit++)
     delete *sit;
 
   mspMapPoints.clear();
