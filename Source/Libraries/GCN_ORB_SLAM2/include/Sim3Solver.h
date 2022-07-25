@@ -34,6 +34,10 @@ public:
              const std::vector<MapPoint *> &vpMatched12,
              const bool bFixScale = true);
 
+  Sim3Solver(const int Ftype, KeyFrame *pKF1, KeyFrame *pKF2,
+             const std::vector<MapPoint *> &vpMatched12,
+             const bool bFixScale = true);
+
   void SetRansacParameters(double probability = 0.99, int minInliers = 6,
                            int maxIterations = 300);
 
