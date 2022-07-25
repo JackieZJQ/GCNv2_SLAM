@@ -887,6 +887,218 @@ int Associater::SearchForTriangulation(KeyFrame *pKF1, KeyFrame *pKF2, cv::Mat F
   return nmatches;         
 }
 
+int Associater::SearchBySim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &vpMatches12, const float &s12,
+                             const cv::Mat &R12, const cv::Mat &t12, const float th, const int Ftype) {
+  const float &fx = pKF1->fx;
+  const float &fy = pKF1->fy;
+  const float &cx = pKF1->cx;
+  const float &cy = pKF1->cy;
+
+  // Camera 1 from world
+  cv::Mat R1w = pKF1->GetRotation();
+  cv::Mat t1w = pKF1->GetTranslation();
+
+  // Camera 2 from world
+  cv::Mat R2w = pKF2->GetRotation();
+  cv::Mat t2w = pKF2->GetTranslation();
+
+  // Transformation between cameras
+  cv::Mat sR12 = s12 * R12;
+  cv::Mat sR21 = (1.0 / s12) * R12.t();
+  cv::Mat t21 = -sR21 * t12;
+
+  const vector<MapPoint *> vpMapPoints1 = pKF1->GetMapPointMatches(Ftype);
+  const int N1 = vpMapPoints1.size();
+
+  const vector<MapPoint *> vpMapPoints2 = pKF2->GetMapPointMatches(Ftype);
+  const int N2 = vpMapPoints2.size();
+
+  vector<bool> vbAlreadyMatched1(N1, false);
+  vector<bool> vbAlreadyMatched2(N2, false);
+
+  for (int i = 0; i < N1; i++) {
+    MapPoint *pMP = vpMatches12[i];
+    if (pMP) {
+      vbAlreadyMatched1[i] = true;
+      int idx2 = pMP->GetIndexInKeyFrame(pKF2);
+      if (idx2 >= 0 && idx2 < N2)
+        vbAlreadyMatched2[idx2] = true;
+    }
+  }
+
+  vector<int> vnMatch1(N1, -1);
+  vector<int> vnMatch2(N2, -1);
+
+  // Transform from KF1 to KF2 and search
+  for (int i1 = 0; i1 < N1; i1++) {
+    MapPoint *pMP = vpMapPoints1[i1];
+
+    if (!pMP || vbAlreadyMatched1[i1])
+      continue;
+
+    if (pMP->isBad())
+      continue;
+
+    cv::Mat p3Dw = pMP->GetWorldPos();
+    cv::Mat p3Dc1 = R1w * p3Dw + t1w;
+    cv::Mat p3Dc2 = sR21 * p3Dc1 + t21;
+
+    // Depth must be positive
+    if (p3Dc2.at<float>(2) < 0.0)
+      continue;
+
+    const float invz = 1.0 / p3Dc2.at<float>(2);
+    const float x = p3Dc2.at<float>(0) * invz;
+    const float y = p3Dc2.at<float>(1) * invz;
+
+    const float u = fx * x + cx;
+    const float v = fy * y + cy;
+
+    // Point must be inside the image
+    if (!pKF2->IsInImage(u, v))
+      continue;
+
+    const float maxDistance = pMP->GetMaxDistanceInvariance();
+    const float minDistance = pMP->GetMinDistanceInvariance();
+    const float dist3D = cv::norm(p3Dc2);
+
+    // Depth must be inside the scale invariance region
+    if (dist3D < minDistance || dist3D > maxDistance)
+      continue;
+
+    // Compute predicted octave
+    const int nPredictedLevel = pMP->PredictScale(dist3D, pKF2);
+
+    // Search in a radius
+    const float radius = th * pKF2->mvScaleFactors[nPredictedLevel];
+
+    const vector<size_t> vIndices = pKF2->GetFeaturesInArea(u, v, radius, Ftype);
+
+    if (vIndices.empty())
+      continue;
+
+    // Match to the most similar keypoint in the radius
+    const cv::Mat dMP = pMP->GetDescriptor();
+
+    int bestDist = INT_MAX;
+    int bestIdx = -1;
+    for (vector<size_t>::const_iterator vit = vIndices.begin(), vend = vIndices.end(); vit != vend; vit++) {
+      const size_t idx = *vit;
+
+      const cv::KeyPoint &kp = pKF2->Channels[Ftype].mvKeysUn[idx];
+
+      if (kp.octave < nPredictedLevel - 1 || kp.octave > nPredictedLevel)
+        continue;
+
+      const cv::Mat &dKF = pKF2->Channels[Ftype].mDescriptors.row(idx);
+
+      const int dist = DescriptorDistance(dMP, dKF);
+
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestIdx = idx;
+      }
+    }
+
+    if (bestDist <= TH_HIGH) {
+      vnMatch1[i1] = bestIdx;
+    }
+  }
+
+  // Transform from KF2 to KF2 and search
+  for (int i2 = 0; i2 < N2; i2++) {
+    MapPoint *pMP = vpMapPoints2[i2];
+
+    if (!pMP || vbAlreadyMatched2[i2])
+      continue;
+
+    if (pMP->isBad())
+      continue;
+
+    cv::Mat p3Dw = pMP->GetWorldPos();
+    cv::Mat p3Dc2 = R2w * p3Dw + t2w;
+    cv::Mat p3Dc1 = sR12 * p3Dc2 + t12;
+
+    // Depth must be positive
+    if (p3Dc1.at<float>(2) < 0.0)
+      continue;
+
+    const float invz = 1.0 / p3Dc1.at<float>(2);
+    const float x = p3Dc1.at<float>(0) * invz;
+    const float y = p3Dc1.at<float>(1) * invz;
+
+    const float u = fx * x + cx;
+    const float v = fy * y + cy;
+
+    // Point must be inside the image
+    if (!pKF1->IsInImage(u, v))
+      continue;
+
+    const float maxDistance = pMP->GetMaxDistanceInvariance();
+    const float minDistance = pMP->GetMinDistanceInvariance();
+    const float dist3D = cv::norm(p3Dc1);
+
+    // Depth must be inside the scale pyramid of the image
+    if (dist3D < minDistance || dist3D > maxDistance)
+      continue;
+
+    // Compute predicted octave
+    const int nPredictedLevel = pMP->PredictScale(dist3D, pKF1);
+
+    // Search in a radius of 2.5*sigma(ScaleLevel)
+    const float radius = th * pKF1->mvScaleFactors[nPredictedLevel];
+
+    const vector<size_t> vIndices = pKF1->GetFeaturesInArea(u, v, radius, Ftype);
+
+    if (vIndices.empty())
+      continue;
+
+    // Match to the most similar keypoint in the radius
+    const cv::Mat dMP = pMP->GetDescriptor();
+
+    int bestDist = INT_MAX;
+    int bestIdx = -1;
+    for (vector<size_t>::const_iterator vit = vIndices.begin(), vend = vIndices.end(); vit != vend; vit++) {
+      const size_t idx = *vit;
+
+      const cv::KeyPoint &kp = pKF1->Channels[Ftype].mvKeysUn[idx];
+
+      if (kp.octave < nPredictedLevel - 1 || kp.octave > nPredictedLevel)
+        continue;
+
+      const cv::Mat &dKF = pKF1->Channels[Ftype].mDescriptors.row(idx);
+
+      const int dist = DescriptorDistance(dMP, dKF);
+
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestIdx = idx;
+      }
+    }
+
+    if (bestDist <= TH_HIGH) {
+      vnMatch2[i2] = bestIdx;
+    }
+  }
+
+  // Check agreement
+  int nFound = 0;
+
+  for (int i1 = 0; i1 < N1; i1++) {
+    int idx2 = vnMatch1[i1];
+
+    if (idx2 >= 0) {
+      int idx1 = vnMatch2[idx2];
+      if (idx1 == i1) {
+        vpMatches12[i1] = vpMapPoints2[idx2];
+        nFound++;
+      }
+    }
+  }
+
+  return nFound;
+}
+
 int Associater::Fuse(const int Ftype, KeyFrame *pKF, const vector<MapPoint *> &vpMapPoints, const float th) {
   cv::Mat Rcw = pKF->GetRotation();
   cv::Mat tcw = pKF->GetTranslation();
