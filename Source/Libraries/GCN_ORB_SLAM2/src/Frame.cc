@@ -472,8 +472,8 @@ vector<size_t> Frame::GetFeaturesInArea(const float &x, const float &y,
 
 // Rewrite GetFeaturesInArea()
 vector<size_t> Frame::GetFeaturesInArea(const int Ftype, const float &x, const float &y,
-                                      const float &r, const int minLevel,
-                                      const int maxLevel) const {
+                                        const float &r, const int minLevel,
+                                        const int maxLevel) const {
   vector<size_t> vIndices;
   vIndices.reserve(Channels[Ftype].N);
 

@@ -470,6 +470,7 @@ int Associater::SearchByBoW(KeyFrame *pKF, Frame &F, vector<MapPoint *> &vpMapPo
   return nmatches;
 }
 
+// used in the loopclosing 
 int Associater::SearchByBoW(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &vpMatches12, const int Ftype) {
   
   // step 1 : get key points of two channels

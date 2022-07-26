@@ -86,13 +86,15 @@ protected:
   bool CheckNewKeyFrames();
 
   bool DetectLoop();
-  bool DetectLoopChannels(const int Ftype);
+  bool DetectLoopMultiChannels(const int Ftype);
 
   bool ComputeSim3();
+  bool ComputeSim3MultiChannels(const int Ftype);
 
   void SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap);
 
   void CorrectLoop();
+  void CorrectLoopMultiChannels(const int Ftype);
 
   void ResetIfRequested();
   bool mbResetRequested;
