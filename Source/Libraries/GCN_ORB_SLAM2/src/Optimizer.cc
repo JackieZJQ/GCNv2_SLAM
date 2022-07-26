@@ -1416,12 +1416,9 @@ int Optimizer::PoseOptimizationMultiChannels(Frame *pFrame) {
 
   std::unique_ptr<g2o::BlockSolver_6_3::LinearSolverType> linearSolver;
 
-  linearSolver = g2o::make_unique<
-      g2o::LinearSolverDense<g2o::BlockSolver_6_3::PoseMatrixType>>();
+  linearSolver = g2o::make_unique<g2o::LinearSolverDense<g2o::BlockSolver_6_3::PoseMatrixType>>();
 
-  g2o::OptimizationAlgorithmLevenberg *solver =
-      new g2o::OptimizationAlgorithmLevenberg(
-          g2o::make_unique<g2o::BlockSolver_6_3>(std::move(linearSolver)));
+  g2o::OptimizationAlgorithmLevenberg *solver = new g2o::OptimizationAlgorithmLevenberg(g2o::make_unique<g2o::BlockSolver_6_3>(std::move(linearSolver)));
 
   optimizer.setAlgorithm(solver);
 
@@ -1472,11 +1469,9 @@ int Optimizer::PoseOptimizationMultiChannels(Frame *pFrame) {
             const cv::KeyPoint &kpUn = pFrame->Channels[Ftype].mvKeysUn[i];
             obs << kpUn.pt.x, kpUn.pt.y;
 
-            g2o::EdgeSE3ProjectXYZOnlyPose *e =
-                new g2o::EdgeSE3ProjectXYZOnlyPose();
+            g2o::EdgeSE3ProjectXYZOnlyPose *e = new g2o::EdgeSE3ProjectXYZOnlyPose();
             
-            e->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex *>(
-                              optimizer.vertex(0)));
+            e->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex *>(optimizer.vertex(0)));
             e->setMeasurement(obs);
             const float invSigma2 = pFrame->mvInvLevelSigma2[kpUn.octave];
             e->setInformation(Eigen::Matrix2d::Identity() * invSigma2);
@@ -1509,11 +1504,9 @@ int Optimizer::PoseOptimizationMultiChannels(Frame *pFrame) {
             const float &kp_ur = pFrame->Channels[Ftype].mvuRight[i];
             obs << kpUn.pt.x, kpUn.pt.y, kp_ur;
 
-            g2o::EdgeStereoSE3ProjectXYZOnlyPose *e =
-                new g2o::EdgeStereoSE3ProjectXYZOnlyPose();
+            g2o::EdgeStereoSE3ProjectXYZOnlyPose *e = new g2o::EdgeStereoSE3ProjectXYZOnlyPose();
 
-            e->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex *>(
-                              optimizer.vertex(0)));
+            e->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex *>(optimizer.vertex(0)));
             e->setMeasurement(obs);
             const float invSigma2 = pFrame->mvInvLevelSigma2[kpUn.octave];
             Eigen::Matrix3d Info = Eigen::Matrix3d::Identity() * invSigma2;
@@ -2106,8 +2099,7 @@ int Optimizer::OptimizeSim3(KeyFrame *pKF1, KeyFrame *pKF2, std::vector<MapPoint
   }
 
   // Recover optimized Sim3
-  g2o::VertexSim3Expmap *vSim3_recov =
-      static_cast<g2o::VertexSim3Expmap *>(optimizer.vertex(0));
+  g2o::VertexSim3Expmap *vSim3_recov = static_cast<g2o::VertexSim3Expmap *>(optimizer.vertex(0));
   g2oS12 = vSim3_recov->estimate();
 
   return nIn;
@@ -2314,8 +2306,7 @@ void Optimizer::OptimizeEssentialGraph(Map *pMap, KeyFrame *pLoopKF, KeyFrame *p
 
     const int nIDi = pKFi->mnId;
 
-    g2o::VertexSim3Expmap *VSim3 =
-        static_cast<g2o::VertexSim3Expmap *>(optimizer.vertex(nIDi));
+    g2o::VertexSim3Expmap *VSim3 = static_cast<g2o::VertexSim3Expmap *>(optimizer.vertex(nIDi));
     g2o::Sim3 CorrectedSiw = VSim3->estimate();
     vCorrectedSwc[nIDi] = CorrectedSiw.inverse();
     Eigen::Matrix3d eigR = CorrectedSiw.rotation().toRotationMatrix();
