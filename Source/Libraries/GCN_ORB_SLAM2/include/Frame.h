@@ -113,8 +113,12 @@ public:
   // coordinate associated to the left keypoint is stored.
   void ComputeStereoMatches();
 
+  void ComputeStereoMatches(const int Ftype);
+
   // Associate a "right" coordinate to a keypoint if there is valid depth in the depthmap.
   void ComputeStereoFromRGBD(const cv::Mat &imDepth);
+
+  void ComputeStereoFromRGBD(const cv::Mat &imDepth, const int Ftype);
 
   void ComputeStereoFromRGBD(const cv::Mat &imDepth, std::vector<float> &uRight, std::vector<float> &Depth, const int &refN, 
                              const std::vector<cv::KeyPoint> &Keys, const std::vector<cv::KeyPoint> &KeysUn);
@@ -231,22 +235,29 @@ private:
   // (called in the constructor).
   void UndistortKeyPoints();
 
+  void UndistortKeyPoints(const int Ftype);
+
   void UndistortKeyPoints(const std::vector<cv::KeyPoint> &Keys, std::vector<cv::KeyPoint> &KeysUn, const int &refN);
 
-  // Computes image bounds for the undistorted image (called in the
-  // constructor).
+  // Computes image bounds for the undistorted image (called in the constructor).
   void ComputeImageBounds(const cv::Mat &imLeft);
 
-  // Assign keypoints to the grid for speed up feature matching (called in the
-  // constructor).
+  // Assign keypoints to the grid for speed up feature matching (called in the constructor).
   void AssignFeaturesToGrid();
+
+  void AssignFeaturesToGrid(const int Ftype);
 
   void AssignFeaturesToGrid(const int &refN, const std::vector<cv::KeyPoint> &KeysUn, std::vector<std::vector<std::vector<std::size_t>>> &Grid);
 
   void ChooseFeature(const int Ftype);
 
   // compute features and assign to grids
-  void ComputeFeatures(const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth);
+  void ComputeFeaturesRGBD(const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth);
+
+  void ComputeFeaturesStereo(const int Ftype, const cv::Mat &imLeft, const cv::Mat &imRight, const cv::Mat &imDepth);
+
+
+  
 
   // Rotation, translation and camera center
   cv::Mat mRcw;
