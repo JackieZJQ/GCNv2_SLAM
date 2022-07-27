@@ -63,16 +63,39 @@ void LoopClosing::SetLocalMapper(LocalMapping *pLocalMapper) {
 void LoopClosing::Run() {
   mbFinished = false;
 
+  // while (1) {
+  //   // Check if there are keyframes in the queue
+  //   if (CheckNewKeyFrames()) {
+  //     // Detect loop candidates and check covisibility consistency
+  //     if (DetectLoop()) {
+  //       // Compute similarity transformation [sR|t]
+  //       // In the stereo/RGBD case s=1
+  //       if (ComputeSim3()) {
+  //         // Perform loop fusion and pose graph optimization
+  //         CorrectLoop();
+  //       }
+  //     }
+  //   }
+
+  //   ResetIfRequested();
+
+  //   if (CheckFinish())
+  //     break;
+
+  //   this_thread::sleep_for(chrono::microseconds(5000));
+  //   // usleep(5000);
+  // }
+
   while (1) {
     // Check if there are keyframes in the queue
     if (CheckNewKeyFrames()) {
       // Detect loop candidates and check covisibility consistency
-      if (DetectLoop()) {
+      if (DetectLoopMultiChannels(0)) {
         // Compute similarity transformation [sR|t]
         // In the stereo/RGBD case s=1
-        if (ComputeSim3()) {
+        if (ComputeSim3MultiChannels(0)) {
           // Perform loop fusion and pose graph optimization
-          CorrectLoop();
+          CorrectLoopMultiChannels(0);
         }
       }
     }
@@ -1120,8 +1143,7 @@ void LoopClosing::CorrectLoopMultiChannels(const int Ftype) {
       pKFi->UpdateConnections(); // Multi Channels ??
     }
 
-    // Start Loop Fusion
-    // Update matched map points and replace if duplicated
+    // Start Loop Fusion. Update matched map points and replace if duplicated
     for (std::size_t i = 0; i < mvpCurrentMatchedPoints.size(); i++) {
       if (mvpCurrentMatchedPoints[i]) {
         MapPoint *pLoopMP = mvpCurrentMatchedPoints[i];
@@ -1140,10 +1162,9 @@ void LoopClosing::CorrectLoopMultiChannels(const int Ftype) {
   // Project MapPoints observed in the neighborhood of the loop keyframe
   // into the current keyframe and neighbors using corrected poses.
   // Fuse duplications.
-  SearchAndFuse(CorrectedSim3);
+  SearchAndFuse(CorrectedSim3, Ftype);
 
-  // After the MapPoint fusion, new links in the covisibility graph will appear
-  // attaching both sides of the loop
+  // After the MapPoint fusion, new links in the covisibility graph will appear. attaching both sides of the loop
   map<KeyFrame *, set<KeyFrame *>> LoopConnections;
 
   for (std::vector<KeyFrame *>::iterator vit = mvpCurrentConnectedKFs.begin(), vend = mvpCurrentConnectedKFs.end(); vit != vend; vit++) {
@@ -1151,7 +1172,7 @@ void LoopClosing::CorrectLoopMultiChannels(const int Ftype) {
     std::vector<KeyFrame *> vpPreviousNeighbors = pKFi->GetVectorCovisibleKeyFrames();
 
     // Update connections. Detect new links.
-    pKFi->UpdateConnections();
+    pKFi->UpdateConnections(); // Multi Channels ??
     LoopConnections[pKFi] = pKFi->GetConnectedKeyFrames();
     for (std::vector<KeyFrame *>::iterator vit_prev = vpPreviousNeighbors.begin(), vend_prev = vpPreviousNeighbors.end(); vit_prev != vend_prev; vit_prev++) {
       LoopConnections[pKFi].erase(*vit_prev);
@@ -1174,7 +1195,7 @@ void LoopClosing::CorrectLoopMultiChannels(const int Ftype) {
   mbRunningGBA = true;
   mbFinishedGBA = false;
   mbStopGBA = false;
-  mpThreadGBA = new thread(&LoopClosing::RunGlobalBundleAdjustment, this, mpCurrentKF->mnId);
+  mpThreadGBA = new thread(&LoopClosing::RunGlobalBundleAdjustmentMultiChannels, this, mpCurrentKF->mnId);
 
   // Loop closed. Release Local Mapping.
   mpLocalMapper->Release();
@@ -1204,6 +1225,103 @@ void LoopClosing::SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap, const 
         pRep->Replace(mvpLoopMapPoints[i]);
       }
     }
+  }
+}
+
+void LoopClosing::RunGlobalBundleAdjustmentMultiChannels(unsigned long nLoopKF) {
+  cout << "Starting Global Bundle Adjustment" << endl;
+
+  int idx = mnFullBAIdx;
+  Optimizer::GlobalBundleAdjustemntMultiChannels(mpMap, 10, &mbStopGBA, nLoopKF, false);
+
+  // Update all MapPoints and KeyFrames
+  // Local Mapping was active during BA, that means that there might be new
+  // keyframes not included in the Global BA and they are not consistent with
+  // the updated map. We need to propagate the correction through the spanning
+  // tree
+  {
+    unique_lock<mutex> lock(mMutexGBA);
+    if (idx != mnFullBAIdx)
+      return;
+
+    if (!mbStopGBA) {
+      cout << "Global Bundle Adjustment finished" << endl;
+      cout << "Updating map ..." << endl;
+      mpLocalMapper->RequestStop();
+      // Wait until Local Mapping has effectively stopped
+
+      while (!mpLocalMapper->isStopped() && !mpLocalMapper->isFinished()) {
+        this_thread::sleep_for(chrono::microseconds(1000));
+        // usleep(1000);
+      }
+
+      // Get Map Mutex
+      unique_lock<mutex> lock(mpMap->mMutexMapUpdate);
+
+      // Correct keyframes starting at map first keyframe
+      std::list<KeyFrame *> lpKFtoCheck(mpMap->mvpKeyFrameOrigins.begin(), mpMap->mvpKeyFrameOrigins.end());
+
+      while (!lpKFtoCheck.empty()) {
+        KeyFrame *pKF = lpKFtoCheck.front();
+        const set<KeyFrame *> sChilds = pKF->GetChilds();
+        cv::Mat Twc = pKF->GetPoseInverse();
+        for (set<KeyFrame *>::const_iterator sit = sChilds.begin(); sit != sChilds.end(); sit++) {
+          KeyFrame *pChild = *sit;
+          if (pChild->mnBAGlobalForKF != nLoopKF) {
+            cv::Mat Tchildc = pChild->GetPose() * Twc;
+            pChild->mTcwGBA = Tchildc * pKF->mTcwGBA; //*Tcorc*pKF->mTcwGBA;
+            pChild->mnBAGlobalForKF = nLoopKF;
+          }
+          lpKFtoCheck.push_back(pChild);
+        }
+
+        pKF->mTcwBefGBA = pKF->GetPose();
+        pKF->SetPose(pKF->mTcwGBA);
+        lpKFtoCheck.pop_front();
+      }
+
+      // Correct MapPoints
+      const std::vector<MapPoint *> vpMPs = mpMap->GetAllMapPoints();
+
+      for (std::size_t i = 0; i < vpMPs.size(); i++) {
+        MapPoint *pMP = vpMPs[i];
+
+        if (pMP->isBad())
+          continue;
+
+        if (pMP->mnBAGlobalForKF == nLoopKF) {
+          // If optimized by Global BA, just update
+          pMP->SetWorldPos(pMP->mPosGBA);
+        } else {
+          // Update according to the correction of its reference keyframe
+          KeyFrame *pRefKF = pMP->GetReferenceKeyFrame();
+
+          if (pRefKF->mnBAGlobalForKF != nLoopKF)
+            continue;
+
+          // Map to non-corrected camera
+          cv::Mat Rcw = pRefKF->mTcwBefGBA.rowRange(0, 3).colRange(0, 3);
+          cv::Mat tcw = pRefKF->mTcwBefGBA.rowRange(0, 3).col(3);
+          cv::Mat Xc = Rcw * pMP->GetWorldPos() + tcw;
+
+          // Backproject using corrected camera
+          cv::Mat Twc = pRefKF->GetPoseInverse();
+          cv::Mat Rwc = Twc.rowRange(0, 3).colRange(0, 3);
+          cv::Mat twc = Twc.rowRange(0, 3).col(3);
+
+          pMP->SetWorldPos(Rwc * Xc + twc);
+        }
+      }
+
+      mpMap->InformNewBigChange();
+
+      mpLocalMapper->Release();
+
+      cout << "Map updated!" << endl;
+    }
+
+    mbFinishedGBA = true;
+    mbRunningGBA = false;
   }
 }
 

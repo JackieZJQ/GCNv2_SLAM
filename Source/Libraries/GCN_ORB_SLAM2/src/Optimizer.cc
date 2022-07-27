@@ -1239,6 +1239,12 @@ int Optimizer::OptimizeSim3(KeyFrame *pKF1, KeyFrame *pKF2,
 
 ///////////////////////////////////Some New Functions//////////////////////////////////
 
+void Optimizer::GlobalBundleAdjustemntMultiChannels(Map *pMap, int nIterations, bool *pbStopFlag, const unsigned long nLoopKF, const bool bRobust) {
+  std::vector<KeyFrame *> vpKFs = pMap->GetAllKeyFrames();
+  std::vector<MapPoint *> vpMP = pMap->GetAllMapPoints();
+  BundleAdjustmentMultiChannels(vpKFs, vpMP, nIterations, pbStopFlag, nLoopKF, bRobust);
+}
+
 void Optimizer::BundleAdjustmentMultiChannels(const std::vector<KeyFrame *> &vpKFs, const std::vector<MapPoint *> &vpMP, int nIterations, bool *pbStopFlag,
                                               const unsigned long nLoopKF, const bool bRobust) {
   std::vector<bool> vbNotIncludedMP;
@@ -2105,7 +2111,7 @@ int Optimizer::OptimizeSim3(KeyFrame *pKF1, KeyFrame *pKF2, std::vector<MapPoint
   return nIn;
 }
 
-//TO-DO rewrite
+//TO-DO rewrite, useless ?? the same as the default one
 void Optimizer::OptimizeEssentialGraph(Map *pMap, KeyFrame *pLoopKF, KeyFrame *pCurKF, const LoopClosing::KeyFrameAndPose &NonCorrectedSim3,
                                        const LoopClosing::KeyFrameAndPose &CorrectedSim3, const map<KeyFrame *, set<KeyFrame *>> &LoopConnections,
                                        const bool &bFixScale, const int FType) {
@@ -2121,7 +2127,7 @@ void Optimizer::OptimizeEssentialGraph(Map *pMap, KeyFrame *pLoopKF, KeyFrame *p
   optimizer.setAlgorithm(solver);
 
   const std::vector<KeyFrame *> vpKFs = pMap->GetAllKeyFrames();
-  const std::vector<MapPoint *> vpMPs = pMap->GetAllMapPoints(); //TO-DO get all mappoints or just one kind mappoints
+  const std::vector<MapPoint *> vpMPs = pMap->GetAllMapPoints(); //TO-DO get all mappoints or just one kind mappoints ?? 
 
   const unsigned int nMaxKFid = pMap->GetMaxKFid(); // Max ID of Keyframe
 
@@ -2179,7 +2185,7 @@ void Optimizer::OptimizeEssentialGraph(Map *pMap, KeyFrame *pLoopKF, KeyFrame *p
 
     for (set<KeyFrame *>::const_iterator sit = spConnections.begin(), send = spConnections.end(); sit != send; sit++) {
       const long unsigned int nIDj = (*sit)->mnId;
-      if ((nIDi != pCurKF->mnId || nIDj != pLoopKF->mnId) && pKF->GetWeight(*sit) < minFeat)
+      if ((nIDi != pCurKF->mnId || nIDj != pLoopKF->mnId) && pKF->GetWeight(*sit) < minFeat) // Two channels, the weight will be very high, should only have one channel
         continue;
 
       const g2o::Sim3 Sjw = vScw[nIDj];
@@ -2349,5 +2355,6 @@ void Optimizer::OptimizeEssentialGraph(Map *pMap, KeyFrame *pLoopKF, KeyFrame *p
     pMP->UpdateNormalAndDepth();
   }
 }
+
 
 } // namespace ORB_SLAM2
