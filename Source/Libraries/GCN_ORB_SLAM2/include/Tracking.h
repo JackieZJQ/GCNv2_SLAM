@@ -192,12 +192,17 @@ protected:
   FeatureExtractor *mpIniORBExtractor;
   FeatureExtractor *mpORBExtractor;
 
+  // Feature extractor arrays
+  FeatureExtractor *mpFeatureExtractorLeft[Ntype];
+  FeatureExtractor *mpFeatureExtractorRight[Ntype];
+  FeatureExtractor *mpIniFeatureExtractor[Ntype];
+  FeatureExtractor *mpFeatureExtractor[Ntype];
+
   // BoW
   std::vector<ORBVocabulary *> mpVocabulary;
   std::vector<KeyFrameDatabase *> mpKeyFrameDB;
 
   
-
   // Initalization (only for monocular)
   Initializer *mpInitializer;
 

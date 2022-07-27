@@ -73,6 +73,11 @@ Frame::Frame(const Frame &frame)
     }
   }
 
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    mpFeatureExtractorLeft[Ftype] = frame.mpFeatureExtractorLeft[Ftype];
+    mpFeatureExtractorRight[Ftype] = frame.mpFeatureExtractorRight[Ftype];
+  }
+
   if (!frame.mTcw.empty())
     SetPose(frame.mTcw);
 }
@@ -80,7 +85,8 @@ Frame::Frame(const Frame &frame)
 // Stereo
 Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeStamp, 
              FeatureExtractor *GCNextractorLeft, FeatureExtractor *GCNextractorRight, 
-             FeatureExtractor *ORBextractorLeft, FeatureExtractor *ORBextractorRight, 
+             FeatureExtractor *ORBextractorLeft, FeatureExtractor *ORBextractorRight,
+             FeatureExtractor *extractorLeft[Ntype], FeatureExtractor *extractorRight[Ntype],
              vector<ORBVocabulary *> voc, cv::Mat &K,
              cv::Mat &distCoef, const float &bf, const float &thDepth)
     : mpVocabulary(voc),
@@ -96,6 +102,12 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
       mpReferenceKF(static_cast<KeyFrame *>(NULL)) {
   // Frame ID
   mnId = nNextId++;
+
+  // Feature Extractor Initlization
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    mpFeatureExtractorLeft[Ftype] = extractorLeft[Ftype];
+    mpFeatureExtractorRight[Ftype] = extractorRight[Ftype];
+  }
 
   // Scale Level Info
   mnScaleLevels = mpORBExtractorLeft->GetLevels();
@@ -141,7 +153,7 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
 // RGB-D
 Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
              const double &timeStamp, 
-             FeatureExtractor *GCNextractor, FeatureExtractor *ORBextractor,
+             FeatureExtractor *GCNextractor, FeatureExtractor *ORBextractor, FeatureExtractor *extractor[Ntype],
              vector<ORBVocabulary *> voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
              const float &thDepth)
     : mpVocabulary(voc),
@@ -156,6 +168,12 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
       mThDepth(thDepth) {
   // Frame ID
   mnId = nNextId++;
+
+  // Feature extractor initlization
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    mpFeatureExtractorLeft[Ftype] = extractor[Ftype];
+    mpFeatureExtractorRight[Ftype] = static_cast<FeatureExtractor *>(NULL);
+  }
 
   // Scale Level Info
   mnScaleLevels = mpORBExtractorLeft->GetLevels();
@@ -200,7 +218,7 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
 // Mono
 Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
-             FeatureExtractor *GCNextractor, FeatureExtractor *ORBextractor, 
+             FeatureExtractor *GCNextractor, FeatureExtractor *ORBextractor, FeatureExtractor *extractor[Ntype],
              vector<ORBVocabulary *> voc, cv::Mat &K,
              cv::Mat &distCoef, const float &bf, const float &thDepth)
     : mpVocabulary(voc),
@@ -215,6 +233,12 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
       mThDepth(thDepth) {
   // Frame ID
   mnId = nNextId++;
+
+  // Feature extractor initlization
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    mpFeatureExtractorLeft[Ftype] = extractor[Ftype];
+    mpFeatureExtractorRight[Ftype] = static_cast<FeatureExtractor *>(NULL);
+  }
 
   // Scale Level Info
   mnScaleLevels = mpORBExtractorLeft->GetLevels();
@@ -310,18 +334,18 @@ void Frame::AssignFeaturesToGrid(const int &refN, const vector<cv::KeyPoint> &Ke
 void Frame::ExtractFeatures(const int Ftype, int imageFlag, const cv::Mat &im) {
   if (Ftype == 0) {
     if (imageFlag == 0) {
-      (*mpORBExtractorLeft)(im, cv::Mat(), Channels[Ftype].mvKeys, Channels[Ftype].mDescriptors);
+      (*mpFeatureExtractorLeft[Ftype])(im, cv::Mat(), Channels[Ftype].mvKeys, Channels[Ftype].mDescriptors);
     }
     else {
-      (*mpORBExtractorRight)(im, cv::Mat(), Channels[Ftype].mvKeysRight, Channels[Ftype].mDescriptorsRight);
+      (*mpFeatureExtractorRight[Ftype])(im, cv::Mat(), Channels[Ftype].mvKeysRight, Channels[Ftype].mDescriptorsRight);
     }
   }
   else {
     if (imageFlag == 0) {
-      (*mpGCNExtractorLeft)(im, cv::Mat(), Channels[Ftype].mvKeys, Channels[Ftype].mDescriptors);
+      (*mpFeatureExtractorLeft[Ftype])(im, cv::Mat(), Channels[Ftype].mvKeys, Channels[Ftype].mDescriptors);
     }
     else {
-      (*mpGCNExtractorRight)(im, cv::Mat(), Channels[Ftype].mvKeysRight, Channels[Ftype].mDescriptorsRight);
+      (*mpFeatureExtractorRight[Ftype])(im, cv::Mat(), Channels[Ftype].mvKeysRight, Channels[Ftype].mDescriptorsRight);
     }
   }
 }
