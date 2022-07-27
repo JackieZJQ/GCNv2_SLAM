@@ -180,15 +180,12 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   mvLevelSigma2 = mpORBExtractorLeft->GetScaleSigmaSquares();
   mvInvLevelSigma2 = mpORBExtractorLeft->GetInverseScaleSigmaSquares();
 
-  // This is done only for the first Frame (or after a change in the
-  // calibration)
+  // This is done only for the first Frame (or after a change in the calibration)
   if (mbInitialComputations) {
     ComputeImageBounds(imGray);
 
-    mfGridElementWidthInv = static_cast<float>(FRAME_GRID_COLS) /
-                            static_cast<float>(mnMaxX - mnMinX);
-    mfGridElementHeightInv = static_cast<float>(FRAME_GRID_ROWS) /
-                             static_cast<float>(mnMaxY - mnMinY);
+    mfGridElementWidthInv = static_cast<float>(FRAME_GRID_COLS) / static_cast<float>(mnMaxX - mnMinX);
+    mfGridElementHeightInv = static_cast<float>(FRAME_GRID_ROWS) / static_cast<float>(mnMaxY - mnMinY);
 
     fx = K.at<float>(0, 0);
     fy = K.at<float>(1, 1);
@@ -211,8 +208,7 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   threadGCN.join();
 
 
-  // Use dictionary to store orb and gcn parms in parallel, then copy data to default variables
-  // Choose orbfeatures
+  // Use dictionary to store orb and gcn parms in parallel, then copy data to default variables Choose orbfeatures, delete ??
   if (getenv("USE_ORB") == nullptr)
     ChooseFeature(1);
   else 
@@ -268,10 +264,8 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
   if (mbInitialComputations) {
     ComputeImageBounds(imGray);
 
-    mfGridElementWidthInv = static_cast<float>(FRAME_GRID_COLS) /
-                            static_cast<float>(mnMaxX - mnMinX);
-    mfGridElementHeightInv = static_cast<float>(FRAME_GRID_ROWS) /
-                             static_cast<float>(mnMaxY - mnMinY);
+    mfGridElementWidthInv = static_cast<float>(FRAME_GRID_COLS) / static_cast<float>(mnMaxX - mnMinX);
+    mfGridElementHeightInv = static_cast<float>(FRAME_GRID_ROWS) / static_cast<float>(mnMaxY - mnMinY);
 
     fx = K.at<float>(0, 0);
     fy = K.at<float>(1, 1);
@@ -304,8 +298,7 @@ void Frame::AssignFeaturesToGrid() {
 }
 
 //rewrite AssignFeaturesToGrid()
-void Frame::AssignFeaturesToGrid(const int &refN, const vector<cv::KeyPoint> &KeysUn, 
-                                  vector<vector<vector<size_t>>> &Grid) {
+void Frame::AssignFeaturesToGrid(const int &refN, const vector<cv::KeyPoint> &KeysUn,vector<vector<vector<size_t>>> &Grid) {
   int nReserve = 0.5f * refN / (FRAME_GRID_COLS * FRAME_GRID_ROWS);
   Grid.resize(FRAME_GRID_COLS);
   for (unsigned int i = 0; i < FRAME_GRID_COLS; i++) {
@@ -471,31 +464,23 @@ vector<size_t> Frame::GetFeaturesInArea(const float &x, const float &y,
 }
 
 // Rewrite GetFeaturesInArea()
-vector<size_t> Frame::GetFeaturesInArea(const int Ftype, const float &x, const float &y,
-                                        const float &r, const int minLevel,
-                                        const int maxLevel) const {
+vector<size_t> Frame::GetFeaturesInArea(const int Ftype, const float &x, const float &y, const float &r, const int minLevel, const int maxLevel) const {
   vector<size_t> vIndices;
   vIndices.reserve(Channels[Ftype].N);
 
-  const int nMinCellX =
-      max(0, (int)floor((x - mnMinX - r) * mfGridElementWidthInv));
+  const int nMinCellX = max(0, (int)floor((x - mnMinX - r) * mfGridElementWidthInv));
   if (nMinCellX >= FRAME_GRID_COLS)
     return vIndices;
 
-  const int nMaxCellX =
-      min((int)FRAME_GRID_COLS - 1,
-          (int)ceil((x - mnMinX + r) * mfGridElementWidthInv));
+  const int nMaxCellX = min((int)FRAME_GRID_COLS - 1, (int)ceil((x - mnMinX + r) * mfGridElementWidthInv));
   if (nMaxCellX < 0)
     return vIndices;
 
-  const int nMinCellY =
-      max(0, (int)floor((y - mnMinY - r) * mfGridElementHeightInv));
+  const int nMinCellY = max(0, (int)floor((y - mnMinY - r) * mfGridElementHeightInv));
   if (nMinCellY >= FRAME_GRID_ROWS)
     return vIndices;
 
-  const int nMaxCellY =
-      min((int)FRAME_GRID_ROWS - 1,
-          (int)ceil((y - mnMinY + r) * mfGridElementHeightInv));
+  const int nMaxCellY = min((int)FRAME_GRID_ROWS - 1, (int)ceil((y - mnMinY + r) * mfGridElementHeightInv));
   if (nMaxCellY < 0)
     return vIndices;
 
@@ -591,8 +576,7 @@ void Frame::UndistortKeyPoints() {
 }
 
 // Rewrite UndistortKeyPoints
-void Frame::UndistortKeyPoints(const vector<cv::KeyPoint> &Keys, 
-                                vector<cv::KeyPoint> &KeysUn, const int &refN) {
+void Frame::UndistortKeyPoints(const vector<cv::KeyPoint> &Keys, vector<cv::KeyPoint> &KeysUn, const int &refN) {
   if (mDistCoef.at<float>(0) == 0.0) {
     KeysUn = Keys;
   }
@@ -941,23 +925,5 @@ void Frame::ComputeFeatures(const int Ftype, const cv::Mat &imGray, const cv::Ma
   // AssignFeaturesToGrid(N, mvKeysUn, mGrid);
   AssignFeaturesToGrid(Channels[Ftype].N, Channels[Ftype].mvKeysUn, Channels[Ftype].mGrid);
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// void Frame::ComputeBoW() {
-
-//   for (int i = 0; i < Ntype; i++) {
-//     if (Channels[i].mBowVec.empty()) {
-//       vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(Channels[i].mDescriptors);
-//       mpVocabulary[i]->transform(vCurrentDesc, Channels[i].mBowVec, Channels[i].mFeatVec, 4);
-//     }
-//   }
-
-//   // only orb works
-//   mBowVec = Channels[0].mBowVec;
-//   mFeatVec = Channels[0].mFeatVec;
-// }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 } // namespace ORB_SLAM2

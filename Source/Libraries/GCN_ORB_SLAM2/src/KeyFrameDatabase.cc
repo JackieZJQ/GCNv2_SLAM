@@ -70,8 +70,7 @@ std::vector<KeyFrame *> KeyFrameDatabase::DetectLoopCandidates(KeyFrame *pKF, fl
   set<KeyFrame *> spConnectedKeyFrames = pKF->GetConnectedKeyFrames();
   std::list<KeyFrame *> lKFsSharingWords;
 
-  // Search all keyframes that share a word with current keyframes
-  // Discard keyframes connected to the query keyframe
+  // Search all keyframes that share a word with current keyframes. Discard keyframes connected to the query keyframe
   {
     unique_lock<mutex> lock(mMutex);
 
