@@ -92,6 +92,7 @@ protected:
   bool ComputeSim3MultiChannels(const int Ftype);
 
   void SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap);
+  void SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap, const int Ftype);
 
   void CorrectLoop();
   void CorrectLoopMultiChannels(const int Ftype);
