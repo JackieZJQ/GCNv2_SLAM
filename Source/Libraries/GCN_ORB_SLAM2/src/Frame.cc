@@ -110,13 +110,13 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
   }
 
   // Scale Level Info
-  mnScaleLevels = mpORBExtractorLeft->GetLevels();
-  mfScaleFactor = mpORBExtractorLeft->GetScaleFactor();
+  mnScaleLevels = mpFeatureExtractorLeft[0]->GetLevels();
+  mfScaleFactor = mpFeatureExtractorLeft[0]->GetScaleFactor();
   mfLogScaleFactor = log(mfScaleFactor);
-  mvScaleFactors = mpORBExtractorLeft->GetScaleFactors();
-  mvInvScaleFactors = mpORBExtractorLeft->GetInverseScaleFactors();
-  mvLevelSigma2 = mpORBExtractorLeft->GetScaleSigmaSquares();
-  mvInvLevelSigma2 = mpORBExtractorLeft->GetInverseScaleSigmaSquares();
+  mvScaleFactors = mpFeatureExtractorLeft[0]->GetScaleFactors();
+  mvInvScaleFactors = mpFeatureExtractorLeft[0]->GetInverseScaleFactors();
+  mvLevelSigma2 = mpFeatureExtractorLeft[0]->GetScaleSigmaSquares();
+  mvInvLevelSigma2 = mpFeatureExtractorLeft[0]->GetInverseScaleSigmaSquares();
 
   // This is done only for the first Frame (or after a change in the calibration)
   if (mbInitialComputations) {
@@ -176,13 +176,13 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   }
 
   // Scale Level Info
-  mnScaleLevels = mpORBExtractorLeft->GetLevels();
-  mfScaleFactor = mpORBExtractorLeft->GetScaleFactor();
+  mnScaleLevels = mpFeatureExtractorLeft[0]->GetLevels();
+  mfScaleFactor = mpFeatureExtractorLeft[0]->GetScaleFactor();
   mfLogScaleFactor = log(mfScaleFactor);
-  mvScaleFactors = mpORBExtractorLeft->GetScaleFactors();
-  mvInvScaleFactors = mpORBExtractorLeft->GetInverseScaleFactors();
-  mvLevelSigma2 = mpORBExtractorLeft->GetScaleSigmaSquares();
-  mvInvLevelSigma2 = mpORBExtractorLeft->GetInverseScaleSigmaSquares();
+  mvScaleFactors = mpFeatureExtractorLeft[0]->GetScaleFactors();
+  mvInvScaleFactors = mpFeatureExtractorLeft[0]->GetInverseScaleFactors();
+  mvLevelSigma2 = mpFeatureExtractorLeft[0]->GetScaleSigmaSquares();
+  mvInvLevelSigma2 = mpFeatureExtractorLeft[0]->GetInverseScaleSigmaSquares();
 
   // This is done only for the first Frame (or after a change in the calibration)
   if (mbInitialComputations) {
@@ -241,13 +241,13 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
   }
 
   // Scale Level Info
-  mnScaleLevels = mpORBExtractorLeft->GetLevels();
-  mfScaleFactor = mpORBExtractorLeft->GetScaleFactor();
+  mnScaleLevels = mpFeatureExtractorLeft[0]->GetLevels();
+  mfScaleFactor = mpFeatureExtractorLeft[0]->GetScaleFactor();
   mfLogScaleFactor = log(mfScaleFactor);
-  mvScaleFactors = mpORBExtractorLeft->GetScaleFactors();
-  mvInvScaleFactors = mpORBExtractorLeft->GetInverseScaleFactors();
-  mvLevelSigma2 = mpORBExtractorLeft->GetScaleSigmaSquares();
-  mvInvLevelSigma2 = mpORBExtractorLeft->GetInverseScaleSigmaSquares();
+  mvScaleFactors = mpFeatureExtractorLeft[0]->GetScaleFactors();
+  mvInvScaleFactors = mpFeatureExtractorLeft[0]->GetInverseScaleFactors();
+  mvLevelSigma2 = mpFeatureExtractorLeft[0]->GetScaleSigmaSquares();
+  mvInvLevelSigma2 = mpFeatureExtractorLeft[0]->GetInverseScaleSigmaSquares();
 
   // This is done only for the first Frame (or after a change in the calibration)
   if (mbInitialComputations) {

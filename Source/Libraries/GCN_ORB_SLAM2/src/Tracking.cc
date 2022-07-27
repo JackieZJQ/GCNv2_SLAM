@@ -255,6 +255,7 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB, const cv::Mat &imD, const 
     imDepth.convertTo(imDepth, CV_32F, mDepthMapFactor);
 
   mCurrentFrame = Frame(mImGray, imDepth, timestamp, mpGCNExtractorLeft, mpORBExtractorLeft, mpFeatureExtractorLeft, mpVocabulary, mK, mDistCoef, mbf, mThDepth);
+  
   Track();
 
   return mCurrentFrame.mTcw.clone();
