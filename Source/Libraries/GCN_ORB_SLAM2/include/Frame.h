@@ -126,6 +126,8 @@ public:
   // Backprojects a keypoint (if stereo/depth info available) into 3D world coordinates.
   cv::Mat UnprojectStereo(const int &i);
 
+  cv::Mat UnprojectStereo(const int &i, const int Ftype);
+
   cv::Mat UnprojectStereo(const int &i, const std::vector<float> &Depth, const std::vector<cv::KeyPoint> &KeysUn);
 
 public:
@@ -254,11 +256,10 @@ private:
   // compute features and assign to grids
   void ComputeFeaturesRGBD(const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth);
 
-  void ComputeFeaturesStereo(const int Ftype, const cv::Mat &imLeft, const cv::Mat &imRight, const cv::Mat &imDepth);
+  void ComputeFeaturesStereo(const int Ftype, const cv::Mat &imLeft, const cv::Mat &imRight);
 
-
+  void ComputeFeaturesMono(const int Ftype, const cv::Mat &imGray); 
   
-
   // Rotation, translation and camera center
   cv::Mat mRcw;
   cv::Mat mtcw;

@@ -106,36 +106,12 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
   mvLevelSigma2 = mpORBExtractorLeft->GetScaleSigmaSquares();
   mvInvLevelSigma2 = mpORBExtractorLeft->GetInverseScaleSigmaSquares();
 
-  // ORB extraction
-  // thread threadLeft(&Frame::ExtractFeatures, this, featureData[0], 0, 0, imLeft);
-  // thread threadRight(&Frame::ExtractFeatures, this, featureData[0], 0, 1, imRight);
-  // threadLeft.join();
-  // threadRight.join();
-
-  ExtractFeatures(0, 0, imLeft);
-  ExtractFeatures(0, 1, imRight);
-
-  // Size of features
-  N = mvKeys.size();
-    
-  if (mvKeys.empty())
-    return;
-
-  UndistortKeyPoints();
-
-  ComputeStereoMatches();
-
-  mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
-  mvbOutlier = vector<bool>(N, false);
-
   // This is done only for the first Frame (or after a change in the calibration)
   if (mbInitialComputations) {
     ComputeImageBounds(imLeft);
 
-    mfGridElementWidthInv =
-        static_cast<float>(FRAME_GRID_COLS) / (mnMaxX - mnMinX);
-    mfGridElementHeightInv =
-        static_cast<float>(FRAME_GRID_ROWS) / (mnMaxY - mnMinY);
+    mfGridElementWidthInv = static_cast<float>(FRAME_GRID_COLS) / static_cast<float>(mnMaxX - mnMinX);
+    mfGridElementHeightInv = static_cast<float>(FRAME_GRID_ROWS) / static_cast<float>(mnMaxY - mnMinY);
 
     fx = K.at<float>(0, 0);
     fy = K.at<float>(1, 1);
@@ -149,7 +125,17 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
 
   mb = mbf / fx;
 
-  AssignFeaturesToGrid();
+  thread threadORB(&Frame::ComputeFeaturesStereo, this, 0, imLeft, imRight);
+  thread threadGCN(&Frame::ComputeFeaturesStereo, this, 1, imLeft, imRight);
+  threadORB.join();
+  threadGCN.join();
+
+
+  // Use dictionary to store orb and gcn parms in parallel, then copy data to default variables Choose orbfeatures, delete ??
+  if (getenv("USE_ORB") == nullptr)
+    ChooseFeature(1);
+  else 
+    ChooseFeature(0);
 }
 
 // RGB-D
@@ -199,9 +185,6 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
   mb = mbf / fx;
 
-  // ComputeFeatures(0, imGray, imDepth);
-  // ComputeFeatures(1, imGray, imDepth);
-
   thread threadORB(&Frame::ComputeFeaturesRGBD, this, 0, imGray, imDepth);
   thread threadGCN(&Frame::ComputeFeaturesRGBD, this, 1, imGray, imDepth);
   threadORB.join();
@@ -242,25 +225,7 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
   mvLevelSigma2 = mpORBExtractorLeft->GetScaleSigmaSquares();
   mvInvLevelSigma2 = mpORBExtractorLeft->GetInverseScaleSigmaSquares();
 
-  // ORB extraction
-  ExtractFeatures(0, 0, imGray);
-
-  N = mvKeys.size();
-
-  if (mvKeys.empty())
-    return;
-
-  UndistortKeyPoints();
-
-  // Set no stereo information
-  mvuRight = vector<float>(N, -1);
-  mvDepth = vector<float>(N, -1);
-
-  mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
-  mvbOutlier = vector<bool>(N, false);
-
-  // This is done only for the first Frame (or after a change in the
-  // calibration)
+  // This is done only for the first Frame (or after a change in the calibration)
   if (mbInitialComputations) {
     ComputeImageBounds(imGray);
 
@@ -279,7 +244,17 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
 
   mb = mbf / fx;
 
-  AssignFeaturesToGrid();
+  thread threadORB(&Frame::ComputeFeaturesMono, this, 0, imGray);
+  thread threadGCN(&Frame::ComputeFeaturesMono, this, 1, imGray);
+  threadORB.join();
+  threadGCN.join();
+
+
+  // Use dictionary to store orb and gcn parms in parallel, then copy data to default variables Choose orbfeatures, delete ??
+  if (getenv("USE_ORB") == nullptr)
+    ChooseFeature(1);
+  else 
+    ChooseFeature(0); 
 }
 
 void Frame::AssignFeaturesToGrid() {
@@ -1088,6 +1063,19 @@ cv::Mat Frame::UnprojectStereo(const int &i) {
     return cv::Mat();
 }
 
+cv::Mat Frame::UnprojectStereo(const int &i, const int Ftype) {
+  const float z = Channels[Ftype].mvDepth[i];
+  if (z > 0) {
+    const float u = Channels[Ftype].mvKeysUn[i].pt.x;
+    const float v = Channels[Ftype].mvKeysUn[i].pt.y;
+    const float x = (u - cx) * z * invfx;
+    const float y = (v - cy) * z * invfy;
+    cv::Mat x3Dc = (cv::Mat_<float>(3, 1) << x, y, z);
+    return mRwc * x3Dc + mOw;
+  } else
+    return cv::Mat();
+}
+
 // Rewrite UnprojectStereo()
 cv::Mat Frame::UnprojectStereo(const int &i, const vector<float> &Depth, const vector<cv::KeyPoint> &KeysUn) {
   const float z = Depth[i];
@@ -1154,7 +1142,7 @@ void Frame::ComputeFeaturesRGBD(const int Ftype, const cv::Mat &imGray, const cv
   // AssignFeaturesToGrid(Channels[Ftype].N, Channels[Ftype].mvKeysUn, Channels[Ftype].mGrid);
 }
 
-void Frame::ComputeFeaturesStereo(const int Ftype, const cv::Mat &imLeft, const cv::Mat &imRight, const cv::Mat &imDepth) {
+void Frame::ComputeFeaturesStereo(const int Ftype, const cv::Mat &imLeft, const cv::Mat &imRight) {
   // Feature extraction
   thread threadLeft(&Frame::ExtractFeatures, this, Ftype, 0, imLeft);
   thread threadRight(&Frame::ExtractFeatures, this, Ftype, 1, imRight);
@@ -1170,8 +1158,33 @@ void Frame::ComputeFeaturesStereo(const int Ftype, const cv::Mat &imLeft, const 
   UndistortKeyPoints(Ftype);
 
   // compute mvuRight and mvDepth
-  ComputeStereoFromRGBD(imDepth, Ftype);
+  ComputeStereoMatches(Ftype);
   
+  // map points
+  Channels[Ftype].mvpMapPoints = vector<MapPoint *>(Channels[Ftype].N, static_cast<MapPoint *>(NULL));
+
+  // outliers
+  Channels[Ftype].mvbOutlier = vector<bool>(Channels[Ftype].N, false);
+
+  AssignFeaturesToGrid(Ftype);
+}
+
+void Frame::ComputeFeaturesMono(const int Ftype, const cv::Mat &imGray) {
+  // Feature extraction
+  ExtractFeatures(Ftype, 0, imGray);
+
+  Channels[Ftype].N = Channels[Ftype].mvKeys.size();
+  
+  if (Channels[Ftype].mvKeys.empty())
+    return;
+
+  // mvKeysUn, Left image
+  UndistortKeyPoints(Ftype);
+
+  // Set no stereo information
+  Channels[Ftype].mvuRight = vector<float>(Channels[Ftype].N, -1);
+  Channels[Ftype].mvDepth = vector<float>(Channels[Ftype].N, -1);
+
   // map points
   Channels[Ftype].mvpMapPoints = vector<MapPoint *>(Channels[Ftype].N, static_cast<MapPoint *>(NULL));
 
