@@ -104,10 +104,10 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
   mnId = nNextId++;
 
   // Feature Extractor Initlization
-  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-    mpFeatureExtractorLeft[Ftype] = extractorLeft[Ftype];
-    mpFeatureExtractorRight[Ftype] = extractorRight[Ftype];
-  }
+  // for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+  //   mpFeatureExtractorLeft[Ftype] = extractorLeft[Ftype];
+  //   mpFeatureExtractorRight[Ftype] = extractorRight[Ftype];
+  // }
 
   // Scale Level Info
   mnScaleLevels = mpFeatureExtractorLeft[0]->GetLevels();
@@ -170,10 +170,10 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   mnId = nNextId++;
 
   // Feature extractor initlization
-  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-    mpFeatureExtractorLeft[Ftype] = extractor[Ftype];
-    mpFeatureExtractorRight[Ftype] = static_cast<FeatureExtractor *>(NULL);
-  }
+  // for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+  //   mpFeatureExtractorLeft[Ftype] = extractor[Ftype];
+  //   mpFeatureExtractorRight[Ftype] = static_cast<FeatureExtractor *>(NULL);
+  // }
 
   // Scale Level Info
   mnScaleLevels = mpFeatureExtractorLeft[0]->GetLevels();

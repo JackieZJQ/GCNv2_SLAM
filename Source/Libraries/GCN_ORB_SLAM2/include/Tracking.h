@@ -121,8 +121,7 @@ protected:
 
   // Map initialization for stereo and RGB-D
   void StereoInitialization();
-  // void StereoInitialization(const int &flag);
-
+  
   // Map initialization for monocular
   void MonocularInitialization();
   void CreateInitialMapMonocular();
@@ -145,6 +144,8 @@ protected:
   void CreateNewKeyFrame();
 
   //////////////////////////////Rewrite///////////////////////////////
+
+  void StereoInitializationMultiChannels();
 
   void CheckReplacedInLastFrame(const int Ftype);
   void UpdateLastFrame(const int Ftype);
