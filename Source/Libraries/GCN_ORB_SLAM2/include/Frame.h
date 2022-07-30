@@ -77,15 +77,12 @@ public:
   void ExtractFeatures(const int Ftype, int imageFlag, const cv::Mat &im);
 
   // Compute Bag of Words representation.
-  void ComputeBoW();
-
   void ComputeBoW(const int Ftype);
 
   // Set the camera pose.
   void SetPose(cv::Mat Tcw);
 
-  // Computes rotation, translation and camera center matrices from the camera
-  // pose.
+  // Computes rotation, translation and camera center matrices from the camera pose.
   void UpdatePoseMatrices();
 
   // Returns the camera center.
@@ -94,41 +91,26 @@ public:
   // Returns inverse of rotation
   inline cv::Mat GetRotationInverse() { return mRwc.clone(); }
 
-  // Check if a MapPoint is in the frustum of the camera
-  // and fill variables of the MapPoint to be used by the tracking
+  // Check if a MapPoint is in the frustum of the camera and fill variables of the MapPoint to be used by the tracking
   bool isInFrustum(MapPoint *pMP, float viewingCosLimit);
 
   // Compute the cell of a keypoint (return false if outside the grid)
   bool PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY);
-
-  std::vector<size_t> GetFeaturesInArea(const float &x, const float &y,
-                                        const float &r, const int minLevel = -1,
-                                        const int maxLevel = -1) const;
   
-  std::vector<size_t> GetFeaturesInArea(const int Ftype, const float &x, const float &y,
-                                        const float &r, const int minLevel = -1,
+  std::vector<size_t> GetFeaturesInArea(const int Ftype, const float &x, const float &y, const float &r, const int minLevel = -1,
                                         const int maxLevel = -1) const;
 
-  // Search a match for each keypoint in the left image to a keypoint in the
-  // right image. If there is a match, depth is computed and the right
+  // Search a match for each keypoint in the left image to a keypoint in the right image. If there is a match, depth is computed and the right
   // coordinate associated to the left keypoint is stored.
-  void ComputeStereoMatches();
-
   void ComputeStereoMatches(const int Ftype);
 
   // Associate a "right" coordinate to a keypoint if there is valid depth in the depthmap.
-  void ComputeStereoFromRGBD(const cv::Mat &imDepth);
-
   void ComputeStereoFromRGBD(const cv::Mat &imDepth, const int Ftype);
-
   void ComputeStereoFromRGBD(const cv::Mat &imDepth, std::vector<float> &uRight, std::vector<float> &Depth, const int &refN, 
                              const std::vector<cv::KeyPoint> &Keys, const std::vector<cv::KeyPoint> &KeysUn);
 
   // Backprojects a keypoint (if stereo/depth info available) into 3D world coordinates.
-  cv::Mat UnprojectStereo(const int &i);
-
   cv::Mat UnprojectStereo(const int &i, const int Ftype);
-
   cv::Mat UnprojectStereo(const int &i, const std::vector<float> &Depth, const std::vector<cv::KeyPoint> &KeysUn);
 
 public:
@@ -139,10 +121,8 @@ public:
   FeatureExtractor *mpFeatureExtractorLeft[Ntype];
   FeatureExtractor *mpFeatureExtractorRight[Ntype];
 
-  // GCN extractor
+  // Feature extractor
   FeatureExtractor *mpGCNExtractorLeft, *mpGCNExtractorRight;
-
-  // ORB extractor
   FeatureExtractor *mpORBExtractorLeft, *mpORBExtractorRight;
 
   // Frame timestamp.
@@ -164,47 +144,15 @@ public:
   // Stereo baseline in meters.
   float mb;
 
-  // Threshold close/far points. Close points are inserted from 1 view.
-  // Far points are inserted as in the monocular case from 2 views.
+  // Threshold close/far points. Close points are inserted from 1 view. Far points are inserted as in the monocular case from 2 views.
   float mThDepth;
 
   // Feature data used to store feature points
   FeaturePoint Channels[Ntype];
 
-  // Number of KeyPoints.
-  int N;
-
-  // std::vector of keypoints (original for visualization) and undistorted
-  // (actually used by the system). In the stereo case, mvKeysUn is redundant as
-  // images must be rectified. In the RGB-D case, RGB images can be distorted.
-  std::vector<cv::KeyPoint> mvKeys, mvKeysRight;
-  std::vector<cv::KeyPoint> mvKeysUn;
-
-  // Corresponding stereo coordinate and depth for each keypoint.
-  // "Monocular" keypoints have a negative value.
-  std::vector<float> mvuRight;
-  std::vector<float> mvDepth;
-
-  // Bag of Words std::vector structures.
-  DBoW2::BowVector mBowVec;
-  DBoW2::FeatureVector mFeatVec;
-
-  // Descriptor, each row associated to a keypoint.
-  cv::Mat mDescriptors, mDescriptorsRight;
-  
-  // MapPoints associated to keypoints, NULL pointer if no association.
-  std::vector<MapPoint *> mvpMapPoints;
-
-  // Flag to identify outlier associations.
-  std::vector<bool> mvbOutlier;
-
-  // Keypoints are assigned to cells in a grid to reduce matching complexity
-  // when projecting MapPoints.
+  // Keypoints are assigned to cells in a grid to reduce matching complexity when projecting MapPoints.
   static float mfGridElementWidthInv;
   static float mfGridElementHeightInv;
-
-  // mGrid
-  std::vector<std::vector<std::vector<std::size_t>>> mGrid;
 
   // Camera pose.
   cv::Mat mTcw;
@@ -237,29 +185,19 @@ private:
   // Undistort keypoints given OpenCV distortion parameters.
   // Only for the RGB-D case. Stereo must be already rectified!
   // (called in the constructor).
-  void UndistortKeyPoints();
-
   void UndistortKeyPoints(const int Ftype);
-
   void UndistortKeyPoints(const std::vector<cv::KeyPoint> &Keys, std::vector<cv::KeyPoint> &KeysUn, const int &refN);
 
   // Computes image bounds for the undistorted image (called in the constructor).
   void ComputeImageBounds(const cv::Mat &imLeft);
 
   // Assign keypoints to the grid for speed up feature matching (called in the constructor).
-  void AssignFeaturesToGrid();
-
   void AssignFeaturesToGrid(const int Ftype);
-
   void AssignFeaturesToGrid(const int &refN, const std::vector<cv::KeyPoint> &KeysUn, std::vector<std::vector<std::vector<std::size_t>>> &Grid);
-
-  void ChooseFeature(const int Ftype);
 
   // compute features and assign to grids
   void ComputeFeaturesRGBD(const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth);
-
   void ComputeFeaturesStereo(const int Ftype, const cv::Mat &imLeft, const cv::Mat &imRight);
-
   void ComputeFeaturesMono(const int Ftype, const cv::Mat &imGray); 
   
   // Rotation, translation and camera center

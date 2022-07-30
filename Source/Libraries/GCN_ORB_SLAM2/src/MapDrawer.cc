@@ -127,13 +127,10 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph) {
 
     for (std::size_t i = 0; i < vpKFs.size(); i++) {
       // Covisibility Graph
-      const std::vector<KeyFrame *> vCovKFs =
-          vpKFs[i]->GetCovisiblesByWeight(100);
+      const std::vector<KeyFrame *> vCovKFs = vpKFs[i]->GetCovisiblesByWeight(100);
       cv::Mat Ow = vpKFs[i]->GetCameraCenter();
       if (!vCovKFs.empty()) {
-        for (std::vector<KeyFrame *>::const_iterator vit = vCovKFs.begin(),
-                                                     vend = vCovKFs.end();
-             vit != vend; vit++) {
+        for (std::vector<KeyFrame *>::const_iterator vit = vCovKFs.begin(), vend = vCovKFs.end(); vit != vend; vit++) {
           if ((*vit)->mnId < vpKFs[i]->mnId)
             continue;
           cv::Mat Ow2 = (*vit)->GetCameraCenter();
@@ -152,9 +149,7 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph) {
 
       // Loops
       set<KeyFrame *> sLoopKFs = vpKFs[i]->GetLoopEdges();
-      for (set<KeyFrame *>::iterator sit = sLoopKFs.begin(),
-                                     send = sLoopKFs.end();
-           sit != send; sit++) {
+      for (set<KeyFrame *>::iterator sit = sLoopKFs.begin(), send = sLoopKFs.end(); sit != send; sit++) {
         if ((*sit)->mnId < vpKFs[i]->mnId)
           continue;
         cv::Mat Owl = (*sit)->GetCameraCenter();

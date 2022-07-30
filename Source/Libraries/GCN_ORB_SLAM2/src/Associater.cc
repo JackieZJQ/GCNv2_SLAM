@@ -85,8 +85,7 @@ int Associater::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, 
           vIndices2 =
               CurrentFrame.GetFeaturesInArea(Ftype ,u, v, radius, 0, nLastOctave);
         else
-          vIndices2 = CurrentFrame.GetFeaturesInArea(
-              Ftype, u, v, radius, nLastOctave - 1, nLastOctave + 1);
+          vIndices2 = CurrentFrame.GetFeaturesInArea(Ftype, u, v, radius, nLastOctave - 1, nLastOctave + 1);
 
         if (vIndices2.empty())
           continue;
@@ -185,8 +184,7 @@ int Associater::SearchByProjection(Frame &F, const vector<MapPoint*> &vpMapPoint
     if (bFactor)
       r *= th;
 
-    const vector<size_t> vIndices = F.GetFeaturesInArea(Ftype, pMP->mTrackProjX, pMP->mTrackProjY,
-                                                        r * F.mvScaleFactors[nPredictedLevel],
+    const vector<size_t> vIndices = F.GetFeaturesInArea(Ftype, pMP->mTrackProjX, pMP->mTrackProjY, r * F.mvScaleFactors[nPredictedLevel],
                                                         nPredictedLevel - 1, nPredictedLevel);
 
     if (vIndices.empty())
@@ -351,6 +349,124 @@ int Associater::SearchByProjection(KeyFrame *pKF, cv::Mat Scw, const vector<MapP
     if (bestDist <= TH_LOW) {
       vpMatched[bestIdx] = pMP;
       nmatches++;
+    }
+  }
+
+  return nmatches;
+}
+
+int Associater::SearchByProjection(Frame &CurrentFrame, KeyFrame *pKF, const set<MapPoint *> &sAlreadyFound, 
+                                   const float th, const int ORBdist, const int Ftype) {
+  int nmatches = 0;
+
+  const cv::Mat Rcw = CurrentFrame.mTcw.rowRange(0, 3).colRange(0, 3);
+  const cv::Mat tcw = CurrentFrame.mTcw.rowRange(0, 3).col(3);
+  const cv::Mat Ow = -Rcw.t() * tcw;
+
+  // Rotation Histogram (to check rotation consistency)
+  vector<int> rotHist[HISTO_LENGTH];
+  for (int i = 0; i < HISTO_LENGTH; i++)
+    rotHist[i].reserve(500);
+  const float factor = 1.0f / HISTO_LENGTH;
+
+  const vector<MapPoint *> vpMPs = pKF->GetMapPointMatches(Ftype);
+
+  for (size_t i = 0, iend = vpMPs.size(); i < iend; i++) {
+    MapPoint *pMP = vpMPs[i];
+
+    if (pMP) {
+      if (!pMP->isBad() && !sAlreadyFound.count(pMP)) {
+        // Project
+        cv::Mat x3Dw = pMP->GetWorldPos();
+        cv::Mat x3Dc = Rcw * x3Dw + tcw;
+
+        const float xc = x3Dc.at<float>(0);
+        const float yc = x3Dc.at<float>(1);
+        const float invzc = 1.0 / x3Dc.at<float>(2);
+
+        const float u = CurrentFrame.fx * xc * invzc + CurrentFrame.cx;
+        const float v = CurrentFrame.fy * yc * invzc + CurrentFrame.cy;
+
+        if (u < CurrentFrame.mnMinX || u > CurrentFrame.mnMaxX)
+          continue;
+        if (v < CurrentFrame.mnMinY || v > CurrentFrame.mnMaxY)
+          continue;
+
+        // Compute predicted scale level
+        cv::Mat PO = x3Dw - Ow;
+        float dist3D = cv::norm(PO);
+
+        const float maxDistance = pMP->GetMaxDistanceInvariance();
+        const float minDistance = pMP->GetMinDistanceInvariance();
+
+        // Depth must be inside the scale pyramid of the image
+        if (dist3D < minDistance || dist3D > maxDistance)
+          continue;
+
+        int nPredictedLevel = pMP->PredictScale(dist3D, &CurrentFrame);
+
+        // Search in a window
+        const float radius = th * CurrentFrame.mvScaleFactors[nPredictedLevel];
+
+        const vector<size_t> vIndices2 = CurrentFrame.GetFeaturesInArea(Ftype, u, v, radius, nPredictedLevel - 1, nPredictedLevel + 1);
+
+        if (vIndices2.empty())
+          continue;
+
+        const cv::Mat dMP = pMP->GetDescriptor();
+
+        int bestDist = 256;
+        int bestIdx2 = -1;
+
+        for (vector<size_t>::const_iterator vit = vIndices2.begin(); vit != vIndices2.end(); vit++) {
+          const size_t i2 = *vit;
+          if (CurrentFrame.Channels[Ftype].mvpMapPoints[i2])
+            continue;
+
+          const cv::Mat &d = CurrentFrame.Channels[Ftype].mDescriptors.row(i2);
+
+          const int dist = DescriptorDistance(dMP, d);
+
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestIdx2 = i2;
+          }
+        }
+
+        if (bestDist <= ORBdist) {
+          CurrentFrame.Channels[Ftype].mvpMapPoints[bestIdx2] = pMP;
+          nmatches++;
+
+          if (mbCheckOrientation) {
+            float rot =
+                pKF->Channels[Ftype].mvKeysUn[i].angle - CurrentFrame.Channels[Ftype].mvKeysUn[bestIdx2].angle;
+            if (rot < 0.0)
+              rot += 360.0f;
+            int bin = round(rot * factor);
+            if (bin == HISTO_LENGTH)
+              bin = 0;
+            assert(bin >= 0 && bin < HISTO_LENGTH);
+            rotHist[bin].push_back(bestIdx2);
+          }
+        }
+      }
+    }
+  }
+
+  if (mbCheckOrientation) {
+    int ind1 = -1;
+    int ind2 = -1;
+    int ind3 = -1;
+
+    ComputeThreeMaxima(rotHist, HISTO_LENGTH, ind1, ind2, ind3);
+
+    for (int i = 0; i < HISTO_LENGTH; i++) {
+      if (i != ind1 && i != ind2 && i != ind3) {
+        for (size_t j = 0, jend = rotHist[i].size(); j < jend; j++) {
+          CurrentFrame.Channels[Ftype].mvpMapPoints[rotHist[i][j]] = NULL;
+          nmatches--;
+        }
+      }
     }
   }
 
@@ -542,8 +658,7 @@ int Associater::SearchByBoW(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &
         }
 
         if (bestDist1 < TH_LOW) {
-          if (static_cast<float>(bestDist1) <
-              mfNNratio * static_cast<float>(bestDist2)) {
+          if (static_cast<float>(bestDist1) <mfNNratio * static_cast<float>(bestDist2)) {
             vpMatches12[idx1] = vpMapPoints2[bestIdx2];
             vbMatched2[bestIdx2] = true;
 
@@ -738,8 +853,7 @@ int Associater::SearchByNN(Frame &F, const vector<MapPoint *> &vpMapPoints) {
   return nmatches;
 }
 
-int Associater::SearchForTriangulation(KeyFrame *pKF1, KeyFrame *pKF2, cv::Mat F12, 
-                                       std::vector<std::pair<size_t, size_t>> &vMatchedPairs, 
+int Associater::SearchForTriangulation(KeyFrame *pKF1, KeyFrame *pKF2, cv::Mat F12, std::vector<std::pair<size_t, size_t>> &vMatchedPairs, 
                                        const bool bOnlyStereo, const int Ftype) {
 
   const DBoW2::FeatureVector &vFeatVec1 = pKF1->Channels[Ftype].mFeatVec;
@@ -1100,6 +1214,107 @@ int Associater::SearchBySim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> 
   return nFound;
 }
 
+int Associater::SearchForInitialization(const int Ftype, Frame &F1, Frame &F2, vector<cv::Point2f> &vbPrevMatched, vector<int> &vnMatches12, int windowSize) {
+  int nmatches = 0;
+  vnMatches12 = vector<int>(F1.Channels[Ftype].mvKeysUn.size(), -1);
+
+  vector<int> rotHist[HISTO_LENGTH];
+  for (int i = 0; i < HISTO_LENGTH; i++)
+    rotHist[i].reserve(500);
+  const float factor = 1.0f / HISTO_LENGTH;
+
+  vector<int> vMatchedDistance(F2.Channels[Ftype].mvKeysUn.size(), INT_MAX);
+  vector<int> vnMatches21(F2.Channels[Ftype].mvKeysUn.size(), -1);
+
+  for (size_t i1 = 0, iend1 = F1.Channels[Ftype].mvKeysUn.size(); i1 < iend1; i1++) {
+    cv::KeyPoint kp1 = F1.Channels[Ftype].mvKeysUn[i1];
+    int level1 = kp1.octave;
+    if (level1 > 0)
+      continue;
+
+    vector<size_t> vIndices2 = F2.GetFeaturesInArea(Ftype, vbPrevMatched[i1].x, vbPrevMatched[i1].y, windowSize, level1, level1);
+
+    if (vIndices2.empty())
+      continue;
+
+    cv::Mat d1 = F1.Channels[Ftype].mDescriptors.row(i1);
+
+    int bestDist = INT_MAX;
+    int bestDist2 = INT_MAX;
+    int bestIdx2 = -1;
+
+    for (vector<size_t>::iterator vit = vIndices2.begin(); vit != vIndices2.end(); vit++) {
+      size_t i2 = *vit;
+
+      cv::Mat d2 = F2.Channels[Ftype].mDescriptors.row(i2);
+
+      int dist = DescriptorDistance(d1, d2);
+
+      if (vMatchedDistance[i2] <= dist)
+        continue;
+
+      if (dist < bestDist) {
+        bestDist2 = bestDist;
+        bestDist = dist;
+        bestIdx2 = i2;
+      } else if (dist < bestDist2) {
+        bestDist2 = dist;
+      }
+    }
+
+    if (bestDist <= TH_LOW) {
+      if (bestDist < (float)bestDist2 * mfNNratio) {
+        if (vnMatches21[bestIdx2] >= 0) {
+          vnMatches12[vnMatches21[bestIdx2]] = -1;
+          nmatches--;
+        }
+        vnMatches12[i1] = bestIdx2;
+        vnMatches21[bestIdx2] = i1;
+        vMatchedDistance[bestIdx2] = bestDist;
+        nmatches++;
+
+        if (mbCheckOrientation) {
+          float rot = F1.Channels[Ftype].mvKeysUn[i1].angle - F2.Channels[Ftype].mvKeysUn[bestIdx2].angle;
+          if (rot < 0.0)
+            rot += 360.0f;
+          int bin = round(rot * factor);
+          if (bin == HISTO_LENGTH)
+            bin = 0;
+          assert(bin >= 0 && bin < HISTO_LENGTH);
+          rotHist[bin].push_back(i1);
+        }
+      }
+    }
+  }
+
+  if (mbCheckOrientation) {
+    int ind1 = -1;
+    int ind2 = -1;
+    int ind3 = -1;
+
+    ComputeThreeMaxima(rotHist, HISTO_LENGTH, ind1, ind2, ind3);
+
+    for (int i = 0; i < HISTO_LENGTH; i++) {
+      if (i == ind1 || i == ind2 || i == ind3)
+        continue;
+      for (size_t j = 0, jend = rotHist[i].size(); j < jend; j++) {
+        int idx1 = rotHist[i][j];
+        if (vnMatches12[idx1] >= 0) {
+          vnMatches12[idx1] = -1;
+          nmatches--;
+        }
+      }
+    }
+  }
+
+  // Update prev matched
+  for (size_t i1 = 0, iend1 = vnMatches12.size(); i1 < iend1; i1++)
+    if (vnMatches12[i1] >= 0)
+      vbPrevMatched[i1] = F2.Channels[Ftype].mvKeysUn[vnMatches12[i1]].pt;
+
+  return nmatches;
+}
+
 int Associater::Fuse(const int Ftype, KeyFrame *pKF, const vector<MapPoint *> &vpMapPoints, const float th) {
   cv::Mat Rcw = pKF->GetRotation();
   cv::Mat tcw = pKF->GetTranslation();
@@ -1391,7 +1606,6 @@ void Associater::ComputeThreeMaxima(vector<int> *histo, const int L, int &ind1, 
   }
 }
 
-// Bit set count operation from http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
 int Associater::DescriptorDistance(const cv::Mat &a, const cv::Mat &b) {
   const int *pa = a.ptr<int32_t>();
   const int *pb = b.ptr<int32_t>();
@@ -1417,12 +1631,9 @@ float Associater::RadiusByViewingCos(const float &viewCos) {
 
 bool Associater::CheckDistEpipolarLine(const cv::KeyPoint &kp1, const cv::KeyPoint &kp2, const cv::Mat &F12, const KeyFrame *pKF2) {
   // Epipolar line in second image l = x1'F12 = [a b c]
-  const float a = kp1.pt.x * F12.at<float>(0, 0) +
-                  kp1.pt.y * F12.at<float>(1, 0) + F12.at<float>(2, 0);
-  const float b = kp1.pt.x * F12.at<float>(0, 1) +
-                  kp1.pt.y * F12.at<float>(1, 1) + F12.at<float>(2, 1);
-  const float c = kp1.pt.x * F12.at<float>(0, 2) +
-                  kp1.pt.y * F12.at<float>(1, 2) + F12.at<float>(2, 2);
+  const float a = kp1.pt.x * F12.at<float>(0, 0) + kp1.pt.y * F12.at<float>(1, 0) + F12.at<float>(2, 0);
+  const float b = kp1.pt.x * F12.at<float>(0, 1) + kp1.pt.y * F12.at<float>(1, 1) + F12.at<float>(2, 1);
+  const float c = kp1.pt.x * F12.at<float>(0, 2) + kp1.pt.y * F12.at<float>(1, 2) + F12.at<float>(2, 2);
 
   const float num = a * kp2.pt.x + b * kp2.pt.y + c;
 

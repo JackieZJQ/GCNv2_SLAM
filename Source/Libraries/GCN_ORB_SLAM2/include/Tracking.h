@@ -53,8 +53,7 @@ public:
   const static int Ntype = 2; // Number of channels
 
 public:
-  Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], FrameDrawer *pFrameDrawer,
-           MapDrawer *pMapDrawer, Map *pMap, KeyFrameDatabase *pKFDB[Ntype],
+  Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, Map *pMap, KeyFrameDatabase *pKFDB[Ntype],
            const std::string &strSettingPath, const int sensor);
 
   // Preprocess the input and call Track(). Extract features and performs stereo matching.
@@ -119,32 +118,11 @@ protected:
   // Main tracking function. It is independent of the input sensor.
   void Track();
 
+  void StereoInitialization(const int Ftype);
+  void MonocularInitialization(const int Ftype);
+  void CreateInitialMapMonocular(const int Ftype);
+
   // Map initialization for stereo and RGB-D
-  void StereoInitialization();
-  
-  // Map initialization for monocular
-  void MonocularInitialization();
-  void CreateInitialMapMonocular();
-
-  void CheckReplacedInLastFrame();
-  bool TrackReferenceKeyFrame();
-  void UpdateLastFrame();
-  bool TrackWithMotionModel();
-
-  bool Relocalization();
-
-  void UpdateLocalMap();
-  void UpdateLocalPoints();
-  void UpdateLocalKeyFrames();
-
-  bool TrackLocalMap();
-  void SearchLocalPoints();
-
-  bool NeedNewKeyFrame();
-  void CreateNewKeyFrame();
-
-  //////////////////////////////Rewrite///////////////////////////////
-
   void StereoInitializationMultiChannels();
 
   void CheckReplacedInLastFrame(const int Ftype);
@@ -152,7 +130,7 @@ protected:
 
   bool TrackWithMotionModelMultiChannels();
   bool TrackReferenceKeyFrameMultiChannels();
-  bool RelocalizationMultiChannels();
+  bool Relocalization(const int Ftype);
 
   void UpdateLocalMapMultiChannels();
   void UpdateLocalKeyFramesMultiChannels();
@@ -168,14 +146,9 @@ protected:
   void DiscardUnobservedMappoints(Frame &F, const int Ftype);
   void DiscardOutliersMappoints(Frame &F, const int Ftype);
 
-  ////////////////////////////////////////////////////////////////////
 
-  
-
-  // In case of performing only localization, this flag is true when there are
-  // no matches to points in the map. Still tracking will continue if there are
-  // enough matches with temporal points. In that case we are doing visual
-  // odometry. The system will try to do relocalization to recover "zero-drift"
+  // In case of performing only localization, this flag is true when there are no matches to points in the map. Still tracking will continue if there are
+  // enough matches with temporal points. In that case we are doing visual odometry. The system will try to do relocalization to recover "zero-drift"
   // localization to the map.
   bool mbVO;
 
@@ -232,10 +205,8 @@ protected:
   int mMinFrames;
   int mMaxFrames;
 
-  // Threshold close/far points
-  // Points seen as close by the stereo/RGBD sensor are considered reliable
-  // and inserted from just one frame. Far points requiere a match in two
-  // keyframes.
+  // Threshold close/far points. Points seen as close by the stereo/RGBD sensor are considered reliable
+  // and inserted from just one frame. Far points requiere a match in two keyframes.
   float mThDepth;
 
   // For RGB-D inputs only. For some datasets (e.g. TUM) the depthmap values are scaled.

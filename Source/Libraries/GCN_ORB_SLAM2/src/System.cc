@@ -140,8 +140,7 @@ System::System(const string (&strVocFile)[Ntype], const string &strSettingsFile,
   mpLoopCloser->SetLocalMapper(mpLocalMapper);
 }
 
-cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight,
-                            const double &timestamp) {
+cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp) {
   if (mSensor != STEREO) {
     cerr << "ERROR: you called TrackStereo but input sensor was not set to "
             "STEREO."
@@ -183,13 +182,12 @@ cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight,
 
   unique_lock<mutex> lock2(mMutexState);
   mTrackingState = mpTracker->mState;
-  mTrackedMapPoints = mpTracker->mCurrentFrame.mvpMapPoints;
-  mTrackedKeyPointsUn = mpTracker->mCurrentFrame.mvKeysUn;
+  mTrackedMapPoints = mpTracker->mCurrentFrame.Channels[0].mvpMapPoints;
+  mTrackedKeyPointsUn = mpTracker->mCurrentFrame.Channels[0].mvKeysUn;
   return Tcw;
 }
 
-cv::Mat System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap,
-                          const double &timestamp) {
+cv::Mat System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const double &timestamp) {
   if (mSensor != RGBD) {
     cerr << "ERROR: you called TrackRGBD but input sensor was not set to RGBD."
          << endl;
@@ -230,8 +228,8 @@ cv::Mat System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap,
 
   unique_lock<mutex> lock2(mMutexState);
   mTrackingState = mpTracker->mState;
-  mTrackedMapPoints = mpTracker->mCurrentFrame.mvpMapPoints;
-  mTrackedKeyPointsUn = mpTracker->mCurrentFrame.mvKeysUn;
+  mTrackedMapPoints = mpTracker->mCurrentFrame.Channels[0].mvpMapPoints;
+  mTrackedKeyPointsUn = mpTracker->mCurrentFrame.Channels[0].mvKeysUn;
   return Tcw;
 }
 
@@ -277,8 +275,8 @@ cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp) {
 
   unique_lock<mutex> lock2(mMutexState);
   mTrackingState = mpTracker->mState;
-  mTrackedMapPoints = mpTracker->mCurrentFrame.mvpMapPoints;
-  mTrackedKeyPointsUn = mpTracker->mCurrentFrame.mvKeysUn;
+  mTrackedMapPoints = mpTracker->mCurrentFrame.Channels[0].mvpMapPoints;
+  mTrackedKeyPointsUn = mpTracker->mCurrentFrame.Channels[0].mvKeysUn;
 
   return Tcw;
 }
@@ -356,9 +354,7 @@ void System::SaveTrajectoryTUM(const string &filename) {
   list<ORB_SLAM2::KeyFrame *>::iterator lRit = mpTracker->mlpReferences.begin();
   list<double>::iterator lT = mpTracker->mlFrameTimes.begin();
   list<bool>::iterator lbL = mpTracker->mlbLost.begin();
-  for (list<cv::Mat>::iterator lit = mpTracker->mlRelativeFramePoses.begin(),
-                               lend = mpTracker->mlRelativeFramePoses.end();
-       lit != lend; lit++, lRit++, lT++, lbL++) {
+  for (list<cv::Mat>::iterator lit = mpTracker->mlRelativeFramePoses.begin(), lend = mpTracker->mlRelativeFramePoses.end(); lit != lend; lit++, lRit++, lT++, lbL++) {
     if (*lbL)
       continue;
 
@@ -366,8 +362,7 @@ void System::SaveTrajectoryTUM(const string &filename) {
 
     cv::Mat Trw = cv::Mat::eye(4, 4, CV_32F);
 
-    // If the reference keyframe was culled, traverse the spanning tree to get a
-    // suitable keyframe.
+    // If the reference keyframe was culled, traverse the spanning tree to get a suitable keyframe.
     while (pKF->isBad()) {
       Trw = Trw * pKF->mTcp;
       pKF = pKF->GetParent();
@@ -451,9 +446,7 @@ void System::SaveTrajectoryKITTI(const string &filename) {
   // a flag which is true when tracking failed (lbL).
   list<ORB_SLAM2::KeyFrame *>::iterator lRit = mpTracker->mlpReferences.begin();
   list<double>::iterator lT = mpTracker->mlFrameTimes.begin();
-  for (list<cv::Mat>::iterator lit = mpTracker->mlRelativeFramePoses.begin(),
-                               lend = mpTracker->mlRelativeFramePoses.end();
-       lit != lend; lit++, lRit++, lT++) {
+  for (list<cv::Mat>::iterator lit = mpTracker->mlRelativeFramePoses.begin(), lend = mpTracker->mlRelativeFramePoses.end(); lit != lend; lit++, lRit++, lT++) {
     ORB_SLAM2::KeyFrame *pKF = *lRit;
 
     cv::Mat Trw = cv::Mat::eye(4, 4, CV_32F);

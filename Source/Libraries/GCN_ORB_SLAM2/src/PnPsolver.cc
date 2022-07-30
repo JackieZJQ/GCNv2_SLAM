@@ -65,17 +65,23 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
-PnPsolver::PnPsolver(const Frame &F,
-                     const std::vector<MapPoint *> &vpMapPointMatches)
-    : pws(0), us(0), alphas(0), pcs(0), maximum_number_of_correspondences(0),
-      number_of_correspondences(0), mnInliersi(0), mnIterations(0),
-      mnBestInliers(0), N(0) {
+PnPsolver::PnPsolver(const Frame &F, const std::vector<MapPoint *> &vpMapPointMatches, const int Ftype)
+    : pws(0), 
+      us(0), 
+      alphas(0), 
+      pcs(0), 
+      maximum_number_of_correspondences(0),
+      number_of_correspondences(0), 
+      mnInliersi(0), 
+      mnIterations(0),
+      mnBestInliers(0), 
+      N(0) {
   mvpMapPointMatches = vpMapPointMatches;
-  mvP2D.reserve(F.mvpMapPoints.size());
-  mvSigma2.reserve(F.mvpMapPoints.size());
-  mvP3Dw.reserve(F.mvpMapPoints.size());
-  mvKeyPointIndices.reserve(F.mvpMapPoints.size());
-  mvAllIndices.reserve(F.mvpMapPoints.size());
+  mvP2D.reserve(F.Channels[Ftype].mvpMapPoints.size());
+  mvSigma2.reserve(F.Channels[Ftype].mvpMapPoints.size());
+  mvP3Dw.reserve(F.Channels[Ftype].mvpMapPoints.size());
+  mvKeyPointIndices.reserve(F.Channels[Ftype].mvpMapPoints.size());
+  mvAllIndices.reserve(F.Channels[Ftype].mvpMapPoints.size());
 
   int idx = 0;
   for (std::size_t i = 0, iend = vpMapPointMatches.size(); i < iend; i++) {
@@ -83,14 +89,13 @@ PnPsolver::PnPsolver(const Frame &F,
 
     if (pMP) {
       if (!pMP->isBad()) {
-        const cv::KeyPoint &kp = F.mvKeysUn[i];
+        const cv::KeyPoint &kp = F.Channels[Ftype].mvKeysUn[i];
 
         mvP2D.push_back(kp.pt);
         mvSigma2.push_back(F.mvLevelSigma2[kp.octave]);
 
         cv::Mat Pos = pMP->GetWorldPos();
-        mvP3Dw.push_back(
-            cv::Point3f(Pos.at<float>(0), Pos.at<float>(1), Pos.at<float>(2)));
+        mvP3Dw.push_back(cv::Point3f(Pos.at<float>(0), Pos.at<float>(1), Pos.at<float>(2)));
 
         mvKeyPointIndices.push_back(i);
         mvAllIndices.push_back(idx);

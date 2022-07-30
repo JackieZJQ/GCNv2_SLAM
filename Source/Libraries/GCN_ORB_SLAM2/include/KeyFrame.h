@@ -55,7 +55,6 @@ public:
   cv::Mat GetTranslation();
 
   // Bag of Words Representation
-  void ComputeBoW();
   void ComputeBoW(const int Ftype);
 
   // Covisibility graph functions
@@ -83,37 +82,25 @@ public:
   std::set<KeyFrame *> GetLoopEdges();
 
   // MapPoint observation functions
-  void AddMapPoint(MapPoint *pMP, const std::size_t &idx);
   void AddMapPoint(MapPoint *pMP, const std::size_t &idx, const int Ftype);
 
-  void EraseMapPointMatch(const std::size_t &idx);
   void EraseMapPointMatch(const std::size_t &idx, const int Ftype);
 
-  void EraseMapPointMatch(MapPoint *pMP);
   void EraseMapPointMatch(MapPoint *pMP, const int Ftype);
 
-  void ReplaceMapPointMatch(const std::size_t &idx, MapPoint *pMP);
   void ReplaceMapPointMatch(const std::size_t &idx, MapPoint *pMP, const int Ftype);
 
-  std::set<MapPoint *> GetMapPoints();
   std::set<MapPoint *> GetMapPoints(const int Ftype);
 
-  std::vector<MapPoint *> GetMapPointMatches();
   std::vector<MapPoint *> GetMapPointMatches(const int Ftype);
 
-  int TrackedMapPoints(const int &minObs);
   int TrackedMapPoints(const int &minObs, const int Ftype);
 
-  MapPoint *GetMapPoint(const std::size_t &idx);
   MapPoint *GetMapPoint(const std::size_t &idx, const int Ftype);
 
   // KeyPoint functions
-  std::vector<std::size_t> GetFeaturesInArea(const float &x, const float &y,
-                                             const float &r) const;
-  std::vector<std::size_t> GetFeaturesInArea(const float &x, const float &y,
-                                             const float &r, const int Ftype) const;
+  std::vector<std::size_t> GetFeaturesInArea(const float &x, const float &y, const float &r, const int Ftype) const;
 
-  cv::Mat UnprojectStereo(int i);
   cv::Mat UnprojectStereo(int i, const int Ftype);
 
   // Image
@@ -128,7 +115,6 @@ public:
   bool isBad();
 
   // Compute Scene Depth (q=2 median). Used in monocular.
-  float ComputeSceneMedianDepth(const int q);
   float ComputeSceneMedianDepth(const int q, const int Ftype);
 
   static bool weightComp(int a, int b) { return a > b; }
@@ -178,24 +164,6 @@ public:
 
   FeaturePoint Channels[Ntype];
 
-  // Number of KeyPoints
-  const int N;
-
-  // KeyPoints, stereo coordinate and descriptors (all associated by an index)
-  const std::vector<cv::KeyPoint> mvKeys;
-
-  const std::vector<cv::KeyPoint> mvKeysUn;
-
-  const std::vector<float> mvuRight; // negative value for monocular points
-
-  const std::vector<float> mvDepth;  // negative value for monocular points
-
-  const cv::Mat mDescriptors;
-
-  // BoW
-  DBoW2::BowVector mBowVec;
-  DBoW2::FeatureVector mFeatVec;
-
   // Pose relative to parent (this is computed when bad flag is activated)
   cv::Mat mTcp;
 
@@ -223,16 +191,11 @@ protected:
 
   cv::Mat Cw; // Stereo middel point. Only for visualization
 
-  // MapPoints associated to keypoints
-  std::vector<MapPoint *> mvpMapPoints;
-
   // BoW
   std::vector<KeyFrameDatabase *> mpKeyFrameDB;
   std::vector<ORBVocabulary *> mpVocabulary;
 
-  // Grid over the image to speed up feature matching
-  std::vector<std::vector<std::vector<std::size_t>>> mGrid;
-
+  // Connected keyframe variables
   std::map<KeyFrame *, int> mConnectedKeyFrameWeights;
   std::vector<KeyFrame *> mvpOrderedConnectedKeyFrames;
   std::vector<int> mvOrderedWeights;

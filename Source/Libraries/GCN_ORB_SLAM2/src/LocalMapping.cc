@@ -54,6 +54,7 @@ void LocalMapping::Run() {
     if (CheckNewKeyFrames()) {
       // BoW conversion and insertion in Map
       ProcessNewKeyFrame();
+      ProcessNewKeyFrameMultiChannels();
 
       // Check recent MapPoints
       MapPointCulling();
@@ -61,9 +62,15 @@ void LocalMapping::Run() {
       // Triangulate new MapPoints
       CreateNewMapPoints();
 
+      for (int Ftype = 0; Ftype < Ntype; Ftype++)
+        CreateNewMapPoints(Ftype);
+
       if (!CheckNewKeyFrames()) {
         // Find more matches in neighbor keyframes and fuse point duplications
         SearchInNeighbors();
+
+        for (int Ftype = 0; Ftype < Ntype; Ftype++)
+          SearchInNeighbors(Ftype);
       }
 
       mbAbortBA = false;
@@ -71,11 +78,11 @@ void LocalMapping::Run() {
       if (!CheckNewKeyFrames() && !stopRequested()) {
         // Local BA
         if (mpMap->KeyFramesInMap() > 2)
-          Optimizer::LocalBundleAdjustment(mpCurrentKeyFrame, &mbAbortBA,
-                                           mpMap);
+          Optimizer::LocalBundleAdjustmentMultiChannels(mpCurrentKeyFrame, &mbAbortBA, mpMap)
 
         // Check redundant local Keyframes
         KeyFrameCulling();
+        KeyFrameCullingMultiChannels();
       }
 
       mpLoopCloser->InsertKeyFrame(mpCurrentKeyFrame);
@@ -971,7 +978,7 @@ void LocalMapping::CreateNewMapPoints(const int Ftype) {
       mpCurrentKeyFrame->AddMapPoint(pMP, idx1, Ftype);
       pKF2->AddMapPoint(pMP, idx2, Ftype);
 
-      pMP->ComputeDistinctiveDescriptors(Ftype);
+      pMP->ComputeDistinctiveDescriptors(Ftype); // May delete Ftype laterly
 
       pMP->UpdateNormalAndDepth(Ftype);
 

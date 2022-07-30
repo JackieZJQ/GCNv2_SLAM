@@ -74,19 +74,11 @@ public:
 
 protected:
 
-///////////////////////////////////////////////////////////////////
+  void ProcessNewKeyFrameMultiChannels();
+  void KeyFrameCullingMultiChannels();
 
-void ProcessNewKeyFrameMultiChannels();
-
-void KeyFrameCullingMultiChannels();
-
-void CreateNewMapPoints(const int Ftype);
-
-void SearchInNeighbors(const int Ftype);
-
-
-
-///////////////////////////////////////////////////////////////////
+  void CreateNewMapPoints(const int Ftype);
+  void SearchInNeighbors(const int Ftype);
 
 
   bool CheckNewKeyFrames();
