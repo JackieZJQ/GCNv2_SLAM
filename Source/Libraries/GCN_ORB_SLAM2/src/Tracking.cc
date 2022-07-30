@@ -27,7 +27,6 @@
 #include "FrameDrawer.h"
 #include "Initializer.h"
 #include "Map.h"
-#include "ORBmatcher.h"
 #include "Associater.h"
 
 #include "FeatureExtractorFactory.h"

@@ -82,13 +82,7 @@ protected:
 
 
   bool CheckNewKeyFrames();
-  void ProcessNewKeyFrame();
-  void CreateNewMapPoints();
-
   void MapPointCulling();
-  void SearchInNeighbors();
-
-  void KeyFrameCulling();
 
   cv::Mat ComputeF12(KeyFrame *&pKF1, KeyFrame *&pKF2);
 
