@@ -1380,7 +1380,7 @@ int Associater::Fuse(const int Ftype, KeyFrame *pKF, const vector<MapPoint *> &v
     // Search in a radius
     const float radius = th * pKF->mvScaleFactors[nPredictedLevel];
 
-    const vector<size_t> vIndices = pKF->GetFeaturesInArea(Ftype, u, v, radius);
+    const vector<size_t> vIndices = pKF->GetFeaturesInArea(u, v, radius, Ftype);
 
     if (vIndices.empty())
       continue;

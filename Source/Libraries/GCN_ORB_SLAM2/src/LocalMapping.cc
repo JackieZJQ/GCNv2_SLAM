@@ -586,7 +586,6 @@ void LocalMapping::SearchInNeighbors(const int Ftype) {
   std::vector<MapPoint *> vpMapPointMatches = mpCurrentKeyFrame->GetMapPointMatches(Ftype);
   for (std::vector<KeyFrame *>::iterator vit = vpTargetKFs.begin(), vend = vpTargetKFs.end(); vit != vend; vit++) {
     KeyFrame *pKFi = *vit;
-
     associater.Fuse(Ftype, pKFi, vpMapPointMatches);
   }
 

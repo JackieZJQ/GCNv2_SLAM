@@ -1411,17 +1411,17 @@ void Tracking::SearchLocalPointsMultiChannels() {
 
   if (nToMatch > 0) {
     Associater associater(0.8);
-    // int th = 1;
-    // if(mSensor==System::RGBD)
-    //     th=3;
-    // // If the camera has been relocalised recently, perform a coarser search
-    // if(mCurrentFrame.mnId<mnLastRelocFrameId+2)
-    //     th=5;
+    int th = 1;
+    if(mSensor==System::RGBD)
+        th=3;
+    // If the camera has been relocalised recently, perform a coarser search
+    if(mCurrentFrame.mnId<mnLastRelocFrameId+2)
+        th=5;
       
-    // associater.SearchByProjection(mCurrentFrame, mvpLocalMapPoints, th);
+    associater.SearchByProjection(mCurrentFrame, mvpLocalMapPoints, th);
 
-    // NN only matching
-    associater.SearchByNN(mCurrentFrame, mvpLocalMapPoints);
+    // // NN only matching
+    // associater.SearchByNN(mCurrentFrame, mvpLocalMapPoints);
   }
 }
 
@@ -1500,8 +1500,8 @@ bool Tracking::NeedNewKeyFrameMultiChannels() {
   // step 5 : Local Mapping accept keyframes?
   bool bLocalMappingIdle = mpLocalMapper->AcceptKeyFrames();
 
-  if (bLocalMappingIdle)
-    cout << 1 << endl;
+  // if (bLocalMappingIdle)
+  //   cout << "bLocalMappingIdle=ture" << endl;
 
   // step 6 : Check how many "close" points are being tracked and how many could be potentially created (for rgdb and sterreo)
   int nNonTrackedClose = 0;
@@ -1542,16 +1542,16 @@ bool Tracking::NeedNewKeyFrameMultiChannels() {
   // step 7.5 : Condition 2: Few tracked points compared to reference keyframe. Lots of visual odometry compared to map matches.
   const bool c2 = ((mnMatchesInliers < nRefMatches * thRefRatio || bNeedToInsertClose) && mnMatchesInliers > 15);
 
-  cout << "mnMatchesInliers:" << mnMatchesInliers << endl;
-  cout << "nRefMatches:" << nRefMatches << endl;
-  cout << "nRefMatches*thRefRatio:"<< nRefMatches*thRefRatio << endl;
-  if (bNeedToInsertClose)
-    cout << "bNeedToInsertClose = true" << endl;
+  // cout << "mnMatchesInliers:" << mnMatchesInliers << endl;
+  // cout << "nRefMatches:" << nRefMatches << endl;
+  // cout << "nRefMatches*thRefRatio:"<< nRefMatches*thRefRatio << endl;
+  // if (bNeedToInsertClose)
+  //   cout << "bNeedToInsertClose = true" << endl;
 
   if ((c1a || c1b || c1c) && c2) {
     // If the mapping accepts keyframes, insert keyframe. Otherwise send a signal to interrupt BA
     if (bLocalMappingIdle) {
-      cout << "INSERT KEYFRAME" << endl;
+      // cout << "INSERT KEYFRAME" << endl;
       return true;
     } else {
       mpLocalMapper->InterruptBA();
@@ -1577,6 +1577,8 @@ void Tracking::CreateNewKeyFrameMultiChannels() {
   // step 2 : reference keyframe 
   mpReferenceKF = pKF;
   mCurrentFrame.mpReferenceKF = pKF;
+
+  
 
   // step 3 : create map points
   if (mSensor != System::MONOCULAR) {
