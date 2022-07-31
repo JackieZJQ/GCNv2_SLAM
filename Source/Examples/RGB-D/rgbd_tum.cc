@@ -49,13 +49,10 @@ int main(int argc, char **argv) {
   vector<string> vstrImageFilenamesRGB;
   vector<string> vstrImageFilenamesD;
   vector<double> vTimestamps;
-  string settingsFile =
-      string(DEFAULT_RGBD_SETTINGS_DIR) + string("/") + string(argv[1]);
-  string strAssociationFilename =
-      string(DEFAULT_RGBD_SETTINGS_DIR) + "/associations/" + string(argv[3]);
+  string settingsFile = string(DEFAULT_RGBD_SETTINGS_DIR) + string("/") + string(argv[1]);
+  string strAssociationFilename = string(DEFAULT_RGBD_SETTINGS_DIR) + "/associations/" + string(argv[3]);
 
-  LoadImages(strAssociationFilename, vstrImageFilenamesRGB, vstrImageFilenamesD,
-             vTimestamps);
+  LoadImages(strAssociationFilename, vstrImageFilenamesRGB, vstrImageFilenamesD, vTimestamps);
 
   // Check consistency in the number of images and depthmaps
   int nImages = vstrImageFilenamesRGB.size();
@@ -67,8 +64,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  // Create SLAM system. It initializes all system threads and gets ready to
-  // process frames.
+  // Create SLAM system. It initializes all system threads and gets ready to process frames.
 
   // Load both ORB and GCN vocabulary file whether or not "USE_ORB" is detected  
   const int Ntype = 2;
@@ -77,8 +73,7 @@ int main(int argc, char **argv) {
   vocabularyFile[0] = DEFAULT_BINARY_ORB_VOCABULARY;
   vocabularyFile[1] = DEFAULT_BINARY_GCN_VOCABULARY;
   
-  ORB_SLAM2::System SLAM(vocabularyFile, settingsFile, ORB_SLAM2::System::RGBD,
-                         true);
+  ORB_SLAM2::System SLAM(vocabularyFile, settingsFile, ORB_SLAM2::System::RGBD, true);
 
   // Vector for tracking time statistics
   vector<float> vTimesTrack;
@@ -93,11 +88,10 @@ int main(int argc, char **argv) {
   std::thread runthread([&]() { // Start in new thread
     cv::Mat imRGB, imD;
     for (int ni = 0; ni < nImages; ni++) {
+
       // Read image and depthmap from file
-      imRGB = cv::imread(string(argv[2]) + "/" + vstrImageFilenamesRGB[ni],
-                         cv::IMREAD_UNCHANGED);
-      imD = cv::imread(string(argv[2]) + "/" + vstrImageFilenamesD[ni],
-                       cv::IMREAD_UNCHANGED);
+      imRGB = cv::imread(string(argv[2]) + "/" + vstrImageFilenamesRGB[ni], cv::IMREAD_UNCHANGED);
+      imD = cv::imread(string(argv[2]) + "/" + vstrImageFilenamesD[ni], cv::IMREAD_UNCHANGED);
       double tframe = vTimestamps[ni];
 
       if (imRGB.empty()) {
@@ -112,18 +106,15 @@ int main(int argc, char **argv) {
         break;
       }
 
-      std::chrono::steady_clock::time_point t1 =
-          std::chrono::steady_clock::now();
+      std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
 
       // Pass the image to the SLAM system
+
       SLAM.TrackRGBD(imRGB, imD, tframe);
 
-      std::chrono::steady_clock::time_point t2 =
-          std::chrono::steady_clock::now();
+      std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
 
-      double ttrack =
-          std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1)
-              .count();
+      double ttrack = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
 
       vTimesTrack[ni] = ttrack;
 
@@ -135,7 +126,7 @@ int main(int argc, char **argv) {
         T = tframe - vTimestamps[ni - 1];
 
       if (ttrack < T)
-        this_thread::sleep_for(chrono::duration<double>(T - ttrack));
+        this_thread::sleep_for(chrono::duration<double>(T - ttrack));      
     }
     SLAM.StopViewer();
   });
@@ -169,10 +160,7 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-void LoadImages(const string &strAssociationFilename,
-                vector<string> &vstrImageFilenamesRGB,
-                vector<string> &vstrImageFilenamesD,
-                vector<double> &vTimestamps) {
+void LoadImages(const string &strAssociationFilename, vector<string> &vstrImageFilenamesRGB, vector<string> &vstrImageFilenamesD, vector<double> &vTimestamps) {
 
   // Check the file exists
   if (fs::exists(strAssociationFilename) == false) {

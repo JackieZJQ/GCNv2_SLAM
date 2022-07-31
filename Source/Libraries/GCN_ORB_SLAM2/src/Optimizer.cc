@@ -236,32 +236,30 @@ int Optimizer::PoseOptimizationMultiChannels(Frame *pFrame) {
   vSE3->setFixed(false);
   optimizer.addVertex(vSE3);
 
-  // Set MapPoint vertices
   std::vector<std::vector<g2o::EdgeSE3ProjectXYZOnlyPose *>> vpEdgesMono;
   std::vector<std::vector<std::size_t>> vnIndexEdgeMono;
-  vpEdgesMono.resize(pFrame->Ntype);
-  vnIndexEdgeMono.resize(pFrame->Ntype);
-  for (int i = 0; i < pFrame->Ntype; i++) {
-    vpEdgesMono[i].reserve(pFrame->Channels[i].N);
-    vnIndexEdgeMono[i].reserve(pFrame->Channels[i].N);
+  vpEdgesMono.resize(Ntype);
+  vnIndexEdgeMono.resize(Ntype);
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    vpEdgesMono[Ftype].reserve(pFrame->Channels[Ftype].N);
+    vnIndexEdgeMono[Ftype].reserve(pFrame->Channels[Ftype].N);
   }
-  
+
   std::vector<std::vector<g2o::EdgeStereoSE3ProjectXYZOnlyPose *>> vpEdgesStereo;
   std::vector<std::vector<std::size_t>> vnIndexEdgeStereo;
-  vpEdgesStereo.resize(pFrame->Ntype);
-  vnIndexEdgeStereo.resize(pFrame->Ntype);
-  for (int i = 0; i < pFrame->Ntype; i++) {
-    vpEdgesStereo[i].reserve(pFrame->Channels[i].N);
-    vnIndexEdgeStereo[i].reserve(pFrame->Channels[i].N);
+  vpEdgesStereo.resize(Ntype);
+  vnIndexEdgeStereo.resize(Ntype);
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    vpEdgesStereo[Ftype].reserve(pFrame->Channels[Ftype].N);
+    vnIndexEdgeStereo[Ftype].reserve(pFrame->Channels[Ftype].N);
   }
-  
+
   const float deltaMono = sqrt(5.991);
   const float deltaStereo = sqrt(7.815);
 
   {
     unique_lock<mutex> lock(MapPoint::mGlobalMutex);
-
-    for (int Ftype = 0; Ftype < pFrame->Ntype; Ftype++) {
+    for (int Ftype = 0; Ftype < Ntype; Ftype++) {
       for (int i = 0; i < pFrame->Channels[Ftype].N; i++) {
         MapPoint *pMP = pFrame->Channels[Ftype].mvpMapPoints[i];
         if (pMP) {
@@ -275,7 +273,7 @@ int Optimizer::PoseOptimizationMultiChannels(Frame *pFrame) {
             obs << kpUn.pt.x, kpUn.pt.y;
 
             g2o::EdgeSE3ProjectXYZOnlyPose *e = new g2o::EdgeSE3ProjectXYZOnlyPose();
-            
+
             e->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex *>(optimizer.vertex(0)));
             e->setMeasurement(obs);
             const float invSigma2 = pFrame->mvInvLevelSigma2[kpUn.octave];
@@ -295,9 +293,9 @@ int Optimizer::PoseOptimizationMultiChannels(Frame *pFrame) {
             e->Xw[2] = Xw.at<float>(2);
 
             optimizer.addEdge(e);
-            
+
             vpEdgesMono[Ftype].push_back(e);
-            vnIndexEdgeMono[Ftype].push_back(i); 
+            vnIndexEdgeMono[Ftype].push_back(i);
           } else // Stereo observation
           {
             nInitialCorrespondences++;
@@ -337,15 +335,14 @@ int Optimizer::PoseOptimizationMultiChannels(Frame *pFrame) {
             vnIndexEdgeStereo[Ftype].push_back(i);
           }
         }
-      } 
+      }
     }
   }
 
   if (nInitialCorrespondences < 3)
     return 0;
 
-  // We perform 4 optimizations, after each optimization we classify observation
-  // as inlier/outlier At the next optimization, outliers are not included, but
+  // We perform 4 optimizations, after each optimization we classify observation as inlier/outlier At the next optimization, outliers are not included, but
   // at the end they can be classified as inliers again.
   const float chi2Mono[4] = {5.991, 5.991, 5.991, 5.991};
   const float chi2Stereo[4] = {7.815, 7.815, 7.815, 7.815};
@@ -359,7 +356,7 @@ int Optimizer::PoseOptimizationMultiChannels(Frame *pFrame) {
     optimizer.optimize(its[it]);
 
     nBad = 0;
-    for (int Ftype = 0; Ftype < pFrame->Ntype; Ftype++) {
+    for (int Ftype = 0; Ftype < Ntype; Ftype++) {
       for (std::size_t i = 0, iend = vpEdgesMono[Ftype].size(); i < iend; i++) {
         g2o::EdgeSE3ProjectXYZOnlyPose *e = vpEdgesMono[Ftype][i];
 
@@ -381,12 +378,10 @@ int Optimizer::PoseOptimizationMultiChannels(Frame *pFrame) {
         }
 
         if (it == 2)
-          e->setRobustKernel(0);        
+          e->setRobustKernel(0);
       }
-    }
-    
-    for (int Ftype = 0; Ftype < pFrame->Ntype; Ftype++) {
-      for (std::size_t i = 0, iend = vpEdgesStereo.size(); i < iend; i++) {
+
+      for (std::size_t i = 0, iend = vpEdgesStereo[Ftype].size(); i < iend; i++) {
         g2o::EdgeStereoSE3ProjectXYZOnlyPose *e = vpEdgesStereo[Ftype][i];
 
         const std::size_t idx = vnIndexEdgeStereo[Ftype][i];
@@ -409,18 +404,20 @@ int Optimizer::PoseOptimizationMultiChannels(Frame *pFrame) {
         if (it == 2)
           e->setRobustKernel(0);
       }
-    }
 
-    if(optimizer.edges().size()<10)
-      break;
+      if (optimizer.edges().size() < 10)
+        break;
+
+    }
   }
 
-  g2o::VertexSE3Expmap* vSE3_recov = static_cast<g2o::VertexSE3Expmap*>(optimizer.vertex(0));
+  // Recover optimized pose and return number of inliers
+  g2o::VertexSE3Expmap *vSE3_recov  = static_cast<g2o::VertexSE3Expmap *>(optimizer.vertex(0));
   g2o::SE3Quat SE3quat_recov = vSE3_recov->estimate();
   cv::Mat pose = Converter::toCvMat(SE3quat_recov);
   pFrame->SetPose(pose);
 
-  return nInitialCorrespondences-nBad;
+  return nInitialCorrespondences - nBad;
 
 }
 
@@ -914,9 +911,8 @@ void Optimizer::LocalBundleAdjustmentMultiChannels(KeyFrame *pKF, bool *pbStopFl
   for (std::list<MapPoint *>::iterator lit = lLocalMapPoints.begin(), lend = lLocalMapPoints.end(); lit != lend; lit++) {
     MapPoint *pMP = *lit;
     g2o::VertexPointXYZ *vPoint = static_cast<g2o::VertexPointXYZ *>(optimizer.vertex(pMP->mnId + maxKFid + 1));
-    const int Ftype = pMP->GetFeatureType();
     pMP->SetWorldPos(Converter::toCvMat(vPoint->estimate()));
-    pMP->UpdateNormalAndDepth(Ftype);
+    pMP->UpdateNormalAndDepth();
   }
 }
 
@@ -1108,7 +1104,7 @@ int Optimizer::OptimizeSim3(KeyFrame *pKF1, KeyFrame *pKF2, std::vector<MapPoint
 //TO-DO rewrite, useless ?? the same as the default one
 void Optimizer::OptimizeEssentialGraph(Map *pMap, KeyFrame *pLoopKF, KeyFrame *pCurKF, const LoopClosing::KeyFrameAndPose &NonCorrectedSim3,
                                        const LoopClosing::KeyFrameAndPose &CorrectedSim3, const map<KeyFrame *, set<KeyFrame *>> &LoopConnections,
-                                       const bool &bFixScale, const int FType) {
+                                       const bool &bFixScale) {
   // Setup optimizer
   g2o::SparseOptimizer optimizer;
   optimizer.setVerbose(false);

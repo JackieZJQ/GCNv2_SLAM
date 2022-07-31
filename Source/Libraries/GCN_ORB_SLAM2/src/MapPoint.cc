@@ -19,7 +19,7 @@
  */
 
 #include "MapPoint.h"
-#include "ORBmatcher.h"
+#include "Associater.h"
 
 #include <mutex>
 
@@ -171,7 +171,7 @@ int MapPoint::Observations() {
 
 void MapPoint::SetBadFlag() {
   map<KeyFrame *, std::size_t> obs;
-  int Ftype = mFtype;
+  int Ftype;
   
   {
     unique_lock<mutex> lock1(mMutexFeatures);
@@ -179,6 +179,7 @@ void MapPoint::SetBadFlag() {
     mbBad = true;
     obs = mObservations;
     mObservations.clear();
+    Ftype = mFtype;
   }
 
   for (map<KeyFrame *, std::size_t>::iterator mit = obs.begin(), mend = obs.end(); mit != mend; mit++) {
@@ -227,7 +228,7 @@ void MapPoint::Replace(MapPoint *pMP) {
   }
   pMP->IncreaseFound(nfound);
   pMP->IncreaseVisible(nvisible);
-  pMP->ComputeDistinctiveDescriptors(Ftype);
+  pMP->ComputeDistinctiveDescriptors();
 
   mpMap->EraseMapPoint(this);
 }
@@ -288,8 +289,7 @@ void MapPoint::ComputeDistinctiveDescriptors() {
   for (std::size_t i = 0; i < N; i++) {
     Distances[i][i] = 0;
     for (std::size_t j = i + 1; j < N; j++) {
-      int distij =
-          ORBmatcher::DescriptorDistance(vDescriptors[i], vDescriptors[j]);
+      int distij = Associater::DescriptorDistance(vDescriptors[i], vDescriptors[j]);
       Distances[i][j] = distij;
       Distances[j][i] = distij;
     }

@@ -30,9 +30,15 @@ using namespace ::std;
 namespace ORB_SLAM2 {
 
 LocalMapping::LocalMapping(Map *pMap, const float bMonocular)
-    : mbMonocular(bMonocular), mbResetRequested(false),
-      mbFinishRequested(false), mbFinished(true), mpMap(pMap), mbAbortBA(false),
-      mbStopped(false), mbStopRequested(false), mbNotStop(false),
+    : mbMonocular(bMonocular), 
+      mbResetRequested(false),
+      mbFinishRequested(false),
+      mbFinished(true), 
+      mpMap(pMap), 
+      mbAbortBA(false),
+      mbStopped(false), 
+      mbStopRequested(false),
+      mbNotStop(false),
       mbAcceptKeyFrames(true) {}
 
 void LocalMapping::SetLoopCloser(LoopClosing *pLoopCloser) {
@@ -46,28 +52,24 @@ void LocalMapping::Run() {
   mbFinished = false;
 
   while (1) {
+
     // Tracking will see that Local Mapping is busy
     SetAcceptKeyFrames(false);
 
     // Check if there are keyframes in the queue
     if (CheckNewKeyFrames()) {
       // BoW conversion and insertion in Map
-      ProcessNewKeyFrame();
       ProcessNewKeyFrameMultiChannels();
 
       // Check recent MapPoints
       MapPointCulling();
 
       // Triangulate new MapPoints
-      CreateNewMapPoints();
-
       for (int Ftype = 0; Ftype < Ntype; Ftype++)
         CreateNewMapPoints(Ftype);
 
       if (!CheckNewKeyFrames()) {
         // Find more matches in neighbor keyframes and fuse point duplications
-        SearchInNeighbors();
-
         for (int Ftype = 0; Ftype < Ntype; Ftype++)
           SearchInNeighbors(Ftype);
       }
@@ -77,10 +79,9 @@ void LocalMapping::Run() {
       if (!CheckNewKeyFrames() && !stopRequested()) {
         // Local BA
         if (mpMap->KeyFramesInMap() > 2)
-          Optimizer::LocalBundleAdjustmentMultiChannels(mpCurrentKeyFrame, &mbAbortBA, mpMap)
+          Optimizer::LocalBundleAdjustmentMultiChannels(mpCurrentKeyFrame, &mbAbortBA, mpMap);
 
         // Check redundant local Keyframes
-        KeyFrameCulling();
         KeyFrameCullingMultiChannels();
       }
 
@@ -307,7 +308,7 @@ void LocalMapping::ProcessNewKeyFrameMultiChannels() {
           if (!pMP->IsInKeyFrame(mpCurrentKeyFrame)) {
             pMP->AddObservation(mpCurrentKeyFrame, i);
             pMP->UpdateNormalAndDepth();
-            pMP->ComputeDistinctiveDescriptors(Ftype);
+            pMP->ComputeDistinctiveDescriptors();
           } else { // this can only happen for new stereo points inserted by the Tracking 
             mlpRecentAddedMapPoints.push_back(pMP);
           }
@@ -487,8 +488,7 @@ void LocalMapping::CreateNewMapPoints(const int Ftype) {
         float errX1 = u1 - kp1.pt.x;
         float errY1 = v1 - kp1.pt.y;
         float errX1_r = u1_r - kp1_ur;
-        if ((errX1 * errX1 + errY1 * errY1 + errX1_r * errX1_r) >
-            7.8 * sigmaSquare1)
+        if ((errX1 * errX1 + errY1 * errY1 + errX1_r * errX1_r) > 7.8 * sigmaSquare1)
           continue;
       }
 
@@ -511,8 +511,7 @@ void LocalMapping::CreateNewMapPoints(const int Ftype) {
         float errX2 = u2 - kp2.pt.x;
         float errY2 = v2 - kp2.pt.y;
         float errX2_r = u2_r - kp2_ur;
-        if ((errX2 * errX2 + errY2 * errY2 + errX2_r * errX2_r) >
-            7.8 * sigmaSquare2)
+        if ((errX2 * errX2 + errY2 * errY2 + errX2_r * errX2_r) > 7.8 * sigmaSquare2)
           continue;
       }
 
@@ -543,9 +542,9 @@ void LocalMapping::CreateNewMapPoints(const int Ftype) {
       mpCurrentKeyFrame->AddMapPoint(pMP, idx1, Ftype);
       pKF2->AddMapPoint(pMP, idx2, Ftype);
 
-      pMP->ComputeDistinctiveDescriptors(Ftype); // May delete Ftype laterly
+      pMP->ComputeDistinctiveDescriptors(); // May delete Ftype laterly
 
-      pMP->UpdateNormalAndDepth(Ftype);
+      pMP->UpdateNormalAndDepth();
 
       mpMap->AddMapPoint(pMP);
       mlpRecentAddedMapPoints.push_back(pMP);
@@ -619,8 +618,8 @@ void LocalMapping::SearchInNeighbors(const int Ftype) {
     MapPoint *pMP = vpMapPointMatches[i];
     if (pMP) {
       if (!pMP->isBad()) {
-        pMP->ComputeDistinctiveDescriptors(Ftype);
-        pMP->UpdateNormalAndDepth(Ftype);
+        pMP->ComputeDistinctiveDescriptors();
+        pMP->UpdateNormalAndDepth();
       }
     }
   }

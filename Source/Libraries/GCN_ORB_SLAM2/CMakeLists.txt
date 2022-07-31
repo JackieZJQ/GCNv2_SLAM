@@ -44,7 +44,6 @@ src/MapDrawer.cc
 src/MapPoint.cc
 src/Optimizer.cc
 src/ORBextractor.cc
-src/ORBmatcher.cc
 src/ORBVocabulary.cc
 src/PnPsolver.cc
 src/Sim3Solver.cc

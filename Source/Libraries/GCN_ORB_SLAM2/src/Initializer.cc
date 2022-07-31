@@ -21,8 +21,7 @@
 #include "Initializer.h"
 
 #include "DUtils/Random.h"
-
-#include "ORBmatcher.h"
+#include "Associater.h"
 #include "Optimizer.h"
 
 #include <thread>
@@ -31,10 +30,10 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
-Initializer::Initializer(const Frame &ReferenceFrame, float sigma, int iterations, const int FType) {
+Initializer::Initializer(const int Ftype, const Frame &ReferenceFrame, float sigma, int iterations) {
   mK = ReferenceFrame.mK.clone();
 
-  mvKeys1 = ReferenceFrame.Channels[FType].mvKeysUn;
+  mvKeys1 = ReferenceFrame.Channels[Ftype].mvKeysUn;
 
   mSigma = sigma;
   mSigma2 = sigma * sigma;
@@ -42,10 +41,10 @@ Initializer::Initializer(const Frame &ReferenceFrame, float sigma, int iteration
 }
 
 bool Initializer::Initialize(const Frame &CurrentFrame, const std::vector<int> &vMatches12, cv::Mat &R21,
-                             cv::Mat &t21, std::vector<cv::Point3f> &vP3D, std::vector<bool> &vbTriangulated, const int FType) {
+                             cv::Mat &t21, std::vector<cv::Point3f> &vP3D, std::vector<bool> &vbTriangulated, const int Ftype) {
   // Fill structures with current keypoints and matches with reference frame
   // Reference Frame: 1, Current Frame: 2
-  mvKeys2 = CurrentFrame.Channels[FType].mvKeysUn;
+  mvKeys2 = CurrentFrame.Channels[Ftype].mvKeysUn;
 
   mvMatches12.clear();
   mvMatches12.reserve(mvKeys2.size());

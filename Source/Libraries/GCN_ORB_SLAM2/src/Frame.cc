@@ -20,7 +20,6 @@
 
 #include "Frame.h"
 #include "Converter.h"
-#include "ORBmatcher.h"
 #include "Associater.h"
 #include <thread>
 
@@ -183,10 +182,18 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
   mb = mbf / fx;
 
-  thread threadORB(&Frame::ComputeFeaturesRGBD, this, 0, imGray, imDepth);
-  thread threadGCN(&Frame::ComputeFeaturesRGBD, this, 1, imGray, imDepth);
-  threadORB.join();
-  threadGCN.join();
+  // cout << "thread (before)" << endl;
+
+  // thread threadORB(&Frame::ComputeFeaturesRGBD, this, 0, imGray, imDepth);
+  // thread threadGCN(&Frame::ComputeFeaturesRGBD, this, 1, imGray, imDepth);
+  // threadORB.join();
+  // threadGCN.join();
+
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    ComputeFeaturesRGBD(Ftype, imGray, imDepth);
+
+  // cout << "thread (after)" << endl;
+
 }
 
 // Mono
@@ -249,10 +256,15 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
 
 void Frame::AssignFeaturesToGrid(const int Ftype) {
   int nReserve = 0.5f * Channels[Ftype].N / (FRAME_GRID_COLS * FRAME_GRID_ROWS);
-  for (unsigned int i = 0; i < FRAME_GRID_COLS; i++)
-    for (unsigned int j = 0; j < FRAME_GRID_ROWS; j++)
+  Channels[Ftype].mGrid.resize(FRAME_GRID_COLS);
+  for (unsigned int i = 0; i < FRAME_GRID_COLS; i++) {
+    Channels[Ftype].mGrid[i].resize(FRAME_GRID_ROWS);
+    for (unsigned int j = 0; j < FRAME_GRID_ROWS; j++) {
       Channels[Ftype].mGrid[i][j].reserve(nReserve);
+    }
 
+  }
+ 
   for (int i = 0; i < Channels[Ftype].N; i++) {
     const cv::KeyPoint &kp = Channels[Ftype].mvKeysUn[i];
 
@@ -285,18 +297,18 @@ void Frame::AssignFeaturesToGrid(const int &refN, const vector<cv::KeyPoint> &Ke
 void Frame::ExtractFeatures(const int Ftype, int imageFlag, const cv::Mat &im) {
   if (Ftype == 0) {
     if (imageFlag == 0) {
-      (*mpFeatureExtractorLeft[Ftype])(im, cv::Mat(), Channels[Ftype].mvKeys, Channels[Ftype].mDescriptors);
+      (*mpORBExtractorLeft)(im, cv::Mat(), Channels[Ftype].mvKeys, Channels[Ftype].mDescriptors);
     }
     else {
-      (*mpFeatureExtractorRight[Ftype])(im, cv::Mat(), Channels[Ftype].mvKeysRight, Channels[Ftype].mDescriptorsRight);
+      (*mpORBExtractorRight)(im, cv::Mat(), Channels[Ftype].mvKeysRight, Channels[Ftype].mDescriptorsRight);
     }
   }
   else {
     if (imageFlag == 0) {
-      (*mpFeatureExtractorLeft[Ftype])(im, cv::Mat(), Channels[Ftype].mvKeys, Channels[Ftype].mDescriptors);
+      (*mpGCNExtractorLeft)(im, cv::Mat(), Channels[Ftype].mvKeys, Channels[Ftype].mDescriptors);
     }
     else {
-      (*mpFeatureExtractorRight[Ftype])(im, cv::Mat(), Channels[Ftype].mvKeysRight, Channels[Ftype].mDescriptorsRight);
+      (*mpGCNExtractorRight)(im, cv::Mat(), Channels[Ftype].mvKeysRight, Channels[Ftype].mDescriptorsRight);
     }
   }
 }
@@ -460,7 +472,7 @@ void Frame::UndistortKeyPoints(const int Ftype) {
   // Fill undistorted keypoint vector
   Channels[Ftype].mvKeysUn.resize(Channels[Ftype].N);
   for (int i = 0; i < Channels[Ftype].N; i++) {
-    cv::KeyPoint kp = mvKeys[i];
+    cv::KeyPoint kp = Channels[Ftype].mvKeys[i];
     kp.pt.x = mat.at<float>(i, 0);
     kp.pt.y = mat.at<float>(i, 1);
     Channels[Ftype].mvKeysUn[i] = kp;
@@ -529,7 +541,7 @@ void Frame::ComputeStereoMatches(const int Ftype) {
   Channels[Ftype].mvuRight = vector<float>(Channels[Ftype].N, -1.0f);
   Channels[Ftype].mvDepth = vector<float>(Channels[Ftype].N, -1.0f);
 
-  const int thOrbDist = (ORBmatcher::TH_HIGH + ORBmatcher::TH_LOW) / 2;
+  const int thOrbDist = (Associater::TH_HIGH + Associater::TH_LOW) / 2;
 
   const int nRows = mpORBExtractorLeft->mvImagePyramid[0].rows; // should be featureextractor[0] 
 
@@ -760,20 +772,31 @@ cv::Mat Frame::UnprojectStereo(const int &i, const vector<float> &Depth, const v
 
 void Frame::ComputeFeaturesRGBD(const int Ftype, const cv::Mat &imGray, const cv::Mat &imDepth) {
   // Feature extraction
+  
+  // cout << "ExtractFeatures (before)" << Ftype << endl;
+
   ExtractFeatures(Ftype, 0, imGray);
+
+  // cout << "ExtractFeatures (after)" << Ftype << endl;
+
 
   Channels[Ftype].N = Channels[Ftype].mvKeys.size();
   
   if (Channels[Ftype].mvKeys.empty())
     return;
 
+  
   // mvKeysUn, Left image
   UndistortKeyPoints(Ftype);
   // UndistortKeyPoints(Channels[Ftype].mvKeys, Channels[Ftype].mvKeysUn, Channels[Ftype].N);
 
+  // cout << "UndistortKeyPoints" << Ftype << endl;
+  
   // compute mvuRight and mvDepth
   ComputeStereoFromRGBD(imDepth, Ftype);
   // ComputeStereoFromRGBD(imDepth, Channels[Ftype].mvuRight, Channels[Ftype].mvDepth, Channels[Ftype].N, Channels[Ftype].mvKeys, Channels[Ftype].mvKeysUn);  
+
+  // cout << "ComputeStereoFromRGBD" << Ftype << endl;
 
   // map points
   Channels[Ftype].mvpMapPoints = vector<MapPoint *>(Channels[Ftype].N, static_cast<MapPoint *>(NULL));
@@ -781,8 +804,10 @@ void Frame::ComputeFeaturesRGBD(const int Ftype, const cv::Mat &imGray, const cv
   // outliers
   Channels[Ftype].mvbOutlier = vector<bool>(Channels[Ftype].N, false);
 
+  
   AssignFeaturesToGrid(Ftype);
-  // AssignFeaturesToGrid(Channels[Ftype].N, Channels[Ftype].mvKeysUn, Channels[Ftype].mGrid);
+  //AssignFeaturesToGrid(Channels[Ftype].N, Channels[Ftype].mvKeysUn, Channels[Ftype].mGrid);
+  // cout << "AssignFeaturesToGrid" << Ftype << endl;
 }
 
 void Frame::ComputeFeaturesStereo(const int Ftype, const cv::Mat &imLeft, const cv::Mat &imRight) {

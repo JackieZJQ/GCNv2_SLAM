@@ -30,9 +30,14 @@ namespace ORB_SLAM2 {
 Viewer::Viewer(System *pSystem, FrameDrawer *pFrameDrawer,
                MapDrawer *pMapDrawer, Tracking *pTracking,
                const string &strSettingPath)
-    : mpSystem(pSystem), mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer),
-      mpTracker(pTracking), mbFinishRequested(false), mbFinished(true),
-      mbStopped(true), mbStopRequested(false) {
+    : mpSystem(pSystem), 
+      mpFrameDrawer(pFrameDrawer), 
+      mpMapDrawer(pMapDrawer),
+      mpTracker(pTracking),
+      mbFinishRequested(false),
+      mbFinished(true),
+      mbStopped(true),
+      mbStopRequested(false) {
   cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
 
   float fps = fSettings["Camera.fps"];
@@ -68,7 +73,7 @@ void Viewer::Run() {
     featureName = "GCN";
   }
   else
-#endif
+  #endif
     featureName = "ORB";
   
   pangolin::CreateWindowAndBind("ORB-SLAM2: Map Viewer (" + featureName + " Features)", 1024, 768);
@@ -80,29 +85,21 @@ void Viewer::Run() {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  pangolin::CreatePanel("menu").SetBounds(0.0, 1.0, 0.0,
-                                          pangolin::Attach::Pix(175));
+  pangolin::CreatePanel("menu").SetBounds(0.0, 1.0, 0.0, pangolin::Attach::Pix(175));
   pangolin::Var<bool> menuFollowCamera("menu.Follow Camera", true, true);
   pangolin::Var<bool> menuShowPoints("menu.Show Points", true, true);
   pangolin::Var<bool> menuShowKeyFrames("menu.Show KeyFrames", true, true);
   pangolin::Var<bool> menuShowGraph("menu.Show Graph", true, true);
-  pangolin::Var<bool> menuLocalizationMode("menu.Localization Mode", false,
-                                           true);
+  pangolin::Var<bool> menuLocalizationMode("menu.Localization Mode", false, true);
   pangolin::Var<bool> menuReset("menu.Reset", false, false);
   pangolin::Var<bool> menuFinish("menu.Finish", false, false);
 
   // Define Camera Render Object (for view / scene browsing)
-  pangolin::OpenGlRenderState s_cam(
-      pangolin::ProjectionMatrix(1024, 768, mViewpointF, mViewpointF, 512, 389,
-                                 0.1, 1000),
-      pangolin::ModelViewLookAt(mViewpointX, mViewpointY, mViewpointZ, 0, 0, 0,
-                                0.0, -1.0, 0.0));
+  pangolin::OpenGlRenderState s_cam(pangolin::ProjectionMatrix(1024, 768, mViewpointF, mViewpointF, 512, 389, 0.1, 1000),
+                                    pangolin::ModelViewLookAt(mViewpointX, mViewpointY, mViewpointZ, 0, 0, 0, 0.0, -1.0, 0.0));
 
   // Add named OpenGL viewport to window and provide 3D Handler
-  pangolin::View &d_cam = pangolin::CreateDisplay()
-                              .SetBounds(0.0, 1.0, pangolin::Attach::Pix(175),
-                                         1.0, -1024.0f / 768.0f)
-                              .SetHandler(new pangolin::Handler3D(s_cam));
+  pangolin::View &d_cam = pangolin::CreateDisplay().SetBounds(0.0, 1.0, pangolin::Attach::Pix(175), 1.0, -1024.0f / 768.0f).SetHandler(new pangolin::Handler3D(s_cam));
 
   pangolin::OpenGlMatrix Twc;
   Twc.SetIdentity();
@@ -115,6 +112,7 @@ void Viewer::Run() {
   bool bLocalizationMode = false;
 
   while (1) {
+    
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     mpMapDrawer->GetCurrentOpenGLCameraMatrix(Twc);
@@ -122,8 +120,7 @@ void Viewer::Run() {
     if (menuFollowCamera && bFollow) {
       s_cam.Follow(Twc);
     } else if (menuFollowCamera && !bFollow) {
-      s_cam.SetModelViewMatrix(pangolin::ModelViewLookAt(
-          mViewpointX, mViewpointY, mViewpointZ, 0, 0, 0, 0.0, -1.0, 0.0));
+      s_cam.SetModelViewMatrix(pangolin::ModelViewLookAt(mViewpointX, mViewpointY, mViewpointZ, 0, 0, 0, 0.0, -1.0, 0.0));
       s_cam.Follow(Twc);
       bFollow = true;
     } else if (!menuFollowCamera && bFollow) {
@@ -150,8 +147,7 @@ void Viewer::Run() {
 
     cv::Mat im = mpFrameDrawer->DrawFrame();
     cv::Mat im_display;
-    cv::resize(im, im_display, cv::Size(), mDisplayImageScale,
-               mDisplayImageScale);
+    cv::resize(im, im_display, cv::Size(), mDisplayImageScale, mDisplayImageScale);
     cv::imshow(currentFrameWindowName, im_display);
     cv::waitKey(mT);
 

@@ -26,8 +26,6 @@
 
 #include "Optimizer.h"
 
-#include "ORBmatcher.h"
-
 #include "Associater.h"
 
 #include <mutex>
@@ -64,15 +62,16 @@ void LoopClosing::Run() {
   mbFinished = false;
 
   while (1) {
+    
     // Check if there are keyframes in the queue
     if (CheckNewKeyFrames()) {
       // Detect loop candidates and check covisibility consistency
-      if (DetectLoopMultiChannels(0)) {
+      if (DetectLoop(0)) {
         // Compute similarity transformation [sR|t]
         // In the stereo/RGBD case s=1
-        if (ComputeSim3MultiChannels(0)) {
+        if (ComputeSim3(0)) {
           // Perform loop fusion and pose graph optimization
-          CorrectLoopMultiChannels(0);
+          CorrectLoop(0);
         }
       }
     }
@@ -437,7 +436,7 @@ void LoopClosing::CorrectLoop(const int Ftype) {
   }
 
   // Ensure current keyframe is updated
-  mpCurrentKF->UpdateConnections(); // Update Connections Multi Channels ??
+  mpCurrentKF->UpdateConnectionsMultiChannels(); // Update Connections Multi Channels ??
 
   // Retrive keyframes connected to the current keyframe and compute corrected Sim3 pose by propagation
   mvpCurrentConnectedKFs = mpCurrentKF->GetVectorCovisibleKeyFrames();
@@ -500,7 +499,7 @@ void LoopClosing::CorrectLoop(const int Ftype) {
         pMPi->SetWorldPos(cvCorrectedP3Dw);
         pMPi->mnCorrectedByKF = mpCurrentKF->mnId;
         pMPi->mnCorrectedReference = pKFi->mnId;
-        pMPi->UpdateNormalAndDepth(Ftype); // Ftype will be deleted
+        pMPi->UpdateNormalAndDepth(); // Ftype will be deleted
       }
 
       // Update keyframe pose with corrected Sim3. First transform Sim3 to SE3 (scale translation)
@@ -515,7 +514,7 @@ void LoopClosing::CorrectLoop(const int Ftype) {
       pKFi->SetPose(correctedTiw);
 
       // Make sure connections are updated
-      pKFi->UpdateConnections(); // Multi Channels ??
+      pKFi->UpdateConnectionsMultiChannels(); // Multi Channels ??
     }
 
     // Start Loop Fusion. Update matched map points and replace if duplicated
@@ -547,7 +546,7 @@ void LoopClosing::CorrectLoop(const int Ftype) {
     std::vector<KeyFrame *> vpPreviousNeighbors = pKFi->GetVectorCovisibleKeyFrames();
 
     // Update connections. Detect new links.
-    pKFi->UpdateConnections(); // Multi Channels ??
+    pKFi->UpdateConnectionsMultiChannels(); // Multi Channels ??
     LoopConnections[pKFi] = pKFi->GetConnectedKeyFrames();
     for (std::vector<KeyFrame *>::iterator vit_prev = vpPreviousNeighbors.begin(), vend_prev = vpPreviousNeighbors.end(); vit_prev != vend_prev; vit_prev++) {
       LoopConnections[pKFi].erase(*vit_prev);

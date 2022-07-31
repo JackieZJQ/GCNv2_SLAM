@@ -40,7 +40,7 @@ class KeyFrameDatabase;
 
 class KeyFrame {
 public:
-  const static int Ntype = 2; // Number of channels
+  const static int Ntype = 1; // Number of channels
   
 public:
   KeyFrame(Frame &F, Map *pMap, std::vector<KeyFrameDatabase *> pKFDB);
@@ -60,7 +60,6 @@ public:
   // Covisibility graph functions
   void AddConnection(KeyFrame *pKF, const int &weight);
   void EraseConnection(KeyFrame *pKF);
-  void UpdateConnections();
   void UpdateConnectionsMultiChannels();
   void UpdateBestCovisibles();
   std::set<KeyFrame *> GetConnectedKeyFrames();

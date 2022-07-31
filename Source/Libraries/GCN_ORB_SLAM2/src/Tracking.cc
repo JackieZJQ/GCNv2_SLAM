@@ -253,9 +253,17 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB, const cv::Mat &imD, const 
   if ((fabs(mDepthMapFactor - 1.0f) > 1e-5) || imDepth.type() != CV_32F)
     imDepth.convertTo(imDepth, CV_32F, mDepthMapFactor);
 
+  // cout << "Frame (before) works well !!" << endl;
+
   mCurrentFrame = Frame(mImGray, imDepth, timestamp, mpGCNExtractorLeft, mpORBExtractorLeft, mpFeatureExtractorLeft, mpVocabulary, mK, mDistCoef, mbf, mThDepth);
   
+  // cout << "Frame works (after) well !!" << endl;
+
+  // cout << "Track (before) works well !!" << endl;
+
   Track();
+
+  // cout << "Track (after) works well !!" << endl;
 
   return mCurrentFrame.mTcw.clone();
 }
@@ -301,7 +309,7 @@ void Tracking::Track() {
   unique_lock<mutex> lock(mpMap->mMutexMapUpdate);
 
   if (mState == NOT_INITIALIZED) {
-    if (mSensor == System::STEREO || mSensor == System::RGBD)
+    if (mSensor == System::STEREO || mSensor == System::RGBD) 
       StereoInitializationMultiChannels();
     else
       MonocularInitialization(0);
@@ -324,9 +332,12 @@ void Tracking::Track() {
           CheckReplacedInLastFrame(Ftype);
 
         if (mVelocity.empty() || mCurrentFrame.mnId < mnLastRelocFrameId + 2) {
-           bOK = TrackReferenceKeyFrameMultiChannels();
+           
+          bOK = TrackReferenceKeyFrameMultiChannels();
+
         } else {
           bOK = TrackWithMotionModelMultiChannels();
+
           if (!bOK) {
             bOK = TrackReferenceKeyFrameMultiChannels();
           }
@@ -371,8 +382,8 @@ void Tracking::Track() {
           if (!mVelocity.empty()) {
             bOKMM = TrackWithMotionModelMultiChannels();
             for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-              vpMPsMM = mCurrentFrame.Channels[Ftype].mvpMapPoints;
-              vbOutMM = mCurrentFrame.Channels[Ftype].mvbOutlier;
+              vpMPsMM[Ftype] = mCurrentFrame.Channels[Ftype].mvpMapPoints;
+              vbOutMM[Ftype] = mCurrentFrame.Channels[Ftype].mvbOutlier;
             }
             TcwMM = mCurrentFrame.mTcw.clone();
           }
@@ -387,8 +398,8 @@ void Tracking::Track() {
           if (bOKMM && !bOKReloc) {
             mCurrentFrame.SetPose(TcwMM);
             for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-              mCurrentFrame.Channels[Ftype].mvpMapPoints = vpMPsMM;
-              mCurrentFrame.Channels[Ftype].mvbOutlier = vbOutMM;
+              mCurrentFrame.Channels[Ftype].mvpMapPoints = vpMPsMM[Ftype];
+              mCurrentFrame.Channels[Ftype].mvbOutlier = vbOutMM[Ftype];
             }
 
             if (mbVO) {
@@ -413,8 +424,12 @@ void Tracking::Track() {
 
     // If we have an initial estimation of the camera pose and matching. Track the local map.
     if (!mbOnlyTracking) {
+
+
       if (bOK) {
+
         bOK = TrackLocalMapMultiChannels();
+
       }
 
       if (!bOK) {
@@ -469,15 +484,17 @@ void Tracking::Track() {
       mlpTemporalPoints.clear();
 
       // Check if we need to insert a new keyframe
-      if (NeedNewKeyFrameMultiChannels()) // TO-DO Multi Channels ??
+      if (NeedNewKeyFrameMultiChannels()) {
         CreateNewKeyFrameMultiChannels();
+      } // TO-DO Multi Channels ??
+        
 
       // We allow points with high innovation (considererd outliers by the Huber Function) pass to the new keyframe, so that bundle adjustment will
       // finally decide if they are outliers or not. We don't want next frame to estimate its position with those points so we discard them in the
       // frame.
       for (int Ftype = 0; Ftype < Ntype; Ftype++) {
         for (int i = 0; i < mCurrentFrame.Channels[Ftype].N; i++) {
-          if (mCurrentFrame.mvpMapPoints[i] && mCurrentFrame.mvbOutlier[i])
+          if (mCurrentFrame.Channels[Ftype].mvpMapPoints[i] && mCurrentFrame.Channels[Ftype].mvbOutlier[i])
             mCurrentFrame.Channels[Ftype].mvpMapPoints[i] = static_cast<MapPoint *>(NULL);
         }
       }
@@ -550,12 +567,12 @@ void Tracking::StereoInitialization(const int Ftype) {
         cv::Mat x3D = mCurrentFrame.UnprojectStereo(i, Ftype);
         MapPoint *pNewMP = new MapPoint(x3D, pKFini, mpMap, Ftype);
         pNewMP->AddObservation(pKFini, i);
-        pKFini->AddMapPoint(pNewMP, i), Ftype;
+        pKFini->AddMapPoint(pNewMP, i, Ftype);
         pNewMP->ComputeDistinctiveDescriptors();
         pNewMP->UpdateNormalAndDepth();
         mpMap->AddMapPoint(pNewMP);
 
-        mCurrentFrame.mvpMapPoints[i] = pNewMP;
+        mCurrentFrame.Channels[Ftype].mvpMapPoints[i] = pNewMP;
       }
     }
 
@@ -654,8 +671,8 @@ void Tracking::CreateInitialMapMonocular(const int Ftype) {
   KeyFrame *pKFini = new KeyFrame(mInitialFrame, mpMap, mpKeyFrameDB);
   KeyFrame *pKFcur = new KeyFrame(mCurrentFrame, mpMap, mpKeyFrameDB);
 
-  pKFini->ComputeBoW(const int Ftype);
-  pKFcur->ComputeBoW(const int Ftype);
+  pKFini->ComputeBoW(Ftype);
+  pKFcur->ComputeBoW(Ftype);
 
   // Insert KFs in the map
   mpMap->AddKeyFrame(pKFini);
@@ -689,20 +706,20 @@ void Tracking::CreateInitialMapMonocular(const int Ftype) {
   }
 
   // Update Connections
-  pKFini->UpdateConnections(); //TO-DO may ahve problems ? use UpdateConnectionsMultiChannels()
-  pKFcur->UpdateConnections();
+  pKFini->UpdateConnectionsMultiChannels(); //TO-DO may ahve problems ? use UpdateConnectionsMultiChannels()
+  pKFcur->UpdateConnectionsMultiChannels(); // The function will only initlize one channel, but update connection of two channels
 
   // Bundle Adjustment
   cout << "New Map created with " << mpMap->MapPointsInMap() << " points"
        << endl;
 
-  Optimizer::GlobalBundleAdjustemnt(mpMap, 20); //TO-DO ??
+  Optimizer::GlobalBundleAdjustemntMultiChannels(mpMap, 20); //TO-DO ??
 
   // Set median depth to 1
   float medianDepth = pKFini->ComputeSceneMedianDepth(2, Ftype);
   float invMedianDepth = 1.0f / medianDepth;
 
-  if (medianDepth < 0 || pKFcur->TrackedMapPoints(1) < 100) {
+  if (medianDepth < 0 || pKFcur->TrackedMapPoints(1, Ftype) < 100) {
     cout << "Wrong initialization, reseting..." << endl;
     Reset();
     return;
@@ -921,8 +938,7 @@ void Tracking::UpdateLastFrame(const int Ftype) {
 
   mLastFrame.SetPose(Tlr * pRef->GetPose());
 
-  if (mnLastKeyFrameId == mLastFrame.mnId || mSensor == System::MONOCULAR ||
-      !mbOnlyTracking)
+  if (mnLastKeyFrameId == mLastFrame.mnId || mSensor == System::MONOCULAR || !mbOnlyTracking)
     return;
 
   // Create "visual odometry" MapPoints
@@ -941,8 +957,7 @@ void Tracking::UpdateLastFrame(const int Ftype) {
 
   sort(vDepthIdx.begin(), vDepthIdx.end());
 
-  // We insert all close points (depth<mThDepth)
-  // If less than 100 close points, we insert the 100 closest ones.
+  // We insert all close points (depth<mThDepth). If less than 100 close points, we insert the 100 closest ones.
   int nPoints = 0;
   for (size_t j = 0; j < vDepthIdx.size(); j++) {
     int i = vDepthIdx[j].second;
@@ -957,7 +972,7 @@ void Tracking::UpdateLastFrame(const int Ftype) {
     }
 
     if (bCreateNew) {
-      cv::Mat x3D = mLastFrame.UnprojectStereo(i, Ftype;
+      cv::Mat x3D = mLastFrame.UnprojectStereo(i, Ftype);
       MapPoint *pNewMP = new MapPoint(x3D, mpMap, &mLastFrame, i, Ftype);
 
       mLastFrame.Channels[Ftype].mvpMapPoints[i] = pNewMP;
@@ -1024,6 +1039,7 @@ bool Tracking::TrackWithMotionModelMultiChannels() {
 
   // Optimize frame pose with all matches
   Optimizer::PoseOptimizationMultiChannels(&mCurrentFrame);
+  //Optimizer::PoseOptimizationMultiChannels(&mCurrentFrame);
 
   // Discard outliers
   int nmatchesMap = 0;
@@ -1082,6 +1098,7 @@ bool Tracking::TrackReferenceKeyFrameMultiChannels() {
   mCurrentFrame.SetPose(mLastFrame.mTcw);
 
   Optimizer::PoseOptimizationMultiChannels(&mCurrentFrame);
+  //Optimizer::PoseOptimizationMultiChannels(&mCurrentFrame);
 
   // Discard outliers
   int nmatchesMap = 0;
@@ -1110,7 +1127,7 @@ bool Tracking::Relocalization(const int Ftype) {
   mCurrentFrame.ComputeBoW(Ftype);
 
   // Relocalization is performed when tracking is lost. Track Lost: Query KeyFrame Database for keyframe candidates for relocalisation
-  vector<KeyFrame *> vpCandidateKFs = mpKeyFrameDB->DetectRelocalizationCandidates(&mCurrentFrame, Ftype); // Multi Channels ??
+  vector<KeyFrame *> vpCandidateKFs = mpKeyFrameDB[Ftype]->DetectRelocalizationCandidates(&mCurrentFrame, Ftype); // Multi Channels ??
 
   if (vpCandidateKFs.empty())
     return false;
@@ -1365,18 +1382,19 @@ void Tracking::SearchLocalPointsMultiChannels() {
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
     for (vector<MapPoint *>::iterator vit = mCurrentFrame.Channels[Ftype].mvpMapPoints.begin(), vend = mCurrentFrame.Channels[Ftype].mvpMapPoints.end(); vit != vend; vit++) {
       MapPoint *pMP = *vit;
-      if (pMP->isBad()) {
-        *vit = static_cast<MapPoint *>(NULL);
-      } else {
-        pMP->IncreaseVisible();
-        pMP->mnLastFrameSeen = mCurrentFrame.mnId;
-        pMP->mbTrackInView = false;
+      if (pMP) {
+        if (pMP->isBad()) {
+          *vit = static_cast<MapPoint *>(NULL);
+        } else {
+          pMP->IncreaseVisible();
+          pMP->mnLastFrameSeen = mCurrentFrame.mnId;
+          pMP->mbTrackInView = false;
+        }
       }
     }
   }
   
   int nToMatch = 0;
-
   // Project points in frame and check its visibility
   for (vector<MapPoint *>::iterator vit = mvpLocalMapPoints.begin(), vend = mvpLocalMapPoints.end(); vit != vend; vit++) {
     MapPoint *pMP = *vit;
@@ -1421,7 +1439,9 @@ bool Tracking::TrackLocalMapMultiChannels() {
 
   UpdateLocalMapMultiChannels();
 
+
   SearchLocalPointsMultiChannels();
+
 
   Optimizer::PoseOptimizationMultiChannels(&mCurrentFrame);
   mnMatchesInliers = 0;
@@ -1442,8 +1462,7 @@ bool Tracking::TrackLocalMapMultiChannels() {
     }
   }
   
-  // Decide if the tracking was succesful
-  // More restrictive if there was a relocalization recently
+  // Decide if the tracking was succesful. More restrictive if there was a relocalization recently
   if (mCurrentFrame.mnId < mnLastRelocFrameId + mMaxFrames && mnMatchesInliers < 50)
     return false;
 
@@ -1480,6 +1499,9 @@ bool Tracking::NeedNewKeyFrameMultiChannels() {
 
   // step 5 : Local Mapping accept keyframes?
   bool bLocalMappingIdle = mpLocalMapper->AcceptKeyFrames();
+
+  if (bLocalMappingIdle)
+    cout << 1 << endl;
 
   // step 6 : Check how many "close" points are being tracked and how many could be potentially created (for rgdb and sterreo)
   int nNonTrackedClose = 0;
@@ -1520,9 +1542,16 @@ bool Tracking::NeedNewKeyFrameMultiChannels() {
   // step 7.5 : Condition 2: Few tracked points compared to reference keyframe. Lots of visual odometry compared to map matches.
   const bool c2 = ((mnMatchesInliers < nRefMatches * thRefRatio || bNeedToInsertClose) && mnMatchesInliers > 15);
 
+  cout << "mnMatchesInliers:" << mnMatchesInliers << endl;
+  cout << "nRefMatches:" << nRefMatches << endl;
+  cout << "nRefMatches*thRefRatio:"<< nRefMatches*thRefRatio << endl;
+  if (bNeedToInsertClose)
+    cout << "bNeedToInsertClose = true" << endl;
+
   if ((c1a || c1b || c1c) && c2) {
     // If the mapping accepts keyframes, insert keyframe. Otherwise send a signal to interrupt BA
     if (bLocalMappingIdle) {
+      cout << "INSERT KEYFRAME" << endl;
       return true;
     } else {
       mpLocalMapper->InterruptBA();
@@ -1590,11 +1619,11 @@ void Tracking::CreateNewKeyFrameMultiChannels() {
           }
 
           if (bCreateNew) {
-            cv::Mat x3D = mCurrentFrame.UnprojectStereo(i, mCurrentFrame.Channels[Ftype].mvDepth, mCurrentFrame.Channels[Ftype].mvKeysUn);
+            cv::Mat x3D = mCurrentFrame.UnprojectStereo(i, Ftype);
             MapPoint *pNewMP = new MapPoint(x3D, pKF, mpMap, Ftype);
             pNewMP->AddObservation(pKF, i);
             pKF->AddMapPoint(pNewMP, i, Ftype);
-            pNewMP->ComputeDistinctiveDescriptors(Ftype);
+            pNewMP->ComputeDistinctiveDescriptors();
             pNewMP->UpdateNormalAndDepth();
             mpMap->AddMapPoint(pNewMP);
 

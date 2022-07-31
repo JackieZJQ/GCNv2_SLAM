@@ -68,6 +68,7 @@ System::System(const string (&strVocFile)[Ntype], const string &strSettingsFile,
 
   // Name of feature types
   const std::string FeatName[Ntype] = {"ORB", "GCN"};
+  //const std::string FeatName[Ntype] = {"ORB"};
 
   for (int i = 0; i < Ntype; i++)
   {
@@ -114,17 +115,22 @@ System::System(const string (&strVocFile)[Ntype], const string &strSettingsFile,
   //(it will live in the main thread of execution, the one that called this constructor)
   mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer, mpMap, mpKeyFrameDatabase, strSettingsFile, mSensor);
 
+
   // Initialize the Local Mapping thread and launch
   mpLocalMapper = new LocalMapping(mpMap, mSensor == MONOCULAR);
+
   mptLocalMapping = new thread(&ORB_SLAM2::LocalMapping::Run, mpLocalMapper);
 
   // Initialize the Loop Closing thread and launch
   mpLoopCloser = new LoopClosing(mpMap, mpKeyFrameDatabase, mpVocabulary, mSensor != MONOCULAR);
+
   mptLoopClosing = new thread(&ORB_SLAM2::LoopClosing::Run, mpLoopCloser);
 
   // Initialize the Viewer thread and launch
   if (bUseViewer) {
+
     mpViewer = new Viewer(this, mpFrameDrawer, mpMapDrawer, mpTracker, strSettingsFile);
+
     // mptViewer = new thread(&Viewer::Run, mpViewer);
     mpTracker->SetViewer(mpViewer);
   }
@@ -225,6 +231,7 @@ cv::Mat System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const doub
   }
 
   cv::Mat Tcw = mpTracker->GrabImageRGBD(im, depthmap, timestamp);
+
 
   unique_lock<mutex> lock2(mMutexState);
   mTrackingState = mpTracker->mState;

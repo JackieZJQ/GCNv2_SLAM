@@ -20,7 +20,7 @@
 
 #include "KeyFrame.h"
 #include "Converter.h"
-#include "ORBmatcher.h"
+#include "Associater.h"
 #include <mutex>
 
 using namespace ::std;
@@ -233,6 +233,7 @@ void KeyFrame::EraseMapPointMatch(MapPoint *pMP, const int Ftype) {
     Channels[Ftype].mvpMapPoints[idx] = static_cast<MapPoint *>(NULL);
 }
 
+// Delete Ftype ? Ftype is useless because we have pMp ??
 void KeyFrame::ReplaceMapPointMatch(const std::size_t &idx, MapPoint *pMP, const int Ftype) {
   int _Ftype = pMP->GetFeatureType();
   Channels[Ftype].mvpMapPoints[idx] = pMP;
@@ -280,87 +281,6 @@ std::vector<MapPoint *> KeyFrame::GetMapPointMatches(const int Ftype) {
 MapPoint *KeyFrame::GetMapPoint(const std::size_t &idx, const int Ftype) {
   unique_lock<mutex> lock(mMutexFeatures);
   return Channels[Ftype].mvpMapPoints[idx];
-}
-
-// TO-DO, rewrite it as updateconnections multi channels
-void KeyFrame::UpdateConnections() {
-  map<KeyFrame *, int> KFcounter;
-
-  std::vector<MapPoint *> vpMP;
-
-  {
-    unique_lock<mutex> lockMPs(mMutexFeatures);
-    vpMP = mvpMapPoints;
-  }
-
-  // For all map points in keyframe check in which other keyframes are they seen, increase counter for those keyframes
-  for (std::vector<MapPoint *>::iterator vit = vpMP.begin(), vend = vpMP.end(); vit != vend; vit++) {
-    MapPoint *pMP = *vit;
-
-    if (!pMP)
-      continue;
-
-    if (pMP->isBad())
-      continue;
-
-    map<KeyFrame *, std::size_t> observations = pMP->GetObservations();
-
-    for (map<KeyFrame *, std::size_t>::iterator mit = observations.begin(), mend = observations.end(); mit != mend; mit++) {
-      if (mit->first->mnId == mnId)
-        continue;
-      KFcounter[mit->first]++;
-    }
-  }
-
-  // This should not happen
-  if (KFcounter.empty())
-    return;
-
-  // If the counter is greater than threshold add connection, in case no keyframe counter is over threshold add the one with maximum counter
-  int nmax = 0;
-  KeyFrame *pKFmax = NULL;
-  int th = 15;
-
-  std::vector<pair<int, KeyFrame *>> vPairs;
-  vPairs.reserve(KFcounter.size());
-  for (map<KeyFrame *, int>::iterator mit = KFcounter.begin(), mend = KFcounter.end(); mit != mend; mit++) {
-    if (mit->second > nmax) {
-      nmax = mit->second;
-      pKFmax = mit->first;
-    }
-    if (mit->second >= th) {
-      vPairs.push_back(make_pair(mit->second, mit->first));
-      (mit->first)->AddConnection(this, mit->second);
-    }
-  }
-
-  if (vPairs.empty()) {
-    vPairs.push_back(make_pair(nmax, pKFmax));
-    pKFmax->AddConnection(this, nmax);
-  }
-
-  sort(vPairs.begin(), vPairs.end());
-  std::list<KeyFrame *> lKFs;
-  std::list<int> lWs;
-  for (std::size_t i = 0; i < vPairs.size(); i++) {
-    lKFs.push_front(vPairs[i].second);
-    lWs.push_front(vPairs[i].first);
-  }
-
-  {
-    unique_lock<mutex> lockCon(mMutexConnections);
-
-    // mspConnectedKeyFrames = spConnectedKeyFrames;
-    mConnectedKeyFrameWeights = KFcounter;
-    mvpOrderedConnectedKeyFrames = std::vector<KeyFrame *>(lKFs.begin(), lKFs.end());
-    mvOrderedWeights = std::vector<int>(lWs.begin(), lWs.end());
-
-    if (mbFirstConnection && mnId != 0) {
-      mpParent = mvpOrderedConnectedKeyFrames.front();
-      mpParent->AddChild(this);
-      mbFirstConnection = false;
-    }
-  }
 }
 
 void KeyFrame::UpdateConnectionsMultiChannels() {
