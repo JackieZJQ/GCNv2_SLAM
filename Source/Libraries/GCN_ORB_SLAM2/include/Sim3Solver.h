@@ -30,17 +30,13 @@ namespace ORB_SLAM2 {
 
 class Sim3Solver {
 public:
-  Sim3Solver(const int Ftype, KeyFrame *pKF1, KeyFrame *pKF2,
-             const std::vector<MapPoint *> &vpMatched12,
-             const bool bFixScale = true);
+  Sim3Solver(const int Ftype, KeyFrame *pKF1, KeyFrame *pKF2, const std::vector<MapPoint *> &vpMatched12, const bool bFixScale = true);
 
-  void SetRansacParameters(double probability = 0.99, int minInliers = 6,
-                           int maxIterations = 300);
+  void SetRansacParameters(double probability = 0.99, int minInliers = 6, int maxIterations = 300);
 
   cv::Mat find(std::vector<bool> &vbInliers12, int &nInliers);
 
-  cv::Mat iterate(int nIterations, bool &bNoMore, std::vector<bool> &vbInliers,
-                  int &nInliers);
+  cv::Mat iterate(int nIterations, bool &bNoMore, std::vector<bool> &vbInliers, int &nInliers);
 
   cv::Mat GetEstimatedRotation();
   cv::Mat GetEstimatedTranslation();

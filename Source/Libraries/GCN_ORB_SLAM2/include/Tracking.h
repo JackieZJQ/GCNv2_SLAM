@@ -50,7 +50,7 @@ class System;
 
 class Tracking {
 public:
-  const static int Ntype = 1; // Number of channels
+  const static int Ntype = 2; // Number of channels
 
 public:
   Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, Map *pMap, KeyFrameDatabase *pKFDB[Ntype],
