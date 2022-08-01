@@ -203,6 +203,8 @@ void GCNextractor::operator()(InputArray _image, InputArray _mask,
   Mat image = _image.getMat();
   assert(image.type() == CV_8UC1);
 
+  ComputePyramid(image);
+
   cv::Mat img;
   image.convertTo(img, CV_32FC1, 1.f / 255.f, 0);
 
@@ -266,6 +268,32 @@ void GCNextractor::operator()(InputArray _image, InputArray _mask,
 
   // std::cout << "Using GCNextractor......" << std::endl;
 
+}
+
+void GCNextractor::ComputePyramid(cv::Mat image) {
+  for (int level = 0; level < nlevels; ++level) {
+    float scale = mvInvScaleFactor[level];
+    Size sz(cvRound((float)image.cols * scale),
+            cvRound((float)image.rows * scale));
+    Size wholeSize(sz.width + EDGE_THRESHOLD * 2,
+                   sz.height + EDGE_THRESHOLD * 2);
+    Mat temp(wholeSize, image.type()), masktemp;
+    mvImagePyramid[level] =
+        temp(Rect(EDGE_THRESHOLD, EDGE_THRESHOLD, sz.width, sz.height));
+
+    // Compute the resized image
+    if (level != 0) {
+      resize(mvImagePyramid[level - 1], mvImagePyramid[level], sz, 0, 0,
+             INTER_LINEAR);
+
+      copyMakeBorder(mvImagePyramid[level], temp, EDGE_THRESHOLD,
+                     EDGE_THRESHOLD, EDGE_THRESHOLD, EDGE_THRESHOLD,
+                     BORDER_REFLECT_101 + BORDER_ISOLATED);
+    } else {
+      copyMakeBorder(image, temp, EDGE_THRESHOLD, EDGE_THRESHOLD,
+                     EDGE_THRESHOLD, EDGE_THRESHOLD, BORDER_REFLECT_101);
+    }
+  }
 }
 
 } // namespace ORB_SLAM2

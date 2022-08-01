@@ -46,6 +46,8 @@ public:
   virtual void operator()(cv::InputArray image, cv::InputArray mask,
                           std::vector<cv::KeyPoint> &keypoints,
                           cv::OutputArray descriptors);
+  
+  void ComputePyramid(cv::Mat image);
 
 protected:
   std::shared_ptr<torch::jit::script::Module> module;

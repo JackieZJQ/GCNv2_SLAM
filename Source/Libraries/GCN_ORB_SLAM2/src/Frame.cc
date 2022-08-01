@@ -247,7 +247,6 @@ void Frame::AssignFeaturesToGrid(const int Ftype) {
     for (unsigned int j = 0; j < FRAME_GRID_ROWS; j++) {
       Channels[Ftype].mGrid[i][j].reserve(nReserve);
     }
-
   }
  
   for (int i = 0; i < Channels[Ftype].N; i++) {
@@ -518,7 +517,7 @@ void Frame::ComputeStereoMatches(const int Ftype) {
 
   const int thOrbDist = (Associater::TH_HIGH + Associater::TH_LOW) / 2;
 
-  const int nRows = mpFeatureExtractorLeft[0]->mvImagePyramid[0].rows; 
+  const int nRows = mpFeatureExtractorLeft[Ftype]->mvImagePyramid[0].rows; 
 
   // Assign keypoints to row table
   vector<vector<size_t>> vRowIndices(nRows, vector<size_t>());
@@ -601,7 +600,7 @@ void Frame::ComputeStereoMatches(const int Ftype) {
 
       // sliding window search
       const int w = 5;
-      cv::Mat IL = mpFeatureExtractorLeft[0]->mvImagePyramid[kpL.octave].rowRange(scaledvL - w, scaledvL + w + 1).colRange(scaleduL - w, scaleduL + w + 1);
+      cv::Mat IL = mpFeatureExtractorLeft[Ftype]->mvImagePyramid[kpL.octave].rowRange(scaledvL - w, scaledvL + w + 1).colRange(scaleduL - w, scaleduL + w + 1);
       IL.convertTo(IL, CV_32F);
       IL = IL - IL.at<float>(w, w) * cv::Mat::ones(IL.rows, IL.cols, CV_32F);
 
@@ -613,11 +612,11 @@ void Frame::ComputeStereoMatches(const int Ftype) {
 
       const float iniu = scaleduR0 + L - w;
       const float endu = scaleduR0 + L + w + 1;
-      if (iniu < 0 || endu >= mpFeatureExtractorRight[0]->mvImagePyramid[kpL.octave].cols)
+      if (iniu < 0 || endu >= mpFeatureExtractorRight[Ftype]->mvImagePyramid[kpL.octave].cols)
         continue;
 
       for (int incR = -L; incR <= +L; incR++) {
-        cv::Mat IR = mpFeatureExtractorRight[0]->mvImagePyramid[kpL.octave].rowRange(scaledvL - w, scaledvL + w + 1).colRange(scaleduR0 + incR - w, scaleduR0 + incR + w + 1);
+        cv::Mat IR = mpFeatureExtractorRight[Ftype]->mvImagePyramid[kpL.octave].rowRange(scaledvL - w, scaledvL + w + 1).colRange(scaleduR0 + incR - w, scaleduR0 + incR + w + 1);
         IR.convertTo(IR, CV_32F);
         IR = IR - IR.at<float>(w, w) * cv::Mat::ones(IR.rows, IR.cols, CV_32F);
 
