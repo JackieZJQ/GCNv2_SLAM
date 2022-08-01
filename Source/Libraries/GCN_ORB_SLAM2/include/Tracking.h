@@ -156,16 +156,6 @@ protected:
   LocalMapping *mpLocalMapper;
   LoopClosing *mpLoopClosing;
 
-  // GCN extractors
-  FeatureExtractor *mpGCNExtractorLeft, *mpGCNExtractorRight;
-  FeatureExtractor *mpIniGCNExtractor;
-  FeatureExtractor *mpGCNExtractor;
-  
-  // ORB extractors
-  FeatureExtractor *mpORBExtractorLeft, *mpORBExtractorRight;
-  FeatureExtractor *mpIniORBExtractor;
-  FeatureExtractor *mpORBExtractor;
-
   // Feature extractor arrays
   FeatureExtractor *mpFeatureExtractorLeft[Ntype];
   FeatureExtractor *mpFeatureExtractorRight[Ntype];

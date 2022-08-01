@@ -37,11 +37,7 @@ Frame::Frame() {}
 
 // Copy Constructor
 Frame::Frame(const Frame &frame)
-    : mpVocabulary(frame.mpVocabulary),
-      mpGCNExtractorLeft(frame.mpGCNExtractorLeft),
-      mpGCNExtractorRight(frame.mpGCNExtractorRight),
-      mpORBExtractorLeft(frame.mpORBExtractorLeft),         
-      mpORBExtractorRight(frame.mpORBExtractorRight),  
+    : mpVocabulary(frame.mpVocabulary), 
       mTimeStamp(frame.mTimeStamp), 
       mK(frame.mK.clone()),
       mDistCoef(frame.mDistCoef.clone()), 
@@ -70,16 +66,10 @@ Frame::Frame(const Frame &frame)
 
 // Stereo
 Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeStamp, 
-             FeatureExtractor *GCNextractorLeft, FeatureExtractor *GCNextractorRight, 
-             FeatureExtractor *ORBextractorLeft, FeatureExtractor *ORBextractorRight,
              FeatureExtractor *extractorLeft[Ntype], FeatureExtractor *extractorRight[Ntype],
              vector<ORBVocabulary *> voc, cv::Mat &K,
              cv::Mat &distCoef, const float &bf, const float &thDepth)
-    : mpVocabulary(voc),
-      mpGCNExtractorLeft(GCNextractorLeft), 
-      mpGCNExtractorRight(GCNextractorRight), 
-      mpORBExtractorLeft(ORBextractorLeft), 
-      mpORBExtractorRight(ORBextractorRight), 
+    : mpVocabulary(voc), 
       mTimeStamp(timeStamp),
       mK(K.clone()), 
       mDistCoef(distCoef.clone()), 
@@ -136,14 +126,10 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
 // RGB-D
 Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
              const double &timeStamp, 
-             FeatureExtractor *GCNextractor, FeatureExtractor *ORBextractor, FeatureExtractor *extractor[Ntype],
+             FeatureExtractor *extractor[Ntype],
              vector<ORBVocabulary *> voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
              const float &thDepth)
-    : mpVocabulary(voc),
-      mpGCNExtractorLeft(GCNextractor),
-      mpGCNExtractorRight(static_cast<FeatureExtractor *>(NULL)),
-      mpORBExtractorLeft(ORBextractor),
-      mpORBExtractorRight(static_cast<FeatureExtractor *>(NULL)), 
+    : mpVocabulary(voc), 
       mTimeStamp(timeStamp), 
       mK(K.clone()), 
       mDistCoef(distCoef.clone()),
@@ -198,14 +184,10 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
 // Mono
 Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
-             FeatureExtractor *GCNextractor, FeatureExtractor *ORBextractor, FeatureExtractor *extractor[Ntype],
+             FeatureExtractor *extractor[Ntype],
              vector<ORBVocabulary *> voc, cv::Mat &K,
              cv::Mat &distCoef, const float &bf, const float &thDepth)
     : mpVocabulary(voc),
-      mpGCNExtractorLeft(GCNextractor),
-      mpGCNExtractorRight(static_cast<FeatureExtractor *>(NULL)),
-      mpORBExtractorLeft(ORBextractor),
-      mpORBExtractorRight(static_cast<FeatureExtractor *>(NULL)), 
       mTimeStamp(timeStamp), 
       mK(K.clone()), 
       mDistCoef(distCoef.clone()),

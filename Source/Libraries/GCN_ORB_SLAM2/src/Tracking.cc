@@ -134,28 +134,17 @@ Tracking::Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], vector<FrameDrawer 
   int fMinThFAST = fSettings["ORBextractor.minThFAST"];
 
   // create left extractor
-  mpORBExtractorLeft = createFeatureExtractor(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST, 0);
-  mpGCNExtractorLeft = createFeatureExtractor(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST, 1);
-
   for (int Ftype = 0; Ftype < Ntype; Ftype++)
     mpFeatureExtractorLeft[Ftype] = createFeatureExtractor(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST, Ftype);
 
   if (sensor == System::STEREO){
-
     // create right extractor
-    mpORBExtractorRight = createFeatureExtractor(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST, 0);
-    mpGCNExtractorRight = createFeatureExtractor(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST, 1);
-
     for (int Ftype = 0; Ftype < Ntype; Ftype++)
       mpFeatureExtractorRight[Ftype] = createFeatureExtractor(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST, Ftype);
   }
 
   if (sensor == System::MONOCULAR){
-
     // create init extractor
-    mpIniORBExtractor = createFeatureExtractor(2 * nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST, 0);
-    mpIniGCNExtractor = createFeatureExtractor(2 * nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST, 1);
-
     for (int Ftype = 0; Ftype < Ntype; Ftype++)
       mpIniFeatureExtractor[Ftype] = createFeatureExtractor(2 * nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST, Ftype);
   }
@@ -219,8 +208,7 @@ cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRe
     cv::resize(imGrayRight, imGrayRight, cv::Size(320, 240), 0, 0, cv::INTER_NEAREST);
   }
 
-  mCurrentFrame = Frame(mImGray, imGrayRight, timestamp, mpGCNExtractorLeft, mpGCNExtractorRight, 
-                        mpORBExtractorLeft, mpORBExtractorRight, mpFeatureExtractorLeft, mpFeatureExtractorRight,
+  mCurrentFrame = Frame(mImGray, imGrayRight, timestamp, mpFeatureExtractorLeft, mpFeatureExtractorRight,
                         mpVocabulary, mK, mDistCoef, mbf, mThDepth);
 
   Track();
@@ -253,17 +241,9 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB, const cv::Mat &imD, const 
   if ((fabs(mDepthMapFactor - 1.0f) > 1e-5) || imDepth.type() != CV_32F)
     imDepth.convertTo(imDepth, CV_32F, mDepthMapFactor);
 
-  // cout << "Frame (before) works well !!" << endl;
-
-  mCurrentFrame = Frame(mImGray, imDepth, timestamp, mpGCNExtractorLeft, mpORBExtractorLeft, mpFeatureExtractorLeft, mpVocabulary, mK, mDistCoef, mbf, mThDepth);
-  
-  // cout << "Frame works (after) well !!" << endl;
-
-  // cout << "Track (before) works well !!" << endl;
+  mCurrentFrame = Frame(mImGray, imDepth, timestamp, mpFeatureExtractorLeft, mpVocabulary, mK, mDistCoef, mbf, mThDepth);
 
   Track();
-
-  // cout << "Track (after) works well !!" << endl;
 
   return mCurrentFrame.mTcw.clone();
 }
@@ -289,9 +269,9 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
   }
 
   if (mState == NOT_INITIALIZED || mState == NO_IMAGES_YET)
-    mCurrentFrame = Frame(mImGray, timestamp, mpIniGCNExtractor, mpIniORBExtractor, mpIniFeatureExtractor, mpVocabulary, mK, mDistCoef, mbf, mThDepth);
+    mCurrentFrame = Frame(mImGray, timestamp, mpIniFeatureExtractor, mpVocabulary, mK, mDistCoef, mbf, mThDepth);
   else
-    mCurrentFrame = Frame(mImGray, timestamp, mpGCNExtractorLeft, mpORBExtractorLeft, mpFeatureExtractorLeft, mpVocabulary, mK, mDistCoef, mbf, mThDepth);
+    mCurrentFrame = Frame(mImGray, timestamp, mpFeatureExtractorLeft, mpVocabulary, mK, mDistCoef, mbf, mThDepth);
 
   Track();
 
