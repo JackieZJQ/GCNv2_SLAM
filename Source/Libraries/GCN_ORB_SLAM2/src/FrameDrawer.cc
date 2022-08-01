@@ -120,7 +120,7 @@ void FrameDrawer::DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText) {
     else
       s << "LOCALIZATION | ";
     int nKFs = mpMap->KeyFramesInMap();
-    int nMPs = mpMap->MapPointsInMap();
+    int nMPs = mpMap->MapPointsInMap(); //Ftype
     s << "KFs: " << nKFs << ", MPs: " << nMPs << ", Matches: " << mnTracked;
     if (mnTrackedVO > 0)
       s << ", + VO matches: " << mnTrackedVO;
@@ -139,23 +139,23 @@ void FrameDrawer::DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText) {
   cv::putText(imText, s.str(), cv::Point(5, imText.rows - 5), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 255, 255), 1, 8);
 }
 
-void FrameDrawer::Update(Tracking *pTracker) {
+void FrameDrawer::Update(Tracking *pTracker, const int Ftype) {
   unique_lock<mutex> lock(mMutex);
   pTracker->mImGray.copyTo(mIm);
-  mvCurrentKeys = pTracker->mCurrentFrame.Channels[0].mvKeys;
+  mvCurrentKeys = pTracker->mCurrentFrame.Channels[Ftype].mvKeys;
   N = mvCurrentKeys.size();
   mvbVO = std::vector<bool>(N, false);
   mvbMap = std::vector<bool>(N, false);
   mbOnlyTracking = pTracker->mbOnlyTracking;
 
   if (pTracker->mLastProcessedState == Tracking::NOT_INITIALIZED) {
-    mvIniKeys = pTracker->mInitialFrame.Channels[0].mvKeys;
-    mvIniMatches = pTracker->mvIniMatches;
+    mvIniKeys = pTracker->mInitialFrame.Channels[Ftype].mvKeys;
+    mvIniMatches = pTracker->mvIniMatches; // What is this ?? 
   } else if (pTracker->mLastProcessedState == Tracking::OK) {
     for (int i = 0; i < N; i++) {
-      MapPoint *pMP = pTracker->mCurrentFrame.Channels[0].mvpMapPoints[i];
+      MapPoint *pMP = pTracker->mCurrentFrame.Channels[Ftype].mvpMapPoints[i];
       if (pMP) {
-        if (!pTracker->mCurrentFrame.Channels[0].mvbOutlier[i]) {
+        if (!pTracker->mCurrentFrame.Channels[Ftype].mvbOutlier[i]) {
           if (pMP->Observations() > 0)
             mvbMap[i] = true;
           else

@@ -108,11 +108,14 @@ System::System(const string (&strVocFile)[Ntype], const string &strSettingsFile,
   mpMap = new Map();
 
   // Create Drawers. These are used by the Viewer
-  mpFrameDrawer = new FrameDrawer(mpMap);
+  
+  mpFrameDrawer.resize(Ntype);
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    mpFrameDrawer[Ftype] = new FrameDrawer(mpMap);
+
   mpMapDrawer = new MapDrawer(mpMap, strSettingsFile);
 
-  // Initialize the Tracking thread
-  //(it will live in the main thread of execution, the one that called this constructor)
+  // Initialize the Tracking thread (it will live in the main thread of execution, the one that called this constructor)
   mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer, mpMap, mpKeyFrameDatabase, strSettingsFile, mSensor);
 
 
@@ -188,7 +191,7 @@ cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const
 
   unique_lock<mutex> lock2(mMutexState);
   mTrackingState = mpTracker->mState;
-  mTrackedMapPoints = mpTracker->mCurrentFrame.Channels[0].mvpMapPoints;
+  mTrackedMapPoints = mpTracker->mCurrentFrame.Channels[0].mvpMapPoints; //TO-DO Multi Channels
   mTrackedKeyPointsUn = mpTracker->mCurrentFrame.Channels[0].mvKeysUn;
   return Tcw;
 }
@@ -235,7 +238,7 @@ cv::Mat System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const doub
 
   unique_lock<mutex> lock2(mMutexState);
   mTrackingState = mpTracker->mState;
-  mTrackedMapPoints = mpTracker->mCurrentFrame.Channels[0].mvpMapPoints;
+  mTrackedMapPoints = mpTracker->mCurrentFrame.Channels[0].mvpMapPoints; //TO-DO Multi-Channels
   mTrackedKeyPointsUn = mpTracker->mCurrentFrame.Channels[0].mvKeysUn;
   return Tcw;
 }
@@ -282,7 +285,7 @@ cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp) {
 
   unique_lock<mutex> lock2(mMutexState);
   mTrackingState = mpTracker->mState;
-  mTrackedMapPoints = mpTracker->mCurrentFrame.Channels[0].mvpMapPoints;
+  mTrackedMapPoints = mpTracker->mCurrentFrame.Channels[0].mvpMapPoints; //TO-DO Multi Channels
   mTrackedKeyPointsUn = mpTracker->mCurrentFrame.Channels[0].mvKeysUn;
 
   return Tcw;

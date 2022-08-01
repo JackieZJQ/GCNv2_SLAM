@@ -42,7 +42,7 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
-Tracking::Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], FrameDrawer *pFrameDrawer,
+Tracking::Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], vector<FrameDrawer *> pFrameDrawer,
                    MapDrawer *pMapDrawer, Map *pMap, KeyFrameDatabase *pKFDB[Ntype],
                    const string &strSettingPath, const int sensor)
     : mState(NO_IMAGES_YET), 
@@ -314,7 +314,8 @@ void Tracking::Track() {
     else
       MonocularInitialization(0);
 
-    mpFrameDrawer->Update(this);
+    for (int Ftype = 0; Ftype < Ntype; Ftype++)
+      mpFrameDrawer[Ftype]->Update(this, Ftype);
 
     if (mState != OK)
       return;
@@ -449,7 +450,8 @@ void Tracking::Track() {
       mState = LOST;
 
     // Update drawer
-    mpFrameDrawer->Update(this);
+    for (int Ftype = 0; Ftype < Ntype; Ftype++)
+      mpFrameDrawer[Ftype]->Update(this, Ftype);
 
     // If tracking were good, check if we insert a keyframe
     if (bOK) {

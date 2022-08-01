@@ -27,9 +27,8 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
-Viewer::Viewer(System *pSystem, FrameDrawer *pFrameDrawer,
-               MapDrawer *pMapDrawer, Tracking *pTracking,
-               const string &strSettingPath)
+Viewer::Viewer(System *pSystem, vector<FrameDrawer *> pFrameDrawer, MapDrawer *pMapDrawer, 
+               Tracking *pTracking, const string &strSettingPath)
     : mpSystem(pSystem), 
       mpFrameDrawer(pFrameDrawer), 
       mpMapDrawer(pMapDrawer),
@@ -66,17 +65,17 @@ void Viewer::Run() {
   mbFinished = false;
   mbStopped = false;
 
-  string featureName;
+  // string featureName;
 
-  #ifdef USE_GCN
-  if (getenv("USE_ORB") == nullptr) {
-    featureName = "GCN";
-  }
-  else
-  #endif
-    featureName = "ORB";
+  // #ifdef USE_GCN
+  // if (getenv("USE_ORB") == nullptr) {
+  //   featureName = "GCN";
+  // }
+  // else
+  // #endif
+  //   featureName = "ORB";
   
-  pangolin::CreateWindowAndBind("ORB-SLAM2: Map Viewer (" + featureName + " Features)", 1024, 768);
+  pangolin::CreateWindowAndBind("ORB-SLAM2: Map Viewer", 1024, 768);
 
   // 3D Mouse handler requires depth testing to be enabled
   glEnable(GL_DEPTH_TEST);
@@ -104,10 +103,15 @@ void Viewer::Run() {
   pangolin::OpenGlMatrix Twc;
   Twc.SetIdentity();
 
-  string currentFrameWindowName = "ORB-SLAM2: Current Frame (" + featureName + " Features)";
-  
-  cv::namedWindow(currentFrameWindowName);
+  string featureName[Ntype] = {"ORB", "GCN"};
 
+  vector<string> currentFrameWindowName;
+  currentFrameWindowName.resize(Ntype);
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    currentFrameWindowName[Ftype] = "ORB-SLAM2: Current Frame (" + featureName[Ftype] + " Features)";
+    cv::namedWindow(currentFrameWindowName[Ftype]);
+  }
+    
   bool bFollow = true;
   bool bLocalizationMode = false;
 
@@ -145,10 +149,13 @@ void Viewer::Run() {
 
     pangolin::FinishFrame();
 
-    cv::Mat im = mpFrameDrawer->DrawFrame();
-    cv::Mat im_display;
-    cv::resize(im, im_display, cv::Size(), mDisplayImageScale, mDisplayImageScale);
-    cv::imshow(currentFrameWindowName, im_display);
+    for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+      cv::Mat im = mpFrameDrawer[Ftype]->DrawFrame();
+      cv::Mat im_display;
+      cv::resize(im, im_display, cv::Size(), mDisplayImageScale, mDisplayImageScale);
+      cv::imshow(currentFrameWindowName[Ftype], im_display);
+    }
+
     cv::waitKey(mT);
 
     if (menuReset) {

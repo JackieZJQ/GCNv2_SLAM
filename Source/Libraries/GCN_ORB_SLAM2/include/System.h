@@ -164,7 +164,7 @@ private:
   // The viewer draws the map and the current camera pose. It uses Pangolin.
   Viewer *mpViewer;
 
-  FrameDrawer *mpFrameDrawer;
+  std::vector<FrameDrawer *> mpFrameDrawer;
   MapDrawer *mpMapDrawer;
 
   // System threads: Local Mapping, Loop Closing, Viewer.

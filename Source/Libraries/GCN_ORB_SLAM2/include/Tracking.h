@@ -53,7 +53,7 @@ public:
   const static int Ntype = 2; // Number of channels
 
 public:
-  Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, Map *pMap, KeyFrameDatabase *pKFDB[Ntype],
+  Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], std::vector<FrameDrawer *> pFrameDrawer, MapDrawer *pMapDrawer, Map *pMap, KeyFrameDatabase *pKFDB[Ntype],
            const std::string &strSettingPath, const int sensor);
 
   // Preprocess the input and call Track(). Extract features and performs stereo matching.
@@ -190,7 +190,7 @@ protected:
 
   // Drawers
   Viewer *mpViewer;
-  FrameDrawer *mpFrameDrawer;
+  std::vector<FrameDrawer *> mpFrameDrawer;
   MapDrawer *mpMapDrawer;
 
   // Map

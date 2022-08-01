@@ -123,10 +123,14 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
 
   mb = mbf / fx;
 
-  thread threadORB(&Frame::ComputeFeaturesStereo, this, 0, imLeft, imRight);
-  thread threadGCN(&Frame::ComputeFeaturesStereo, this, 1, imLeft, imRight);
-  threadORB.join();
-  threadGCN.join();
+  thread CompFeaturesThread[Ntype];
+
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    CompFeaturesThread[Ftype] = thread(&Frame::ComputeFeaturesStereo, this, Ftype, imLeft, imRight);
+    
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    CompFeaturesThread[Ftype].join();
+
 }
 
 // RGB-D
@@ -182,17 +186,13 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
   mb = mbf / fx;
 
-  // cout << "thread (before)" << endl;
-
-  // thread threadORB(&Frame::ComputeFeaturesRGBD, this, 0, imGray, imDepth);
-  // thread threadGCN(&Frame::ComputeFeaturesRGBD, this, 1, imGray, imDepth);
-  // threadORB.join();
-  // threadGCN.join();
+  thread CompFeaturesThread[Ntype];
 
   for (int Ftype = 0; Ftype < Ntype; Ftype++)
-    ComputeFeaturesRGBD(Ftype, imGray, imDepth);
-
-  // cout << "thread (after)" << endl;
+    CompFeaturesThread[Ftype] = thread(&Frame::ComputeFeaturesRGBD, this, Ftype, imGray, imDepth);
+    
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    CompFeaturesThread[Ftype].join();
 
 }
 
@@ -248,10 +248,13 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
 
   mb = mbf / fx;
 
-  thread threadORB(&Frame::ComputeFeaturesMono, this, 0, imGray);
-  thread threadGCN(&Frame::ComputeFeaturesMono, this, 1, imGray);
-  threadORB.join();
-  threadGCN.join();
+  thread CompFeaturesThread[Ntype];
+  
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    CompFeaturesThread[Ftype] = thread(&Frame::ComputeFeaturesMono, this, Ftype, imGray);
+
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    CompFeaturesThread[Ftype].join();
 }
 
 void Frame::AssignFeaturesToGrid(const int Ftype) {
@@ -295,21 +298,11 @@ void Frame::AssignFeaturesToGrid(const int &refN, const vector<cv::KeyPoint> &Ke
 }
 
 void Frame::ExtractFeatures(const int Ftype, int imageFlag, const cv::Mat &im) {
-  if (Ftype == 0) {
-    if (imageFlag == 0) {
-      (*mpORBExtractorLeft)(im, cv::Mat(), Channels[Ftype].mvKeys, Channels[Ftype].mDescriptors);
-    }
-    else {
-      (*mpORBExtractorRight)(im, cv::Mat(), Channels[Ftype].mvKeysRight, Channels[Ftype].mDescriptorsRight);
-    }
+  if (imageFlag == 0) {
+    (*mpFeatureExtractorLeft[Ftype])(im, cv::Mat(), Channels[Ftype].mvKeys, Channels[Ftype].mDescriptors);
   }
   else {
-    if (imageFlag == 0) {
-      (*mpGCNExtractorLeft)(im, cv::Mat(), Channels[Ftype].mvKeys, Channels[Ftype].mDescriptors);
-    }
-    else {
-      (*mpGCNExtractorRight)(im, cv::Mat(), Channels[Ftype].mvKeysRight, Channels[Ftype].mDescriptorsRight);
-    }
+    (*mpFeatureExtractorRight[Ftype])(im, cv::Mat(), Channels[Ftype].mvKeysRight, Channels[Ftype].mDescriptorsRight);
   }
 }
 
