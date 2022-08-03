@@ -94,6 +94,7 @@ public:
   std::vector<MapPoint *> GetMapPointMatches(const int Ftype);
 
   int TrackedMapPoints(const int &minObs, const int Ftype);
+  int TrackedMapPoints(const int &minObs);
 
   MapPoint *GetMapPoint(const std::size_t &idx, const int Ftype);
 
@@ -115,6 +116,7 @@ public:
 
   // Compute Scene Depth (q=2 median). Used in monocular.
   float ComputeSceneMedianDepth(const int q, const int Ftype);
+  float ComputeSceneMedianDepth(const int q);
 
   static bool weightComp(int a, int b) { return a > b; }
 

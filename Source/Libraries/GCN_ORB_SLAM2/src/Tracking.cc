@@ -558,7 +558,7 @@ void Tracking::StereoInitialization(const int Ftype) {
       }
     }
 
-    cout << "New map created with " << mpMap->MapPointsInMap() << " points"
+    cout << "New map created with " << mpMap->MapPointsInMap(Ftype) << " points"
          << endl;
 
     mpLocalMapper->InsertKeyFrame(pKFini);
@@ -695,7 +695,7 @@ void Tracking::CreateInitialMapMonocular(const int Ftype) {
   cout << "New Map created with " << mpMap->MapPointsInMap() << " points"
        << endl;
 
-  Optimizer::GlobalBundleAdjustemntMultiChannels(mpMap, 20); //TO-DO ??
+  Optimizer::GlobalBundleAdjustemnt(mpMap, 20); //TO-DO ??
 
   // Set median depth to 1
   float medianDepth = pKFini->ComputeSceneMedianDepth(2, Ftype);
@@ -895,6 +895,215 @@ void Tracking::StereoInitializationMultiChannels() {
   mpMap->mvpKeyFrameOrigins.push_back(pKFini);
 
   mpMapDrawer->SetCurrentCameraPose(mCurrentFrame.mTcw);
+
+  mState = OK;
+}
+
+void Tracking::MonocularInitializationMultiChannels() {
+
+  if (!mpInitializer.begin()) {
+
+    // Sum all mappoints
+    int nKeys = 0;
+    for (int Ftype = 0; Ftype < Ntype; Ftype++)
+      nKeys += mCurrentFrame.Channels[Ftype].mvKeys.size();
+
+    // Set Reference Frame
+    if (nKeys > 100) {
+      mInitialFrame = Frame(mCurrentFrame);
+      mLastFrame = Frame(mCurrentFrame);
+
+      mvbPrevMatched.resize(Ntype);
+      for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+        mvbPrevMatched[Ftype].resize(mCurrentFrame.Channels[Ftype].mvKeysUn.size());
+        for (size_t i = 0; i < mCurrentFrame.Channels[Ftype].mvKeysUn.size(); i++) {
+          mvbPrevMatched[Ftype][i] = mCurrentFrame.Channels[Ftype].mvKeysUn[i].pt;
+        }
+      }
+
+      for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+        if (mpInitializer[Ftype]) 
+          delete mpInitializer[Ftype];
+
+        mpInitializer[Ftype] = new Initializer(Ftype, mCurrentFrame, 1.0, 200);
+
+        fill(mvIniMatches[Ftype].begin(), mvIniMatches[Ftype].end(), -1); 
+      
+      }
+      
+      return;
+    }
+  } else {
+    // Sum numbers of keys
+    int nKeys = 0;
+    for (int Ftype = 0; Ftype < Ntype; Ftype++)
+      nKeys += mCurrentFrame.Channels[Ftype].mvKeys.size();
+
+    if (nKeys <= 100) {
+      for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+        delete mpInitializer[Ftype];
+        mpInitializer[Ftype] = static_cast<Initializer *>(NULL);
+        fill(mvIniMatches[Ftype].begin(), mvIniMatches[Ftype].end(), -1); 
+      }
+
+      return;
+    }
+
+    // Find correspondences
+    Associater associater(0.9, true);
+    
+    int nmatches[Ntype];
+    for (int Ftype = 0; Ftype < Ntype; Ftype++)
+      nmatches[Ftype] = associater.SearchForInitialization(Ftype, mInitialFrame, mCurrentFrame, mvbPrevMatched[Ftype], mvIniMatches[Ftype], 100);
+
+    int nmatchesSum = 0;
+    for (int Ftype = 0; Ftype < Ntype; Ftype++)
+      nmatchesSum += nmatches[Ftype];
+    
+    // Check if there are enough correspondences
+    if (nmatchesSum < 100) {
+      for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+        delete mpInitializer[Ftype];
+        mpInitializer[Ftype] = static_cast<Initializer *>(NULL);
+      }
+
+      return;
+    }
+
+    cv::Mat Rcw;                 // Current Camera Rotation
+    cv::Mat tcw;                 // Current Camera Translation
+    vector<vector<bool>> vbTriangulated; // Triangulated Correspondences (mvIniMatches)
+    vbTriangulated.resize(Ntype); 
+
+    // vector<bool> tryInit;
+    // tryInit.resize(Ntype);
+
+    bool flag = false;
+    for (int Ftype = 0; Ftype < Ntype; Ftype++) 
+      if(mpInitializer->Initialize(mCurrentFrame, mvIniMatches[Ftype], Rcw, tcw, mvIniP3D[Ftype], vbTriangulated[Ftype], Ftype))
+        flag = true;
+    
+    for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+      for (size_t i = 0, iend = mvIniMatches[Ftype].size(); i < iend; i++) {
+        if (mvIniMatches[Ftype][i] >= 0 && !vbTriangulated[Ftype][i]) {
+          mvIniMatches[Ftype][i] = -1;
+          nmatches[Ftype]--;
+        }
+      }
+    }
+
+    if(flag) {
+      // Set Frame Poses
+      mInitialFrame.SetPose(cv::Mat::eye(4, 4, CV_32F));
+      cv::Mat Tcw = cv::Mat::eye(4, 4, CV_32F);
+      Rcw.copyTo(Tcw.rowRange(0, 3).colRange(0, 3));
+      tcw.copyTo(Tcw.rowRange(0, 3).col(3));
+      mCurrentFrame.SetPose(Tcw);
+      CreateInitialMapMonocularMultiChannels();
+    }  
+  }
+}
+
+void Tracking::CreateInitialMapMonocularMultiChannels() {
+  // Create KeyFrames
+  KeyFrame *pKFini = new KeyFrame(mInitialFrame, mpMap, mpKeyFrameDB);
+  KeyFrame *pKFcur = new KeyFrame(mCurrentFrame, mpMap, mpKeyFrameDB);
+
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    pKFini->ComputeBoW(Ftype);
+    pKFcur->ComputeBoW(Ftype);
+  }
+
+  // Insert KFs in the map
+  mpMap->AddKeyFrame(pKFini);
+  mpMap->AddKeyFrame(pKFcur);
+
+  // Create MapPoints and asscoiate to keyframes
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    for (size_t i = 0; i < mvIniMatches[Ftype].size(); i++) {
+      if (mvIniMatches[Ftype][i] < 0)
+        continue;
+
+      // Create MapPoint.
+      cv::Mat worldPos(mvIniP3D[Ftype][i]);
+
+      MapPoint *pMP = new MapPoint(worldPos, pKFcur, mpMap, Ftype);
+
+      pKFini->AddMapPoint(pMP, i, Ftype);
+      pKFcur->AddMapPoint(pMP, mvIniMatches[Ftype][i], Ftype);
+
+      pMP->AddObservation(pKFini, i);
+      pMP->AddObservation(pKFcur, mvIniMatches[Ftype][i]);
+
+      pMP->ComputeDistinctiveDescriptors();
+      pMP->UpdateNormalAndDepth();
+
+      // Fill Current Frame structure
+      mCurrentFrame.Channels[Ftype].mvpMapPoints[mvIniMatches[Ftype][i]] = pMP;
+      mCurrentFrame.Channels[Ftype].mvbOutlier[mvIniMatches[Ftype][i]] = false;
+
+      // Add to Map
+      mpMap->AddMapPoint(pMP);
+    }
+  }
+
+  // Update Connections
+  pKFini->UpdateConnectionsMultiChannels(); //TO-DO may ahve problems ? use UpdateConnectionsMultiChannels()
+  pKFcur->UpdateConnectionsMultiChannels(); // The function will only initlize one channel, but update connection of two channels
+
+  // Bundle Adjustment
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    cout << "New map created with " << mpMap->MapPointsInMap(Ftype) << " points for " << Ftype << " Feature Type " << endl;
+
+  Optimizer::GlobalBundleAdjustemnt(mpMap, 20); 
+
+  // Set median depth to 1
+  float medianDepth = pKFini->ComputeSceneMedianDepth(2);
+  float invMedianDepth = 1.0f / medianDepth;
+
+  if (medianDepth < 0 || pKFcur->TrackedMapPoints(1) < 100) {
+    cout << "Wrong initialization, reseting..." << endl;
+    Reset();
+    return;
+  }
+
+  // Scale initial baseline
+  cv::Mat Tc2w = pKFcur->GetPose();
+  Tc2w.col(3).rowRange(0, 3) = Tc2w.col(3).rowRange(0, 3) * invMedianDepth;
+  pKFcur->SetPose(Tc2w);
+
+  // Scale points
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    vector<MapPoint *> vpAllMapPoints = pKFini->GetMapPointMatches(Ftype);
+    for (size_t iMP = 0; iMP < vpAllMapPoints.size(); iMP++) {
+      if (vpAllMapPoints[iMP]) {
+        MapPoint *pMP = vpAllMapPoints[iMP];
+        pMP->SetWorldPos(pMP->GetWorldPos() * invMedianDepth);
+      }
+    }
+  }
+
+
+  mpLocalMapper->InsertKeyFrame(pKFini);
+  mpLocalMapper->InsertKeyFrame(pKFcur);
+
+  mCurrentFrame.SetPose(pKFcur->GetPose());
+  mnLastKeyFrameId = mCurrentFrame.mnId;
+  mpLastKeyFrame = pKFcur;
+
+  mvpLocalKeyFrames.push_back(pKFcur);
+  mvpLocalKeyFrames.push_back(pKFini);
+  mvpLocalMapPoints = mpMap->GetAllMapPoints();
+  mpReferenceKF = pKFcur;
+  mCurrentFrame.mpReferenceKF = pKFcur;
+
+  mLastFrame = Frame(mCurrentFrame);
+
+  mpMap->SetReferenceMapPoints(mvpLocalMapPoints);
+
+  mpMapDrawer->SetCurrentCameraPose(pKFcur->GetPose());
+
+  mpMap->mvpKeyFrameOrigins.push_back(pKFini);
 
   mState = OK;
 }

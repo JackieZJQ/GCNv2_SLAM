@@ -96,10 +96,10 @@ public:
   cv::Mat mImGray;
 
   // Initialization Variables (Monocular)
-  std::vector<int> mvIniLastMatches;
-  std::vector<int> mvIniMatches;
-  std::vector<cv::Point2f> mvbPrevMatched;
-  std::vector<cv::Point3f> mvIniP3D;
+  std::vector<std::vector<int>> mvIniLastMatches;
+  std::vector<std::vector<int>> mvIniMatches;
+  std::vector<std::vector<cv::Point2f>> mvbPrevMatched;
+  std::vector<std::vector<cv::Point3f>> mvIniP3D;
   Frame mInitialFrame;
 
   // Lists used to recover the full camera trajectory at the end of the execution. Basically we store the reference keyframe for each frame and its
@@ -124,6 +124,8 @@ protected:
 
   // Map initialization for stereo and RGB-D
   void StereoInitializationMultiChannels();
+  void MonocularInitializationMultiChannels();
+  void CreateInitialMapMonocularMultiChannels();
 
   void CheckReplacedInLastFrame(const int Ftype);
   void UpdateLastFrame(const int Ftype);
@@ -168,7 +170,7 @@ protected:
 
   
   // Initalization (only for monocular)
-  Initializer *mpInitializer;
+  std::vector<Initializer *> mpInitializer;
 
   // Local Map
   KeyFrame *mpReferenceKF;

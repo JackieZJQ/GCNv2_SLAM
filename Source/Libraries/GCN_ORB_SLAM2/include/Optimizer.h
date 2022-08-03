@@ -38,12 +38,12 @@ public:
   const static int Ntype = 2; // Number of Channels
   
 public:  
-  void static BundleAdjustmentMultiChannels(const std::vector<KeyFrame *> &vpKF, const std::vector<MapPoint *> &vpMP, int nIterations = 5, bool *pbStopFlag = NULL,
+  void static BundleAdjustment(const std::vector<KeyFrame *> &vpKF, const std::vector<MapPoint *> &vpMP, int nIterations = 5, bool *pbStopFlag = NULL,
                                             const unsigned long nLoopKF = 0, const bool bRobust = true);
                                        
-  void static GlobalBundleAdjustemntMultiChannels(Map *pMap, int nIterations = 5, bool *pbStopFlag = NULL, const unsigned long nLoopKF = 0, const bool bRobust = true);
+  void static GlobalBundleAdjustemnt(Map *pMap, int nIterations = 5, bool *pbStopFlag = NULL, const unsigned long nLoopKF = 0, const bool bRobust = true);
 
-  void static LocalBundleAdjustmentMultiChannels(KeyFrame *pKF, bool *pbStopFlag, Map *pMap);
+  void static LocalBundleAdjustment(KeyFrame *pKF, bool *pbStopFlag, Map *pMap);
   
   int static PoseOptimizationMultiChannels(Frame *pFrame);
 

@@ -606,7 +606,7 @@ void LoopClosing::RunGlobalBundleAdjustmentMultiChannels(unsigned long nLoopKF) 
   cout << "Starting Global Bundle Adjustment" << endl;
 
   int idx = mnFullBAIdx;
-  Optimizer::GlobalBundleAdjustemntMultiChannels(mpMap, 10, &mbStopGBA, nLoopKF, false);
+  Optimizer::GlobalBundleAdjustemnt(mpMap, 10, &mbStopGBA, nLoopKF, false);
 
   // Update all MapPoints and KeyFrames
   // Local Mapping was active during BA, that means that there might be new

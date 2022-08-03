@@ -38,13 +38,13 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
-void Optimizer::GlobalBundleAdjustemntMultiChannels(Map *pMap, int nIterations, bool *pbStopFlag, const unsigned long nLoopKF, const bool bRobust) {
+void Optimizer::GlobalBundleAdjustemnt(Map *pMap, int nIterations, bool *pbStopFlag, const unsigned long nLoopKF, const bool bRobust) {
   std::vector<KeyFrame *> vpKFs = pMap->GetAllKeyFrames();
   std::vector<MapPoint *> vpMP = pMap->GetAllMapPoints();
-  BundleAdjustmentMultiChannels(vpKFs, vpMP, nIterations, pbStopFlag, nLoopKF, bRobust);
+  BundleAdjustment(vpKFs, vpMP, nIterations, pbStopFlag, nLoopKF, bRobust);
 }
 
-void Optimizer::BundleAdjustmentMultiChannels(const std::vector<KeyFrame *> &vpKFs, const std::vector<MapPoint *> &vpMP, int nIterations, bool *pbStopFlag,
+void Optimizer::BundleAdjustment(const std::vector<KeyFrame *> &vpKFs, const std::vector<MapPoint *> &vpMP, int nIterations, bool *pbStopFlag,
                                               const unsigned long nLoopKF, const bool bRobust) {
   std::vector<bool> vbNotIncludedMP;
   vbNotIncludedMP.resize(vpMP.size());
@@ -216,7 +216,7 @@ void Optimizer::BundleAdjustmentMultiChannels(const std::vector<KeyFrame *> &vpK
   }
 }
 
-void Optimizer::LocalBundleAdjustmentMultiChannels(KeyFrame *pKF, bool *pbStopFlag, Map *pMap) {
+void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool *pbStopFlag, Map *pMap) {
   // Local KeyFrames: First Breath Search from Current Keyframe
   std::list<KeyFrame *> lLocalKeyFrames;
 

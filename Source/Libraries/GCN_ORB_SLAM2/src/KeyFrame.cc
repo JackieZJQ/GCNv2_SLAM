@@ -273,6 +273,29 @@ int KeyFrame::TrackedMapPoints(const int &minObs, const int Ftype) {
   return nPoints;
 }
 
+int KeyFrame::TrackedMapPoints(const int &minObs) {
+  unique_lock<mutex> lock(mMutexFeatures);
+
+  int nPoints = 0;
+  const bool bCheckObs = minObs > 0;
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    for (int i = 0; i < Channels[Ftype].N; i++) {
+      MapPoint *pMP = Channels[Ftype].mvpMapPoints[i];
+      if (pMP) {
+        if (!pMP->isBad()) {
+          if (bCheckObs) {
+            if (Channels[Ftype].mvpMapPoints[i]->Observations() >= minObs)
+              nPoints++;
+          } else
+            nPoints++;
+        }
+      }
+    }
+  }
+  
+  return nPoints;
+}
+
 std::vector<MapPoint *> KeyFrame::GetMapPointMatches(const int Ftype) {
   unique_lock<mutex> lock(mMutexFeatures);
   return Channels[Ftype].mvpMapPoints;
@@ -601,13 +624,51 @@ float KeyFrame::ComputeSceneMedianDepth(const int q, const int Ftype) {
   }
 
   std::vector<float> vDepths;
-  vDepths.reserve(Channels[Ftype].N);
+  vDepths.reserve(vpMapPoints.size());
   cv::Mat Rcw2 = Tcw_.row(2).colRange(0, 3);
   Rcw2 = Rcw2.t();
   float zcw = Tcw_.at<float>(2, 3);
-  for (int i = 0; i < Channels[Ftype].N; i++) {
-    if (Channels[Ftype].mvpMapPoints[i]) {
-      MapPoint *pMP = Channels[Ftype].mvpMapPoints[i];
+  for (int i = 0; i < vpMapPoints.size(); i++) {
+    if (vpMapPoints[i]) {  //vpmappoints ??
+      MapPoint *pMP = vpMapPoints[i];
+      cv::Mat x3Dw = pMP->GetWorldPos();
+      float z = Rcw2.dot(x3Dw) + zcw;
+      vDepths.push_back(z);
+    }
+  }
+
+  sort(vDepths.begin(), vDepths.end());
+
+  return vDepths[(vDepths.size() - 1) / q];
+}
+
+float KeyFrame::ComputeSceneMedianDepth(const int q) {
+  std::vector<MapPoint *> vpMapPoints;
+  cv::Mat Tcw_;
+
+  int Nsum = 0;
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    Nsum += Channels[Ftype].N;
+  vpMapPoints.reserve(Nsum);
+
+  {
+    unique_lock<mutex> lock(mMutexFeatures);
+    unique_lock<mutex> lock2(mMutexPose);
+
+    for (int Ftype = 0; Ftype < Ntype; Ftype++)
+      vpMapPoints.insert(vpMapPoints.end(), Channels[Ftype].mvpMapPoints.begin(), Channels[Ftype].mvpMapPoints.end());
+
+    Tcw_ = Tcw.clone();
+  }
+
+  std::vector<float> vDepths;
+  vDepths.reserve(vpMapPoints.size());
+  cv::Mat Rcw2 = Tcw_.row(2).colRange(0, 3);
+  Rcw2 = Rcw2.t();
+  float zcw = Tcw_.at<float>(2, 3);
+  for (int i = 0; i < vpMapPoints.size(); i++) {
+    if (vpMapPoints[i]) {
+      MapPoint *pMP = vpMapPoints[i];
       cv::Mat x3Dw = pMP->GetWorldPos();
       float z = Rcw2.dot(x3Dw) + zcw;
       vDepths.push_back(z);

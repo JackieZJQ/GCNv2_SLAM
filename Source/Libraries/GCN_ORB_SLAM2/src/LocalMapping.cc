@@ -79,7 +79,7 @@ void LocalMapping::Run() {
       if (!CheckNewKeyFrames() && !stopRequested()) {
         // Local BA
         if (mpMap->KeyFramesInMap() > 2)
-          Optimizer::LocalBundleAdjustmentMultiChannels(mpCurrentKeyFrame, &mbAbortBA, mpMap);
+          Optimizer::LocalBundleAdjustment(mpCurrentKeyFrame, &mbAbortBA, mpMap);
 
         // Check redundant local Keyframes
         KeyFrameCullingMultiChannels();
