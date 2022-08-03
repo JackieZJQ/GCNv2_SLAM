@@ -283,6 +283,7 @@ MapPoint *KeyFrame::GetMapPoint(const std::size_t &idx, const int Ftype) {
   return Channels[Ftype].mvpMapPoints[idx];
 }
 
+// Multi Channels ??
 void KeyFrame::UpdateConnectionsMultiChannels() {
   map<KeyFrame *, int> KFcounter;
 
@@ -460,8 +461,7 @@ void KeyFrame::SetBadFlag() {
     set<KeyFrame *> sParentCandidates;
     sParentCandidates.insert(mpParent);
 
-    // Assign at each iteration one children with a parent (the pair with highest covisibility weight) Include that children as new parent
-    // candidate for the rest
+    // Assign at each iteration one children with a parent (the pair with highest covisibility weight) Include that children as new parent candidate for the rest
     while (!mspChildrens.empty()) {
       bool bContinue = false;
 

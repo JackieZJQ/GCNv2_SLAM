@@ -41,9 +41,7 @@ public:
 
   void AddKeyFrame(KeyFrame *pKF);
   void AddMapPoint(MapPoint *pMP);
-  void AddMapPoint(MapPoint *pMP, const int Ftype);
   void EraseMapPoint(MapPoint *pMP);
-  void EraseMapPoint(MapPoint *pMP, const int Ftype);
   void EraseKeyFrame(KeyFrame *pKF);
   void SetReferenceMapPoints(const std::vector<MapPoint *> &vpMPs);
   void InformNewBigChange();
@@ -55,6 +53,7 @@ public:
   std::vector<MapPoint *> GetReferenceMapPoints();
 
   long unsigned int MapPointsInMap();
+  long unsigned int MapPointsInMap(const int Ftype);
   long unsigned KeyFramesInMap();
 
   long unsigned int GetMaxKFid();
@@ -70,8 +69,7 @@ public:
   std::mutex mMutexPointCreation;
 
 protected:
-  std::set<MapPoint *> mspMapPoints;
-  std::set<MapPoint *> _mspMapPoints[Ntype];
+  std::set<MapPoint *> mspMapPoints[Ntype];
   std::set<KeyFrame *> mspKeyFrames;
 
   std::vector<MapPoint *> mvpReferenceMapPoints;
