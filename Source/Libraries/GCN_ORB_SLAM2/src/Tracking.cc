@@ -203,7 +203,7 @@ cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRe
     }
   }
 
-  if (getenv("NN_ONLY") != nullptr || getenv("FULL_RESOLUTION") == nullptr) {
+  if (getenv("FULL_RESOLUTION") == nullptr) {
     cv::resize(mImGray, mImGray, cv::Size(320, 240));
     cv::resize(imGrayRight, imGrayRight, cv::Size(320, 240), 0, 0, cv::INTER_NEAREST);
   }
@@ -233,7 +233,7 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB, const cv::Mat &imD, const 
       cvtColor(mImGray, mImGray, cv::COLOR_BGRA2GRAY);
   }
 
-  if (getenv("NN_ONLY") != nullptr || getenv("FULL_RESOLUTION") == nullptr) {
+  if (getenv("FULL_RESOLUTION") == nullptr) {
     cv::resize(mImGray, mImGray, cv::Size(320, 240));
     cv::resize(imDepth, imDepth, cv::Size(320, 240), 0, 0, cv::INTER_NEAREST);
   }
@@ -264,7 +264,7 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
       cvtColor(mImGray, mImGray, cv::COLOR_BGRA2GRAY);
   }
 
-  if (getenv("NN_ONLY") != nullptr || getenv("FULL_RESOLUTION") == nullptr) {
+  if (getenv("FULL_RESOLUTION") == nullptr) {
     cv::resize(mImGray, mImGray, cv::Size(320, 240));
   }
 

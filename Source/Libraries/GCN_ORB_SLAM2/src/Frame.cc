@@ -121,6 +121,8 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
   for (int Ftype = 0; Ftype < Ntype; Ftype++)
     CompFeaturesThread[Ftype].join();
 
+  // for (int Ftype = 0; Ftype < Ntype; Ftype++)
+  //   ComputeFeaturesStereo(Ftype, imLeft, imRight);
 }
 
 // RGB-D
@@ -453,34 +455,6 @@ void Frame::UndistortKeyPoints(const int Ftype) {
   }
 }
 
-// Rewrite UndistortKeyPoints
-void Frame::UndistortKeyPoints(const vector<cv::KeyPoint> &Keys, vector<cv::KeyPoint> &KeysUn, const int &refN) {
-  if (mDistCoef.at<float>(0) == 0.0) {
-    KeysUn = Keys;
-  }
-
-  // Fill matrix with points
-  cv::Mat mat(refN, 2, CV_32F);
-  for (int i = 0; i < refN; i++) {
-    mat.at<float>(i, 0) = Keys[i].pt.x;
-    mat.at<float>(i, 1) = Keys[i].pt.y;
-  }
-
-  // Undistort points
-  mat = mat.reshape(2);
-  cv::undistortPoints(mat, mat, mK, mDistCoef, cv::Mat(), mK);
-  mat = mat.reshape(1);
-
-  // Fill undistorted keypoint vector
-  KeysUn.resize(refN);
-  for (int i = 0; i < refN; i++) {
-    cv::KeyPoint kp = Keys[i];
-    kp.pt.x = mat.at<float>(i, 0);
-    kp.pt.y = mat.at<float>(i, 1);
-    KeysUn[i] = kp;
-  }
-}
-
 void Frame::ComputeImageBounds(const cv::Mat &imLeft) {
   if (mDistCoef.at<float>(0) != 0.0) {
     cv::Mat mat(4, 2, CV_32F);
@@ -517,7 +491,7 @@ void Frame::ComputeStereoMatches(const int Ftype) {
 
   const int thOrbDist = (Associater::TH_HIGH + Associater::TH_LOW) / 2;
 
-  const int nRows = mpFeatureExtractorLeft[Ftype]->mvImagePyramid[0].rows; 
+  const int nRows = mpFeatureExtractorLeft[Ftype]->mvImagePyramid[0].rows;
 
   // Assign keypoints to row table
   vector<vector<size_t>> vRowIndices(nRows, vector<size_t>());
@@ -694,48 +668,11 @@ void Frame::ComputeStereoFromRGBD(const cv::Mat &imDepth, const int Ftype) {
   }
 }
 
-// Rewrite ComputeStereoFromRGBD
-void Frame::ComputeStereoFromRGBD(const cv::Mat &imDepth, vector<float> &uRight, vector<float> &Depth, const int &refN, 
-                                  const vector<cv::KeyPoint> &Keys, const vector<cv::KeyPoint> &KeysUn) {
-  uRight = vector<float>(refN, -1);
-  Depth = vector<float>(refN, -1);
-
-  for (int i = 0; i < refN; i++) {
-
-    const cv::KeyPoint &kp = Keys[i];
-    const cv::KeyPoint &kpU = KeysUn[i];
-
-    const float &v = kp.pt.y;
-    const float &u = kp.pt.x;
-
-    const float d = imDepth.at<float>(v, u);
-
-    if (d > 0.1f && d < 20.f) {
-      Depth[i] = d;
-      uRight[i] = kpU.pt.x - mbf / d;
-    }
-  }
-}
-
 cv::Mat Frame::UnprojectStereo(const int &i, const int Ftype) {
   const float z = Channels[Ftype].mvDepth[i];
   if (z > 0) {
     const float u = Channels[Ftype].mvKeysUn[i].pt.x;
     const float v = Channels[Ftype].mvKeysUn[i].pt.y;
-    const float x = (u - cx) * z * invfx;
-    const float y = (v - cy) * z * invfy;
-    cv::Mat x3Dc = (cv::Mat_<float>(3, 1) << x, y, z);
-    return mRwc * x3Dc + mOw;
-  } else
-    return cv::Mat();
-}
-
-// Rewrite UnprojectStereo()
-cv::Mat Frame::UnprojectStereo(const int &i, const vector<float> &Depth, const vector<cv::KeyPoint> &KeysUn) {
-  const float z = Depth[i];
-  if (z > 0) {
-    const float u = KeysUn[i].pt.x;
-    const float v = KeysUn[i].pt.y;
     const float x = (u - cx) * z * invfx;
     const float y = (v - cy) * z * invfy;
     cv::Mat x3Dc = (cv::Mat_<float>(3, 1) << x, y, z);
@@ -835,5 +772,70 @@ void Frame::ComputeFeaturesMono(const int Ftype, const cv::Mat &imGray) {
 
   AssignFeaturesToGrid(Ftype);
 }
+
+// Rewrite UndistortKeyPoints
+// void Frame::UndistortKeyPoints(const vector<cv::KeyPoint> &Keys, vector<cv::KeyPoint> &KeysUn, const int &refN) {
+//   if (mDistCoef.at<float>(0) == 0.0) {
+//     KeysUn = Keys;
+//   }
+
+//   // Fill matrix with points
+//   cv::Mat mat(refN, 2, CV_32F);
+//   for (int i = 0; i < refN; i++) {
+//     mat.at<float>(i, 0) = Keys[i].pt.x;
+//     mat.at<float>(i, 1) = Keys[i].pt.y;
+//   }
+
+//   // Undistort points
+//   mat = mat.reshape(2);
+//   cv::undistortPoints(mat, mat, mK, mDistCoef, cv::Mat(), mK);
+//   mat = mat.reshape(1);
+
+//   // Fill undistorted keypoint vector
+//   KeysUn.resize(refN);
+//   for (int i = 0; i < refN; i++) {
+//     cv::KeyPoint kp = Keys[i];
+//     kp.pt.x = mat.at<float>(i, 0);
+//     kp.pt.y = mat.at<float>(i, 1);
+//     KeysUn[i] = kp;
+//   }
+// }
+
+// Rewrite UnprojectStereo()
+// cv::Mat Frame::UnprojectStereo(const int &i, const vector<float> &Depth, const vector<cv::KeyPoint> &KeysUn) {
+//   const float z = Depth[i];
+//   if (z > 0) {
+//     const float u = KeysUn[i].pt.x;
+//     const float v = KeysUn[i].pt.y;
+//     const float x = (u - cx) * z * invfx;
+//     const float y = (v - cy) * z * invfy;
+//     cv::Mat x3Dc = (cv::Mat_<float>(3, 1) << x, y, z);
+//     return mRwc * x3Dc + mOw;
+//   } else
+//     return cv::Mat();
+// }
+
+// Rewrite ComputeStereoFromRGBD
+// void Frame::ComputeStereoFromRGBD(const cv::Mat &imDepth, vector<float> &uRight, vector<float> &Depth, const int &refN, 
+//                                   const vector<cv::KeyPoint> &Keys, const vector<cv::KeyPoint> &KeysUn) {
+//   uRight = vector<float>(refN, -1);
+//   Depth = vector<float>(refN, -1);
+
+//   for (int i = 0; i < refN; i++) {
+
+//     const cv::KeyPoint &kp = Keys[i];
+//     const cv::KeyPoint &kpU = KeysUn[i];
+
+//     const float &v = kp.pt.y;
+//     const float &u = kp.pt.x;
+
+//     const float d = imDepth.at<float>(v, u);
+
+//     if (d > 0.1f && d < 20.f) {
+//       Depth[i] = d;
+//       uRight[i] = kpU.pt.x - mbf / d;
+//     }
+//   }
+// }
 
 } // namespace ORB_SLAM2

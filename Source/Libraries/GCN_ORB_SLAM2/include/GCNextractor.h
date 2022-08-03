@@ -35,17 +35,12 @@ namespace ORB_SLAM2 {
 
 class GCNextractor : public FeatureExtractor {
 public:
-  GCNextractor(int nfeatures, float scaleFactor, int nlevels, int iniThFAST,
-               int minThFAST);
+  GCNextractor(int nfeatures, float scaleFactor, int nlevels, int iniThFAST, int minThFAST);
 
   virtual ~GCNextractor() {}
 
-  // Compute the ORB features and descriptors on an image.
-  // ORB are dispersed on the image using an octree.
-  // Mask is ignored in the current implementation.
-  virtual void operator()(cv::InputArray image, cv::InputArray mask,
-                          std::vector<cv::KeyPoint> &keypoints,
-                          cv::OutputArray descriptors);
+  // Compute the ORB features and descriptors on an image. ORB are dispersed on the image using an octree. Mask is ignored in the current implementation.
+  virtual void operator()(cv::InputArray image, cv::InputArray mask, std::vector<cv::KeyPoint> &keypoints, cv::OutputArray descriptors);
   
   void ComputePyramid(cv::Mat image);
 

@@ -129,10 +129,8 @@ void nms(cv::Mat det, cv::Mat desc, std::vector<cv::KeyPoint> &pts,
         continue;
 
       if (grid.at<char>(v, u) == 2) {
-        int select_ind =
-            (int)inds.at<unsigned short>(v - dist_thresh, u - dist_thresh);
-        pts.push_back(cv::KeyPoint(pts_raw[select_ind].x * ratio_width,
-                                   pts_raw[select_ind].y * ratio_height, 1.0f));
+        int select_ind = (int)inds.at<unsigned short>(v - dist_thresh, u - dist_thresh);
+        pts.push_back(cv::KeyPoint(pts_raw[select_ind].x * ratio_width, pts_raw[select_ind].y * ratio_height, 1.0f));
 
         select_indice.push_back(select_ind);
         valid_cnt++;
@@ -150,10 +148,8 @@ void nms(cv::Mat det, cv::Mat desc, std::vector<cv::KeyPoint> &pts,
   }
 }
 
-GCNextractor::GCNextractor(int _nfeatures, float _scaleFactor, int _nlevels,
-                           int _iniThFAST, int _minThFAST)
-    : FeatureExtractor(_nfeatures, _scaleFactor, _nlevels, _iniThFAST,
-                       _minThFAST) {
+GCNextractor::GCNextractor(int _nfeatures, float _scaleFactor, int _nlevels, int _iniThFAST, int _minThFAST)
+    : FeatureExtractor(_nfeatures, _scaleFactor, _nlevels, _iniThFAST, _minThFAST) {
 
   bool cudaAvailable = torch::cuda::is_available();
   const char *net_fn = getenv("GCN_PATH");
@@ -174,8 +170,8 @@ GCNextractor::GCNextractor(int _nfeatures, float _scaleFactor, int _nlevels,
       }
     }
   }
-  string networkName =
-      string(DEFAULT_GCN_NETWORK_DIR) + string("/") + string(net_fn);
+  string networkName = string(DEFAULT_GCN_NETWORK_DIR) + string("/") + string(net_fn);
+
   cout << "Loading " << networkName << endl;
   module = torch::jit::load(networkName);
   cout << "Loaded" << endl;
@@ -184,9 +180,7 @@ GCNextractor::GCNextractor(int _nfeatures, float _scaleFactor, int _nlevels,
   
 }
 
-void GCNextractor::operator()(InputArray _image, InputArray _mask,
-                              vector<KeyPoint> &_keypoints,
-                              OutputArray _descriptors) {
+void GCNextractor::operator()(InputArray _image, InputArray _mask, vector<KeyPoint> &_keypoints, OutputArray _descriptors) {
 
   torch::DeviceType device_type;
   if (torch::cuda::is_available() == true) {
@@ -232,9 +226,7 @@ void GCNextractor::operator()(InputArray _image, InputArray _mask,
   auto img_var = torch::from_blob(img.data, dims, torch::kFloat32).to(device);
   img_var = img_var.permute({0, 3, 1, 2});
 #else
-  auto img_tensor =
-      torch::CPU(torch::kFloat32)
-          .tensorFromBlob(img.data, {1, img_height, img_width, 1});
+  auto img_tensor = torch::CPU(torch::kFloat32).tensorFromBlob(img.data, {1, img_height, img_width, 1});
   img_tensor = img_tensor.permute({0, 3, 1, 2});
   auto img_var = torch::autograd::make_variable(img_tensor, false).to(device);
 #endif
@@ -247,13 +239,11 @@ void GCNextractor::operator()(InputArray _image, InputArray _mask,
   auto desc = output->elements()[1].toTensor().to(torch::kCPU).squeeze();
 
   cv::Mat pts_mat(cv::Size(3, pts.size(0)), CV_32FC1, pts.data<float>());
-  cv::Mat desc_mat(cv::Size(32, pts.size(0)), CV_8UC1,
-                   desc.data<unsigned char>());
+  cv::Mat desc_mat(cv::Size(32, pts.size(0)), CV_8UC1, desc.data<unsigned char>());
 
   std::vector<cv::KeyPoint> keypoints;
   cv::Mat descriptors;
-  nms(pts_mat, desc_mat, keypoints, descriptors, border, dist_thresh, img_width,
-      img_height, ratio_width, ratio_height);
+  nms(pts_mat, desc_mat, keypoints, descriptors, border, dist_thresh, img_width, img_height, ratio_width, ratio_height);
 
   _keypoints.insert(_keypoints.end(), keypoints.begin(), keypoints.end());
 
@@ -273,25 +263,19 @@ void GCNextractor::operator()(InputArray _image, InputArray _mask,
 void GCNextractor::ComputePyramid(cv::Mat image) {
   for (int level = 0; level < nlevels; ++level) {
     float scale = mvInvScaleFactor[level];
-    Size sz(cvRound((float)image.cols * scale),
-            cvRound((float)image.rows * scale));
-    Size wholeSize(sz.width + EDGE_THRESHOLD * 2,
-                   sz.height + EDGE_THRESHOLD * 2);
+    Size sz(cvRound((float)image.cols * scale), cvRound((float)image.rows * scale));
+    Size wholeSize(sz.width + EDGE_THRESHOLD * 2, sz.height + EDGE_THRESHOLD * 2);
     Mat temp(wholeSize, image.type()), masktemp;
-    mvImagePyramid[level] =
-        temp(Rect(EDGE_THRESHOLD, EDGE_THRESHOLD, sz.width, sz.height));
+    mvImagePyramid[level] = temp(Rect(EDGE_THRESHOLD, EDGE_THRESHOLD, sz.width, sz.height));
 
     // Compute the resized image
     if (level != 0) {
-      resize(mvImagePyramid[level - 1], mvImagePyramid[level], sz, 0, 0,
-             INTER_LINEAR);
+      resize(mvImagePyramid[level - 1], mvImagePyramid[level], sz, 0, 0, INTER_LINEAR);
 
-      copyMakeBorder(mvImagePyramid[level], temp, EDGE_THRESHOLD,
-                     EDGE_THRESHOLD, EDGE_THRESHOLD, EDGE_THRESHOLD,
+      copyMakeBorder(mvImagePyramid[level], temp, EDGE_THRESHOLD, EDGE_THRESHOLD, EDGE_THRESHOLD, EDGE_THRESHOLD,
                      BORDER_REFLECT_101 + BORDER_ISOLATED);
     } else {
-      copyMakeBorder(image, temp, EDGE_THRESHOLD, EDGE_THRESHOLD,
-                     EDGE_THRESHOLD, EDGE_THRESHOLD, BORDER_REFLECT_101);
+      copyMakeBorder(image, temp, EDGE_THRESHOLD, EDGE_THRESHOLD, EDGE_THRESHOLD, EDGE_THRESHOLD, BORDER_REFLECT_101);
     }
   }
 }
