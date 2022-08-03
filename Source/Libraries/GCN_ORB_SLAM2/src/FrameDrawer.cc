@@ -30,7 +30,7 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
-FrameDrawer::FrameDrawer(Map *pMap) : mpMap(pMap) {
+FrameDrawer::FrameDrawer(Map *pMap, const int Ftype) : mpMap(pMap), mFtype(Ftype) {
   mState = Tracking::SYSTEM_NOT_READY;
   mIm = cv::Mat(480, 640, CV_8UC3, cv::Scalar(0, 0, 0));
 }
@@ -120,7 +120,7 @@ void FrameDrawer::DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText) {
     else
       s << "LOCALIZATION | ";
     int nKFs = mpMap->KeyFramesInMap();
-    int nMPs = mpMap->MapPointsInMap(); //Ftype
+    int nMPs = mpMap->MapPointsInMap(mFtype); 
     s << "KFs: " << nKFs << ", MPs: " << nMPs << ", Matches: " << mnTracked;
     if (mnTrackedVO > 0)
       s << ", + VO matches: " << mnTrackedVO;
@@ -139,23 +139,23 @@ void FrameDrawer::DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText) {
   cv::putText(imText, s.str(), cv::Point(5, imText.rows - 5), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 255, 255), 1, 8);
 }
 
-void FrameDrawer::Update(Tracking *pTracker, const int Ftype) {
+void FrameDrawer::Update(Tracking *pTracker) {
   unique_lock<mutex> lock(mMutex);
   pTracker->mImGray.copyTo(mIm);
-  mvCurrentKeys = pTracker->mCurrentFrame.Channels[Ftype].mvKeys;
+  mvCurrentKeys = pTracker->mCurrentFrame.Channels[mFtype].mvKeys;
   N = mvCurrentKeys.size();
   mvbVO = std::vector<bool>(N, false);
   mvbMap = std::vector<bool>(N, false);
   mbOnlyTracking = pTracker->mbOnlyTracking;
 
   if (pTracker->mLastProcessedState == Tracking::NOT_INITIALIZED) {
-    mvIniKeys = pTracker->mInitialFrame.Channels[Ftype].mvKeys;
+    mvIniKeys = pTracker->mInitialFrame.Channels[mFtype].mvKeys;
     mvIniMatches = pTracker->mvIniMatches; // What is this ?? 
   } else if (pTracker->mLastProcessedState == Tracking::OK) {
     for (int i = 0; i < N; i++) {
-      MapPoint *pMP = pTracker->mCurrentFrame.Channels[Ftype].mvpMapPoints[i];
+      MapPoint *pMP = pTracker->mCurrentFrame.Channels[mFtype].mvpMapPoints[i];
       if (pMP) {
-        if (!pTracker->mCurrentFrame.Channels[Ftype].mvbOutlier[i]) {
+        if (!pTracker->mCurrentFrame.Channels[mFtype].mvbOutlier[i]) {
           if (pMP->Observations() > 0)
             mvbMap[i] = true;
           else

@@ -97,8 +97,7 @@ System::System(const string (&strVocFile)[Ntype], const string &strSettingsFile,
     }
     
     cout << FeatName[i];
-    printf(" Vocabulary loaded in %.2fs\n",
-          (double)(clock() - tStart) / CLOCKS_PER_SEC);
+    printf(" Vocabulary loaded in %.2fs\n", (double)(clock() - tStart) / CLOCKS_PER_SEC);
     cout << endl;
     // Create KeyFrame Database
     mpKeyFrameDatabase[i] = new KeyFrameDatabase(*mpVocabulary[i]);
@@ -111,7 +110,7 @@ System::System(const string (&strVocFile)[Ntype], const string &strSettingsFile,
   
   mpFrameDrawer.resize(Ntype);
   for (int Ftype = 0; Ftype < Ntype; Ftype++)
-    mpFrameDrawer[Ftype] = new FrameDrawer(mpMap);
+    mpFrameDrawer[Ftype] = new FrameDrawer(mpMap, Ftype);
 
   mpMapDrawer = new MapDrawer(mpMap, strSettingsFile);
 

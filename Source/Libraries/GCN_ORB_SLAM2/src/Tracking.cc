@@ -295,7 +295,7 @@ void Tracking::Track() {
       MonocularInitialization(0);
 
     for (int Ftype = 0; Ftype < Ntype; Ftype++)
-      mpFrameDrawer[Ftype]->Update(this, Ftype);
+      mpFrameDrawer[Ftype]->Update(this);
 
     if (mState != OK)
       return;
@@ -431,7 +431,7 @@ void Tracking::Track() {
 
     // Update drawer
     for (int Ftype = 0; Ftype < Ntype; Ftype++)
-      mpFrameDrawer[Ftype]->Update(this, Ftype);
+      mpFrameDrawer[Ftype]->Update(this);
 
     // If tracking were good, check if we insert a keyframe
     if (bOK) {
@@ -867,7 +867,7 @@ void Tracking::StereoInitializationMultiChannels() {
         MapPoint *pNewMP = new MapPoint(x3D, pKFini, mpMap, Ftype);
         pNewMP->AddObservation(pKFini, i);
         pKFini->AddMapPoint(pNewMP, i, Ftype);
-        pNewMP->ComputeDistinctiveDescriptors(); //TO-DO ? Specify the channel ? 
+        pNewMP->ComputeDistinctiveDescriptors(); 
         pNewMP->UpdateNormalAndDepth(); 
         mpMap->AddMapPoint(pNewMP);
 
@@ -876,8 +876,8 @@ void Tracking::StereoInitializationMultiChannels() {
     }
   }
 
-  cout << "New map created with " << mpMap->MapPointsInMap() << " points"
-       << endl;
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    cout << "New map created with " << mpMap->MapPointsInMap(Ftype) << " points for " << Ftype << " Feature Type " << endl;
 
   mpLocalMapper->InsertKeyFrame(pKFini);
 

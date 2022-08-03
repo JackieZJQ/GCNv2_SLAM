@@ -81,12 +81,15 @@ std::vector<KeyFrame *> Map::GetAllKeyFrames() {
 std::vector<MapPoint *> Map::GetAllMapPoints() {
   unique_lock<mutex> lock(mMutexMap);
   std::vector<MapPoint *> allMapPoints;
+  
   int s = 0;
   for (int Ftype = 0; Ftype < Ntype; Ftype++)
     s += mspMapPoints[Ftype].size();
+
   allMapPoints.reserve(s);
   for (int Ftype = 0; Ftype < Ntype; Ftype++)
     allMapPoints.insert(allMapPoints.end(), mspMapPoints[Ftype].begin(), mspMapPoints[Ftype].end());
+    
   return allMapPoints;
 }
 
