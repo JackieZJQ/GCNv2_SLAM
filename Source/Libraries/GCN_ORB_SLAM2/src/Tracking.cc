@@ -49,7 +49,6 @@ Tracking::Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], vector<FrameDrawer 
       mSensor(sensor), 
       mbOnlyTracking(false),
       mbVO(false),
-      mpInitializer(static_cast<Initializer *>(NULL)), 
       mpSystem(pSys),
       mpViewer(NULL), 
       mpFrameDrawer(pFrameDrawer), 
@@ -60,9 +59,14 @@ Tracking::Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], vector<FrameDrawer 
   // Initlize vocabulary vector
   mpVocabulary.resize(Ntype);
   mpKeyFrameDB.resize(Ntype);
+  mpInitializer.resize(Ntype);
+  mvbPrevMatched.resize(Ntype);
+  mvIniMatches.resize(Ntype);
+  mvIniP3D.resize(Ntype);
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
     mpVocabulary[Ftype] = pVoc[Ftype];
     mpKeyFrameDB[Ftype] = pKFDB[Ftype];
+    mpInitializer[Ftype] = static_cast<Initializer *>(NULL);
   }
   
   // Load camera parameters from settings file
@@ -584,53 +588,55 @@ void Tracking::StereoInitialization(const int Ftype) {
 
 void Tracking::MonocularInitialization(const int Ftype) {
 
-  if (!mpInitializer) {
+  if (!mpInitializer[Ftype]) {
+
     // Set Reference Frame
     if (mCurrentFrame.Channels[Ftype].mvKeys.size() > 100) {
       mInitialFrame = Frame(mCurrentFrame);
       mLastFrame = Frame(mCurrentFrame);
-      mvbPrevMatched.resize(mCurrentFrame.Channels[Ftype].mvKeysUn.size());
+      mvbPrevMatched[Ftype].resize(mCurrentFrame.Channels[Ftype].mvKeysUn.size());
       for (size_t i = 0; i < mCurrentFrame.Channels[Ftype].mvKeysUn.size(); i++)
-        mvbPrevMatched[i] = mCurrentFrame.Channels[Ftype].mvKeysUn[i].pt;
+        mvbPrevMatched[Ftype][i] = mCurrentFrame.Channels[Ftype].mvKeysUn[i].pt;
 
-      if (mpInitializer)
-        delete mpInitializer;
+      if (mpInitializer[Ftype])
+        delete mpInitializer[Ftype];
 
-      mpInitializer = new Initializer(Ftype, mCurrentFrame, 1.0, 200);
+      mpInitializer[Ftype] = new Initializer(Ftype, mCurrentFrame, 1.0, 200);
 
-      fill(mvIniMatches.begin(), mvIniMatches.end(), -1);
+      fill(mvIniMatches[Ftype].begin(), mvIniMatches[Ftype].end(), -1);
 
       return;
     }
   } else {
     // Try to initialize
     if ((int)mCurrentFrame.Channels[Ftype].mvKeys.size() <= 100) {
-      delete mpInitializer;
-      mpInitializer = static_cast<Initializer *>(NULL);
-      fill(mvIniMatches.begin(), mvIniMatches.end(), -1);
+      delete mpInitializer[Ftype];
+      mpInitializer[Ftype] = static_cast<Initializer *>(NULL);
+      fill(mvIniMatches[Ftype].begin(), mvIniMatches[Ftype].end(), -1);
       return;
     }
 
     // Find correspondences
     Associater associater(0.9, true);
 
-    int nmatches = associater.SearchForInitialization(Ftype, mInitialFrame, mCurrentFrame, mvbPrevMatched, mvIniMatches, 100);
+    int nmatches = associater.SearchForInitialization(Ftype, mInitialFrame, mCurrentFrame, mvbPrevMatched[Ftype], mvIniMatches[Ftype], 100);
 
     // Check if there are enough correspondences
     if (nmatches < 100) {
-      delete mpInitializer;
-      mpInitializer = static_cast<Initializer *>(NULL);
+      delete mpInitializer[Ftype];
+      mpInitializer[Ftype] = static_cast<Initializer *>(NULL);
       return;
     }
 
     cv::Mat Rcw;                 // Current Camera Rotation
     cv::Mat tcw;                 // Current Camera Translation
-    vector<bool> vbTriangulated; // Triangulated Correspondences (mvIniMatches)
-
-    if (mpInitializer->Initialize(mCurrentFrame, mvIniMatches, Rcw, tcw, mvIniP3D, vbTriangulated, Ftype)) {
-      for (size_t i = 0, iend = mvIniMatches.size(); i < iend; i++) {
-        if (mvIniMatches[i] >= 0 && !vbTriangulated[i]) {
-          mvIniMatches[i] = -1;
+    vector<vector<bool>> vbTriangulated; // Triangulated Correspondences (mvIniMatches)
+    vbTriangulated.resize(Ntype);
+    
+    if (mpInitializer[Ftype]->Initialize(mCurrentFrame, mvIniMatches[Ftype], Rcw, tcw, mvIniP3D[Ftype], vbTriangulated[Ftype], Ftype)) {
+      for (size_t i = 0, iend = mvIniMatches[Ftype].size(); i < iend; i++) {
+        if (mvIniMatches[Ftype][i] >= 0 && !vbTriangulated[Ftype][i]) {
+          mvIniMatches[Ftype][i] = -1;
           nmatches--;
         }
       }
@@ -661,27 +667,27 @@ void Tracking::CreateInitialMapMonocular(const int Ftype) {
   mpMap->AddKeyFrame(pKFcur);
 
   // Create MapPoints and asscoiate to keyframes
-  for (size_t i = 0; i < mvIniMatches.size(); i++) {
-    if (mvIniMatches[i] < 0)
+  for (size_t i = 0; i < mvIniMatches[Ftype].size(); i++) {
+    if (mvIniMatches[Ftype][i] < 0)
       continue;
 
     // Create MapPoint.
-    cv::Mat worldPos(mvIniP3D[i]);
+    cv::Mat worldPos(mvIniP3D[Ftype][i]);
 
     MapPoint *pMP = new MapPoint(worldPos, pKFcur, mpMap, Ftype);
 
     pKFini->AddMapPoint(pMP, i, Ftype);
-    pKFcur->AddMapPoint(pMP, mvIniMatches[i], Ftype);
+    pKFcur->AddMapPoint(pMP, mvIniMatches[Ftype][i], Ftype);
 
     pMP->AddObservation(pKFini, i);
-    pMP->AddObservation(pKFcur, mvIniMatches[i]);
+    pMP->AddObservation(pKFcur, mvIniMatches[Ftype][i]);
 
     pMP->ComputeDistinctiveDescriptors();
     pMP->UpdateNormalAndDepth();
 
     // Fill Current Frame structure
-    mCurrentFrame.Channels[Ftype].mvpMapPoints[mvIniMatches[i]] = pMP;
-    mCurrentFrame.Channels[Ftype].mvbOutlier[mvIniMatches[i]] = false;
+    mCurrentFrame.Channels[Ftype].mvpMapPoints[mvIniMatches[Ftype][i]] = pMP;
+    mCurrentFrame.Channels[Ftype].mvbOutlier[mvIniMatches[Ftype][i]] = false;
 
     // Add to Map
     mpMap->AddMapPoint(pMP);
@@ -777,9 +783,11 @@ void Tracking::Reset() {
   Frame::nNextId = 0;
   mState = NO_IMAGES_YET;
 
-  if (mpInitializer) {
-    delete mpInitializer;
-    mpInitializer = static_cast<Initializer *>(NULL);
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    if (mpInitializer[Ftype]) {
+      delete mpInitializer[Ftype];
+      mpInitializer[Ftype] = static_cast<Initializer *>(NULL);
+    }
   }
 
   mlRelativeFramePoses.clear();
@@ -900,8 +908,8 @@ void Tracking::StereoInitializationMultiChannels() {
 }
 
 void Tracking::MonocularInitializationMultiChannels() {
-
-  if (!mpInitializer.begin()) {
+  
+  if (!mpInitializer[0]) {
 
     // Sum all mappoints
     int nKeys = 0;
@@ -913,7 +921,6 @@ void Tracking::MonocularInitializationMultiChannels() {
       mInitialFrame = Frame(mCurrentFrame);
       mLastFrame = Frame(mCurrentFrame);
 
-      mvbPrevMatched.resize(Ntype);
       for (int Ftype = 0; Ftype < Ntype; Ftype++) {
         mvbPrevMatched[Ftype].resize(mCurrentFrame.Channels[Ftype].mvKeysUn.size());
         for (size_t i = 0; i < mCurrentFrame.Channels[Ftype].mvKeysUn.size(); i++) {
@@ -980,7 +987,7 @@ void Tracking::MonocularInitializationMultiChannels() {
 
     bool flag = false;
     for (int Ftype = 0; Ftype < Ntype; Ftype++) 
-      if(mpInitializer->Initialize(mCurrentFrame, mvIniMatches[Ftype], Rcw, tcw, mvIniP3D[Ftype], vbTriangulated[Ftype], Ftype))
+      if(mpInitializer[Ftype]->Initialize(mCurrentFrame, mvIniMatches[Ftype], Rcw, tcw, mvIniP3D[Ftype], vbTriangulated[Ftype], Ftype))
         flag = true;
     
     for (int Ftype = 0; Ftype < Ntype; Ftype++) {
