@@ -30,10 +30,10 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
-Initializer::Initializer(const int Ftype, const Frame &ReferenceFrame, float sigma, int iterations) {
+Initializer::Initializer(const Frame &ReferenceFrame, float sigma, int iterations) {
   mK = ReferenceFrame.mK.clone();
 
-  mvKeys1 = ReferenceFrame.Channels[Ftype].mvKeysUn;
+  mvKeys1 = ReferenceFrame.Channels[0].mvKeysUn;
 
   mSigma = sigma;
   mSigma2 = sigma * sigma;
@@ -41,10 +41,10 @@ Initializer::Initializer(const int Ftype, const Frame &ReferenceFrame, float sig
 }
 
 bool Initializer::Initialize(const Frame &CurrentFrame, const std::vector<int> &vMatches12, cv::Mat &R21,
-                             cv::Mat &t21, std::vector<cv::Point3f> &vP3D, std::vector<bool> &vbTriangulated, const int Ftype) {
+                             cv::Mat &t21, std::vector<cv::Point3f> &vP3D, std::vector<bool> &vbTriangulated) {
   // Fill structures with current keypoints and matches with reference frame
   // Reference Frame: 1, Current Frame: 2
-  mvKeys2 = CurrentFrame.Channels[Ftype].mvKeysUn;
+  mvKeys2 = CurrentFrame.Channels[0].mvKeysUn;
 
   mvMatches12.clear();
   mvMatches12.reserve(mvKeys2.size());
@@ -93,8 +93,8 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const std::vector<int> &
   float SH, SF;
   cv::Mat H, F;
 
-  thread threadH(&Initializer::FindHomography, this, ref(vbMatchesInliersH), ref(SH), ref(H));
-  thread threadF(&Initializer::FindFundamental, this, ref(vbMatchesInliersF), ref(SF), ref(F));
+  thread threadH(&Initializer::FindHomography, this, mvKeys1, mvKeys2, mvMatches12, ref(vbMatchesInliersH), ref(SH), ref(H));
+  thread threadF(&Initializer::FindFundamental, this, mvKeys1, mvKeys2, mvMatches12, ref(vbMatchesInliersF), ref(SF), ref(F));
 
   // Wait until both threads have finished
   threadH.join();
@@ -106,22 +106,23 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const std::vector<int> &
   // Try to reconstruct from homography or fundamental depending on the ratio
   // (0.40-0.45)
   if (RH > 0.40)
-    return ReconstructH(vbMatchesInliersH, H, mK, R21, t21, vP3D, vbTriangulated, 1.0, 50);
+    return ReconstructH(mvKeys1, mvKeys2, mvMatches12, vbMatchesInliersH, H, mK, R21, t21, vP3D, vbTriangulated, 1.0, 50);
   else // if(pF_HF>0.6)
-    return ReconstructF(vbMatchesInliersF, F, mK, R21, t21, vP3D, vbTriangulated, 1.0, 50);
+    return ReconstructF(mvKeys1, mvKeys2, mvMatches12, vbMatchesInliersF, F, mK, R21, t21, vP3D, vbTriangulated, 1.0, 50);
 
   return false;
 }
 
-void Initializer::FindHomography(std::vector<bool> &vbMatchesInliers, float &score, cv::Mat &H21) {
+void Initializer::FindHomography(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
+                                 std::vector<bool> &vbMatchesInliers, float &score, cv::Mat &H21) {
   // Number of putative matches
-  const int N = mvMatches12.size();
+  const int N = vMatches12.size();
 
   // Normalize coordinates
   std::vector<cv::Point2f> vPn1, vPn2;
   cv::Mat T1, T2;
-  Normalize(mvKeys1, vPn1, T1);
-  Normalize(mvKeys2, vPn2, T2);
+  Normalize(vKeys1, vPn1, T1);
+  Normalize(vKeys2, vPn2, T2);
   cv::Mat T2inv = T2.inv();
 
   // Best Results variables
@@ -141,15 +142,15 @@ void Initializer::FindHomography(std::vector<bool> &vbMatchesInliers, float &sco
     for (std::size_t j = 0; j < 8; j++) {
       int idx = mvSets[it][j];
 
-      vPn1i[j] = vPn1[mvMatches12[idx].first];
-      vPn2i[j] = vPn2[mvMatches12[idx].second];
+      vPn1i[j] = vPn1[vMatches12[idx].first];
+      vPn2i[j] = vPn2[vMatches12[idx].second];
     }
 
     cv::Mat Hn = ComputeH21(vPn1i, vPn2i);
     H21i = T2inv * Hn * T1;
     H12i = H21i.inv();
 
-    currentScore = CheckHomography(H21i, H12i, vbCurrentInliers, mSigma);
+    currentScore = CheckHomography(vKeys1, vKeys2, vMatches12, H21i, H12i, vbCurrentInliers, mSigma);
 
     if (currentScore > score) {
       H21 = H21i.clone();
@@ -159,15 +160,16 @@ void Initializer::FindHomography(std::vector<bool> &vbMatchesInliers, float &sco
   }
 }
 
-void Initializer::FindFundamental(std::vector<bool> &vbMatchesInliers, float &score, cv::Mat &F21) {
+void Initializer::FindFundamental(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
+                                  std::vector<bool> &vbMatchesInliers, float &score, cv::Mat &F21) {
   // Number of putative matches
   const int N = vbMatchesInliers.size();
 
   // Normalize coordinates
   std::vector<cv::Point2f> vPn1, vPn2;
   cv::Mat T1, T2;
-  Normalize(mvKeys1, vPn1, T1);
-  Normalize(mvKeys2, vPn2, T2);
+  Normalize(vKeys1, vPn1, T1);
+  Normalize(vKeys2, vPn2, T2);
   cv::Mat T2t = T2.t();
 
   // Best Results variables
@@ -187,15 +189,15 @@ void Initializer::FindFundamental(std::vector<bool> &vbMatchesInliers, float &sc
     for (int j = 0; j < 8; j++) {
       int idx = mvSets[it][j];
 
-      vPn1i[j] = vPn1[mvMatches12[idx].first];
-      vPn2i[j] = vPn2[mvMatches12[idx].second];
+      vPn1i[j] = vPn1[vMatches12[idx].first];
+      vPn2i[j] = vPn2[vMatches12[idx].second];
     }
 
     cv::Mat Fn = ComputeF21(vPn1i, vPn2i);
 
     F21i = T2t * Fn * T1;
 
-    currentScore = CheckFundamental(F21i, vbCurrentInliers, mSigma);
+    currentScore = CheckFundamental(vKeys1, vKeys2, vMatches12, F21i, vbCurrentInliers, mSigma);
 
     if (currentScore > score) {
       F21 = F21i.clone();
@@ -279,8 +281,9 @@ cv::Mat Initializer::ComputeF21(const std::vector<cv::Point2f> &vP1, const std::
   return u * cv::Mat::diag(w) * vt;
 }
 
-float Initializer::CheckHomography(const cv::Mat &H21, const cv::Mat &H12, std::vector<bool> &vbMatchesInliers, float sigma) {
-  const int N = mvMatches12.size();
+float Initializer::CheckHomography(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
+                                   const cv::Mat &H21, const cv::Mat &H12, std::vector<bool> &vbMatchesInliers, float sigma) {
+  const int N = vMatches12.size();
 
   const float h11 = H21.at<float>(0, 0);
   const float h12 = H21.at<float>(0, 1);
@@ -313,8 +316,8 @@ float Initializer::CheckHomography(const cv::Mat &H21, const cv::Mat &H12, std::
   for (int i = 0; i < N; i++) {
     bool bIn = true;
 
-    const cv::KeyPoint &kp1 = mvKeys1[mvMatches12[i].first];
-    const cv::KeyPoint &kp2 = mvKeys2[mvMatches12[i].second];
+    const cv::KeyPoint &kp1 = vKeys1[vMatches12[i].first];
+    const cv::KeyPoint &kp2 = vKeys2[vMatches12[i].second];
 
     const float u1 = kp1.pt.x;
     const float v1 = kp1.pt.y;
@@ -364,8 +367,9 @@ float Initializer::CheckHomography(const cv::Mat &H21, const cv::Mat &H12, std::
   return score;
 }
 
-float Initializer::CheckFundamental(const cv::Mat &F21, std::vector<bool> &vbMatchesInliers, float sigma) {
-  const int N = mvMatches12.size();
+float Initializer::CheckFundamental(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
+                                    const cv::Mat &F21, std::vector<bool> &vbMatchesInliers, float sigma) {
+  const int N = vMatches12.size();
 
   const float f11 = F21.at<float>(0, 0);
   const float f12 = F21.at<float>(0, 1);
@@ -389,8 +393,8 @@ float Initializer::CheckFundamental(const cv::Mat &F21, std::vector<bool> &vbMat
   for (int i = 0; i < N; i++) {
     bool bIn = true;
 
-    const cv::KeyPoint &kp1 = mvKeys1[mvMatches12[i].first];
-    const cv::KeyPoint &kp2 = mvKeys2[mvMatches12[i].second];
+    const cv::KeyPoint &kp1 = vKeys1[vMatches12[i].first];
+    const cv::KeyPoint &kp2 = vKeys2[vMatches12[i].second];
 
     const float u1 = kp1.pt.x;
     const float v1 = kp1.pt.y;
@@ -442,9 +446,9 @@ float Initializer::CheckFundamental(const cv::Mat &F21, std::vector<bool> &vbMat
   return score;
 }
 
-bool Initializer::ReconstructF(std::vector<bool> &vbMatchesInliers, cv::Mat &F21, cv::Mat &K, cv::Mat &R21,
-                               cv::Mat &t21, std::vector<cv::Point3f> &vP3D, std::vector<bool> &vbTriangulated,
-                               float minParallax, int minTriangulated) {
+bool Initializer::ReconstructF(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
+                               std::vector<bool> &vbMatchesInliers, cv::Mat &F21, cv::Mat &K, cv::Mat &R21, cv::Mat &t21, std::vector<cv::Point3f> &vP3D, 
+                               std::vector<bool> &vbTriangulated, float minParallax, int minTriangulated) {
   int N = 0;
   for (std::size_t i = 0, iend = vbMatchesInliers.size(); i < iend; i++)
     if (vbMatchesInliers[i])
@@ -466,10 +470,10 @@ bool Initializer::ReconstructF(std::vector<bool> &vbMatchesInliers, cv::Mat &F21
   std::vector<bool> vbTriangulated1, vbTriangulated2, vbTriangulated3, vbTriangulated4;
   float parallax1, parallax2, parallax3, parallax4;
 
-  int nGood1 = CheckRT(R1, t1, mvKeys1, mvKeys2, mvMatches12, vbMatchesInliers, K, vP3D1, 4.0 * mSigma2, vbTriangulated1, parallax1);
-  int nGood2 = CheckRT(R2, t1, mvKeys1, mvKeys2, mvMatches12, vbMatchesInliers, K, vP3D2, 4.0 * mSigma2, vbTriangulated2, parallax2);
-  int nGood3 = CheckRT(R1, t2, mvKeys1, mvKeys2, mvMatches12, vbMatchesInliers, K, vP3D3, 4.0 * mSigma2, vbTriangulated3, parallax3);
-  int nGood4 = CheckRT(R2, t2, mvKeys1, mvKeys2, mvMatches12, vbMatchesInliers, K, vP3D4, 4.0 * mSigma2, vbTriangulated4, parallax4);
+  int nGood1 = CheckRT(R1, t1, vKeys1, vKeys2, vMatches12, vbMatchesInliers, K, vP3D1, 4.0 * mSigma2, vbTriangulated1, parallax1);
+  int nGood2 = CheckRT(R2, t1, vKeys1, vKeys2, vMatches12, vbMatchesInliers, K, vP3D2, 4.0 * mSigma2, vbTriangulated2, parallax2);
+  int nGood3 = CheckRT(R1, t2, vKeys1, vKeys2, vMatches12, vbMatchesInliers, K, vP3D3, 4.0 * mSigma2, vbTriangulated3, parallax3);
+  int nGood4 = CheckRT(R2, t2, vKeys1, vKeys2, vMatches12, vbMatchesInliers, K, vP3D4, 4.0 * mSigma2, vbTriangulated4, parallax4);
 
   int maxGood = max(nGood1, max(nGood2, max(nGood3, nGood4)));
 
@@ -536,9 +540,9 @@ bool Initializer::ReconstructF(std::vector<bool> &vbMatchesInliers, cv::Mat &F21
   return false;
 }
 
-bool Initializer::ReconstructH(std::vector<bool> &vbMatchesInliers, cv::Mat &H21, cv::Mat &K, cv::Mat &R21,
-                               cv::Mat &t21, std::vector<cv::Point3f> &vP3D, std::vector<bool> &vbTriangulated,
-                               float minParallax, int minTriangulated) {
+bool Initializer::ReconstructH(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
+                               std::vector<bool> &vbMatchesInliers, cv::Mat &H21, cv::Mat &K, cv::Mat &R21, cv::Mat &t21, std::vector<cv::Point3f> &vP3D, 
+                               std::vector<bool> &vbTriangulated, float minParallax, int minTriangulated) {
   int N = 0;
   for (std::size_t i = 0, iend = vbMatchesInliers.size(); i < iend; i++)
     if (vbMatchesInliers[i])
@@ -664,7 +668,7 @@ bool Initializer::ReconstructH(std::vector<bool> &vbMatchesInliers, cv::Mat &H21
     float parallaxi;
     std::vector<cv::Point3f> vP3Di;
     std::vector<bool> vbTriangulatedi;
-    int nGood = CheckRT(vR[i], vt[i], mvKeys1, mvKeys2, mvMatches12, vbMatchesInliers, K, vP3Di, 4.0 * mSigma2, vbTriangulatedi, parallaxi);
+    int nGood = CheckRT(vR[i], vt[i], vKeys1, vKeys2, vMatches12, vbMatchesInliers, K, vP3Di, 4.0 * mSigma2, vbTriangulatedi, parallaxi);
 
     if (nGood > bestGood) {
       secondBestGood = bestGood;
@@ -690,8 +694,7 @@ bool Initializer::ReconstructH(std::vector<bool> &vbMatchesInliers, cv::Mat &H21
   return false;
 }
 
-void Initializer::Triangulate(const cv::KeyPoint &kp1, const cv::KeyPoint &kp2,
-                              const cv::Mat &P1, const cv::Mat &P2, cv::Mat &x3D) {
+void Initializer::Triangulate(const cv::KeyPoint &kp1, const cv::KeyPoint &kp2, const cv::Mat &P1, const cv::Mat &P2, cv::Mat &x3D) {
   cv::Mat A(4, 4, CV_32F);
 
   A.row(0) = kp1.pt.x * P1.row(2) - P1.row(0);
@@ -857,8 +860,7 @@ int Initializer::CheckRT(const cv::Mat &R, const cv::Mat &t, const std::vector<c
   return nGood;
 }
 
-void Initializer::DecomposeE(const cv::Mat &E, cv::Mat &R1, cv::Mat &R2,
-                             cv::Mat &t) {
+void Initializer::DecomposeE(const cv::Mat &E, cv::Mat &R1, cv::Mat &R2, cv::Mat &t) {
   cv::Mat u, w, vt;
   cv::SVD::compute(E, w, u, vt);
 

@@ -32,27 +32,35 @@ class Initializer {
 
 public:
   // Fix the reference frame
-  Initializer(const int Ftype, const Frame &ReferenceFrame, float sigma = 1.0, int iterations = 200);
+  Initializer(const Frame &ReferenceFrame, float sigma = 1.0, int iterations = 200);
 
   // Computes in parallel a fundamental matrix and a homography. Selects a model and tries to recover the motion and the structure from motion
   bool Initialize(const Frame &CurrentFrame, const std::vector<int> &vMatches12, cv::Mat &R21, cv::Mat &t21, std::vector<cv::Point3f> &vP3D,
-                  std::vector<bool> &vbTriangulated, const int Ftype);
+                  std::vector<bool> &vbTriangulated);
 
 private:
-  void FindHomography(std::vector<bool> &vbMatchesInliers, float &score, cv::Mat &H21);
-  void FindFundamental(std::vector<bool> &vbInliers, float &score, cv::Mat &F21);
+  void FindHomography(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
+                      std::vector<bool> &vbMatchesInliers, float &score, cv::Mat &H21);
+
+  void FindFundamental(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
+                       std::vector<bool> &vbInliers, float &score, cv::Mat &F21);
 
   cv::Mat ComputeH21(const std::vector<cv::Point2f> &vP1, const std::vector<cv::Point2f> &vP2);
+
   cv::Mat ComputeF21(const std::vector<cv::Point2f> &vP1, const std::vector<cv::Point2f> &vP2);
 
-  float CheckHomography(const cv::Mat &H21, const cv::Mat &H12, std::vector<bool> &vbMatchesInliers, float sigma);
+  float CheckHomography(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
+                        const cv::Mat &H21, const cv::Mat &H12, std::vector<bool> &vbMatchesInliers, float sigma);
 
-  float CheckFundamental(const cv::Mat &F21, std::vector<bool> &vbMatchesInliers, float sigma);
+  float CheckFundamental(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
+                         const cv::Mat &F21, std::vector<bool> &vbMatchesInliers, float sigma);
 
-  bool ReconstructF(std::vector<bool> &vbMatchesInliers, cv::Mat &F21, cv::Mat &K, cv::Mat &R21, cv::Mat &t21, std::vector<cv::Point3f> &vP3D,
+  bool ReconstructF(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
+                    std::vector<bool> &vbMatchesInliers, cv::Mat &F21, cv::Mat &K, cv::Mat &R21, cv::Mat &t21, std::vector<cv::Point3f> &vP3D,
                     std::vector<bool> &vbTriangulated, float minParallax, int minTriangulated);
 
-  bool ReconstructH(std::vector<bool> &vbMatchesInliers, cv::Mat &H21, cv::Mat &K, cv::Mat &R21, cv::Mat &t21, std::vector<cv::Point3f> &vP3D,
+  bool ReconstructH(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
+                    std::vector<bool> &vbMatchesInliers, cv::Mat &H21, cv::Mat &K, cv::Mat &R21, cv::Mat &t21, std::vector<cv::Point3f> &vP3D,
                     std::vector<bool> &vbTriangulated, float minParallax, int minTriangulated);
 
   void Triangulate(const cv::KeyPoint &kp1, const cv::KeyPoint &kp2, const cv::Mat &P1, const cv::Mat &P2, cv::Mat &x3D);

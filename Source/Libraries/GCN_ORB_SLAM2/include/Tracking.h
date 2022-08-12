@@ -170,7 +170,7 @@ protected:
 
   
   // Initalization (only for monocular)
-  std::vector<Initializer *> mpInitializer;
+  Initializer *mpInitializer;
 
   // Local Map
   KeyFrame *mpReferenceKF;
