@@ -33,88 +33,139 @@ namespace ORB_SLAM2 {
 Initializer::Initializer(const Frame &ReferenceFrame, float sigma, int iterations) {
   mK = ReferenceFrame.mK.clone();
 
-  mvKeys1 = ReferenceFrame.Channels[0].mvKeysUn;
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    mvKeys1[Ftype] = ReferenceFrame.Channels[Ftype].mvKeysUn;
 
   mSigma = sigma;
   mSigma2 = sigma * sigma;
+
   mMaxIterations = iterations;
 }
 
-bool Initializer::Initialize(const Frame &CurrentFrame, const std::vector<int> &vMatches12, cv::Mat &R21,
+bool Initializer::Initialize(const Frame &CurrentFrame, const std::vector<std::vector<int>> &vMatches12, cv::Mat &R21,
                              cv::Mat &t21, std::vector<cv::Point3f> &vP3D, std::vector<bool> &vbTriangulated) {
   // Fill structures with current keypoints and matches with reference frame
   // Reference Frame: 1, Current Frame: 2
-  mvKeys2 = CurrentFrame.Channels[0].mvKeysUn;
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    mvKeys2[Ftype] = CurrentFrame.Channels[Ftype].mvKeysUn;
 
-  mvMatches12.clear();
-  mvMatches12.reserve(mvKeys2.size());
-  mvbMatched1.resize(mvKeys1.size());
-  for (std::size_t i = 0, iend = vMatches12.size(); i < iend; i++) {
-    if (vMatches12[i] >= 0) {
-      mvMatches12.push_back(make_pair(i, vMatches12[i]));
-      mvbMatched1[i] = true;
-    } else
-      mvbMatched1[i] = false;
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    mvMatches12[Ftype].clear();
+    mvMatches12[Ftype].reserve(mvKeys2[Ftype].size());
+    mvbMatched1[Ftype].resize(mvKeys1[Ftype].size());
   }
 
-  const int N = mvMatches12.size();
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    for (std::size_t i = 0, iend = vMatches12[Ftype].size(); i < iend; i++) {
+      if (vMatches12[Ftype][i] >= 0) {
+        mvMatches12[Ftype].push_back(make_pair(i, vMatches12[Ftype][i]));
+        mvbMatched1[Ftype][i] = true;
+      } else {
+        mvbMatched1[Ftype][i] = false;
+      }
+    }
+  }
+
+  int N[Ntype];
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    N[Ftype] = mvMatches12[Ftype].size();
 
   // Indices for minimum set selection
-  std::vector<std::size_t> vAllIndices;
-  vAllIndices.reserve(N);
-  std::vector<std::size_t> vAvailableIndices;
+  std::vector<std::size_t> vAllIndices[Ntype];
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    vAllIndices[Ftype].reserve(N[Ftype]);
 
-  for (int i = 0; i < N; i++) {
-    vAllIndices.push_back(i);
-  }
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    for (int i = 0; i < N[Ftype]; i++) 
+      vAllIndices[Ftype].push_back(i);
 
+  std::vector<std::size_t> vAvailableIndices[Ntype];
+  
   // Generate sets of 8 points for each RANSAC iteration
-  mvSets = std::vector<std::vector<std::size_t>>(mMaxIterations, std::vector<std::size_t>(8, 0));
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    mvSets[Ftype] = std::vector<std::vector<std::size_t>>(mMaxIterations, std::vector<std::size_t>(8, 0));
 
   DUtils::Random::SeedRandOnce(0);
 
   for (int it = 0; it < mMaxIterations; it++) {
-    vAvailableIndices = vAllIndices;
+    
+    for (int Ftype = 0; Ftype < Ntype; Ftype++)
+      vAvailableIndices[Ftype] = vAllIndices[Ftype];
 
     // Select a minimum set
-    for (std::size_t j = 0; j < 8; j++) {
-      int randi = DUtils::Random::RandomInt(0, vAvailableIndices.size() - 1);
-      int idx = vAvailableIndices[randi];
+    for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+      for (std::size_t j = 0; j < 8; j++) {
+        int randi = DUtils::Random::RandomInt(0, vAvailableIndices[Ftype].size() - 1);
+        int idx = vAvailableIndices[Ftype][randi];
 
-      mvSets[it][j] = idx;
+        mvSets[Ftype][it][j] = idx;
 
-      vAvailableIndices[randi] = vAvailableIndices.back();
-      vAvailableIndices.pop_back();
+        vAvailableIndices[Ftype][randi] = vAvailableIndices[Ftype].back();
+        vAvailableIndices[Ftype].pop_back();
+      }
     }
   }
 
   // Launch threads to compute in parallel a fundamental matrix and a homography
-  std::vector<bool> vbMatchesInliersH, vbMatchesInliersF;
-  float SH, SF;
-  cv::Mat H, F;
+  std::vector<bool> vbMatchesInliersH[Ntype], vbMatchesInliersF[Ntype];
+  float SH[Ntype], SF[Ntype];
+  cv::Mat H[Ntype], F[Ntype];
 
-  thread threadH(&Initializer::FindHomography, this, mvKeys1, mvKeys2, mvMatches12, ref(vbMatchesInliersH), ref(SH), ref(H));
-  thread threadF(&Initializer::FindFundamental, this, mvKeys1, mvKeys2, mvMatches12, ref(vbMatchesInliersF), ref(SF), ref(F));
+  thread findThreadH[Ntype];
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    findThreadH[Ftype] = thread(&Initializer::FindHomography, this, mvKeys1[Ftype], mvKeys2[Ftype], mvMatches12[Ftype], ref(vbMatchesInliersH[Ftype]), ref(SH[Ftype]), ref(H[Ftype]), mvSets[Ftype]);
+  
+  thread findThreadF[Ntype];
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    findThreadF[Ftype] = thread(&Initializer::FindFundamental, this, mvKeys1[Ftype], mvKeys2[Ftype], mvMatches12[Ftype], ref(vbMatchesInliersF[Ftype]), ref(SF[Ftype]), ref(F[Ftype]), mvSets[Ftype]);
 
-  // Wait until both threads have finished
-  threadH.join();
-  threadF.join();
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    findThreadH[Ftype].join();
+
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    findThreadF[Ftype].join();
 
   // Compute ratio of scores
-  float RH = SH / (SH + SF);
+  float RH[Ntype];
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    RH[Ftype] = SH[Ftype] / (SH[Ftype] + SF[Ftype]);
 
   // Try to reconstruct from homography or fundamental depending on the ratio
   // (0.40-0.45)
-  if (RH > 0.40)
-    return ReconstructH(mvKeys1, mvKeys2, mvMatches12, vbMatchesInliersH, H, mK, R21, t21, vP3D, vbTriangulated, 1.0, 50);
-  else // if(pF_HF>0.6)
-    return ReconstructF(mvKeys1, mvKeys2, mvMatches12, vbMatchesInliersF, F, mK, R21, t21, vP3D, vbTriangulated, 1.0, 50);
+  
+  cv::Mat R[Ntype], t[Ntype];
+  std::vector<cv::Point3f> tempv3DP[Ntype];
+  std::vector<bool> tempvbTriangulated[Ntype];
+
+
+  // Method 0ne : if one channel initlize successfully, use that channel to estimate rotation and translation
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    if (RH[Ftype] > 0.40) {
+      bool flag = ReconstructH(mvKeys1[Ftype], mvKeys2[Ftype], mvMatches12[Ftype], vbMatchesInliersH[Ftype], H[Ftype], mK, R[Ftype], t[Ftype], tempv3DP[Ftype], tempvbTriangulated[Ftype], 1.0, 50);
+      vP3D = tempv3DP[Ftype];
+      vbTriangulated = tempvbTriangulated[Ftype];
+      R21 = R[Ftype];
+      t21 = t[Ftype];
+
+      return flag;
+    } else {
+      bool flag = ReconstructF(mvKeys1[Ftype], mvKeys2[Ftype], mvMatches12[Ftype], vbMatchesInliersF[Ftype], F[Ftype], mK, R[Ftype], t[Ftype], tempv3DP[Ftype], tempvbTriangulated[Ftype], 1.0, 50);
+      vP3D = tempv3DP[Ftype];
+      vbTriangulated = tempvbTriangulated[Ftype];
+      R21 = R[Ftype];
+      t21 = t[Ftype];
+
+      return flag;
+
+    }
+      
+  }
 
   return false;
 }
 
 void Initializer::FindHomography(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
-                                 std::vector<bool> &vbMatchesInliers, float &score, cv::Mat &H21) {
+                                 std::vector<bool> &vbMatchesInliers, float &score, cv::Mat &H21, std::vector<std::vector<std::size_t>> vSets) {
   // Number of putative matches
   const int N = vMatches12.size();
 
@@ -140,7 +191,7 @@ void Initializer::FindHomography(const std::vector<cv::KeyPoint> &vKeys1, const 
   for (int it = 0; it < mMaxIterations; it++) {
     // Select a minimum set
     for (std::size_t j = 0; j < 8; j++) {
-      int idx = mvSets[it][j];
+      int idx = vSets[it][j];
 
       vPn1i[j] = vPn1[vMatches12[idx].first];
       vPn2i[j] = vPn2[vMatches12[idx].second];
@@ -161,7 +212,7 @@ void Initializer::FindHomography(const std::vector<cv::KeyPoint> &vKeys1, const 
 }
 
 void Initializer::FindFundamental(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
-                                  std::vector<bool> &vbMatchesInliers, float &score, cv::Mat &F21) {
+                                  std::vector<bool> &vbMatchesInliers, float &score, cv::Mat &F21, std::vector<std::vector<std::size_t>> vSets) {
   // Number of putative matches
   const int N = vbMatchesInliers.size();
 
@@ -187,7 +238,7 @@ void Initializer::FindFundamental(const std::vector<cv::KeyPoint> &vKeys1, const
   for (int it = 0; it < mMaxIterations; it++) {
     // Select a minimum set
     for (int j = 0; j < 8; j++) {
-      int idx = mvSets[it][j];
+      int idx = vSets[it][j];
 
       vPn1i[j] = vPn1[vMatches12[idx].first];
       vPn2i[j] = vPn2[vMatches12[idx].second];
@@ -331,8 +382,7 @@ float Initializer::CheckHomography(const std::vector<cv::KeyPoint> &vKeys1, cons
     const float u2in1 = (h11inv * u2 + h12inv * v2 + h13inv) * w2in1inv;
     const float v2in1 = (h21inv * u2 + h22inv * v2 + h23inv) * w2in1inv;
 
-    const float squareDist1 =
-        (u1 - u2in1) * (u1 - u2in1) + (v1 - v2in1) * (v1 - v2in1);
+    const float squareDist1 = (u1 - u2in1) * (u1 - u2in1) + (v1 - v2in1) * (v1 - v2in1);
 
     const float chiSquare1 = squareDist1 * invSigmaSquare;
 
@@ -348,8 +398,7 @@ float Initializer::CheckHomography(const std::vector<cv::KeyPoint> &vKeys1, cons
     const float u1in2 = (h11 * u1 + h12 * v1 + h13) * w1in2inv;
     const float v1in2 = (h21 * u1 + h22 * v1 + h23) * w1in2inv;
 
-    const float squareDist2 =
-        (u2 - u1in2) * (u2 - u1in2) + (v2 - v1in2) * (v2 - v1in2);
+    const float squareDist2 = (u2 - u1in2) * (u2 - u1in2) + (v2 - v1in2) * (v2 - v1in2);
 
     const float chiSquare2 = squareDist2 * invSigmaSquare;
 

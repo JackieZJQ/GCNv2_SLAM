@@ -31,19 +31,22 @@ class Initializer {
   typedef std::pair<int, int> Match;
 
 public:
+  const static int Ntype = 2;
+
+public:
   // Fix the reference frame
   Initializer(const Frame &ReferenceFrame, float sigma = 1.0, int iterations = 200);
 
   // Computes in parallel a fundamental matrix and a homography. Selects a model and tries to recover the motion and the structure from motion
-  bool Initialize(const Frame &CurrentFrame, const std::vector<int> &vMatches12, cv::Mat &R21, cv::Mat &t21, std::vector<cv::Point3f> &vP3D,
+  bool Initialize(const Frame &CurrentFrame, const std::vector<std::vector<int>> &vMatches12, cv::Mat &R21, cv::Mat &t21, std::vector<cv::Point3f> &vP3D,
                   std::vector<bool> &vbTriangulated);
 
 private:
   void FindHomography(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
-                      std::vector<bool> &vbMatchesInliers, float &score, cv::Mat &H21);
+                      std::vector<bool> &vbMatchesInliers, float &score, cv::Mat &H21, std::vector<std::vector<std::size_t>> vSets);
 
   void FindFundamental(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
-                       std::vector<bool> &vbInliers, float &score, cv::Mat &F21);
+                       std::vector<bool> &vbInliers, float &score, cv::Mat &F21, std::vector<std::vector<std::size_t>> vSets);
 
   cv::Mat ComputeH21(const std::vector<cv::Point2f> &vP1, const std::vector<cv::Point2f> &vP2);
 
@@ -74,14 +77,14 @@ private:
   void DecomposeE(const cv::Mat &E, cv::Mat &R1, cv::Mat &R2, cv::Mat &t);
 
   // Keypoints from Reference Frame (Frame 1)
-  std::vector<cv::KeyPoint> mvKeys1;
+  std::vector<cv::KeyPoint> mvKeys1[Ntype];
 
   // Keypoints from Current Frame (Frame 2)
-  std::vector<cv::KeyPoint> mvKeys2;
+  std::vector<cv::KeyPoint> mvKeys2[Ntype];
 
   // Current Matches from Reference to Current
-  std::vector<Match> mvMatches12;
-  std::vector<bool> mvbMatched1;
+  std::vector<Match> mvMatches12[Ntype];
+  std::vector<bool> mvbMatched1[Ntype];
 
   // Calibration
   cv::Mat mK;
@@ -93,7 +96,7 @@ private:
   int mMaxIterations;
 
   // Ransac sets
-  std::vector<std::vector<std::size_t>> mvSets;
+  std::vector<std::vector<std::size_t>> mvSets[Ntype];
 };
 
 } // namespace ORB_SLAM2
