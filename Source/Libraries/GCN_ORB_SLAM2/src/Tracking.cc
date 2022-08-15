@@ -983,13 +983,16 @@ void Tracking::MonocularInitializationMultiChannels() {
     // vector<bool> tryInit;
     // tryInit.resize(Ntype);
 
-    if (mpInitializer->Initialize(mCurrentFrame, mvIniMatches, Rcw, tcw, mvIniP3D[0], vbTriangulated[0])) {
-      for (size_t i = 0, iend = mvIniMatches[0].size(); i < iend; i++) {
-        if (mvIniMatches[0][i] >= 0 && !vbTriangulated[0][i]) {
-          mvIniMatches[0][i] = -1;
-          nmatches[0]--;
+    if (mpInitializer->Initialize(mCurrentFrame, mvIniMatches, Rcw, tcw, mvIniP3D, vbTriangulated)) {
+      for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+        for (size_t i = 0, iend = mvIniMatches[Ftype].size(); i < iend; i++) {
+          if (mvIniMatches[Ftype][i] >= 0 && !vbTriangulated[Ftype][i]) {
+            mvIniMatches[Ftype][i] = -1;
+            nmatches[Ftype]--;
+          }
         }
       }
+
 
       // Set Frame Poses
       mInitialFrame.SetPose(cv::Mat::eye(4, 4, CV_32F));
@@ -1018,7 +1021,7 @@ void Tracking::CreateInitialMapMonocularMultiChannels() {
   mpMap->AddKeyFrame(pKFcur);
 
   // Create MapPoints and asscoiate to keyframes
-  for (int Ftype = 0; Ftype < 1; Ftype++) {
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
     for (size_t i = 0; i < mvIniMatches[Ftype].size(); i++) {
       if (mvIniMatches[Ftype][i] < 0)
         continue;

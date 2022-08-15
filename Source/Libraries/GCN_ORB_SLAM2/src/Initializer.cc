@@ -43,7 +43,7 @@ Initializer::Initializer(const Frame &ReferenceFrame, float sigma, int iteration
 }
 
 bool Initializer::Initialize(const Frame &CurrentFrame, const std::vector<std::vector<int>> &vMatches12, cv::Mat &R21,
-                             cv::Mat &t21, std::vector<cv::Point3f> &vP3D, std::vector<bool> &vbTriangulated) {
+                             cv::Mat &t21, std::vector<std::vector<cv::Point3f>> &vP3D, std::vector<std::vector<bool>> &vbTriangulated) {
   // Fill structures with current keypoints and matches with reference frame
   // Reference Frame: 1, Current Frame: 2
   for (int Ftype = 0; Ftype < Ntype; Ftype++)
@@ -134,35 +134,68 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const std::vector<std::v
   // (0.40-0.45)
   
   cv::Mat R[Ntype], t[Ntype];
-  std::vector<cv::Point3f> tempv3DP[Ntype];
-  std::vector<bool> tempvbTriangulated[Ntype];
-
+  bool flag[Ntype];
 
   // Method 0ne : if one channel initlize successfully, use that channel to estimate rotation and translation
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
     if (RH[Ftype] > 0.40) {
-      bool flag = ReconstructH(mvKeys1[Ftype], mvKeys2[Ftype], mvMatches12[Ftype], vbMatchesInliersH[Ftype], H[Ftype], mK, R[Ftype], t[Ftype], tempv3DP[Ftype], tempvbTriangulated[Ftype], 1.0, 50);
-      vP3D = tempv3DP[Ftype];
-      vbTriangulated = tempvbTriangulated[Ftype];
-      R21 = R[Ftype];
-      t21 = t[Ftype];
-
-      return flag;
+      flag[Ftype] = ReconstructH(mvKeys1[Ftype], mvKeys2[Ftype], mvMatches12[Ftype], vbMatchesInliersH[Ftype], H[Ftype], mK, R[Ftype], t[Ftype], vP3D[Ftype], vbTriangulated[Ftype], 1.0, 50);
     } else {
-      bool flag = ReconstructF(mvKeys1[Ftype], mvKeys2[Ftype], mvMatches12[Ftype], vbMatchesInliersF[Ftype], F[Ftype], mK, R[Ftype], t[Ftype], tempv3DP[Ftype], tempvbTriangulated[Ftype], 1.0, 50);
-      vP3D = tempv3DP[Ftype];
-      vbTriangulated = tempvbTriangulated[Ftype];
+      flag[Ftype] = ReconstructF(mvKeys1[Ftype], mvKeys2[Ftype], mvMatches12[Ftype], vbMatchesInliersF[Ftype], F[Ftype], mK, R[Ftype], t[Ftype], vP3D[Ftype],vbTriangulated[Ftype], 1.0, 50);
+    }  
+  }
+
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    if (flag[Ftype] == true) {
+      
       R21 = R[Ftype];
       t21 = t[Ftype];
-
-      return flag;
-
-    }
       
+      for (int lFtype = 0; lFtype < Ntype; lFtype++) {
+        if (lFtype != Ftype) {
+          if(RH[Ftype] > 0.40) {
+
+            vbMatchesInliersH[lFtype].clear();
+            vP3D[lFtype].clear();
+            vbTriangulated[lFtype].clear();
+           
+            float parallaxtemp;
+
+            float score = CheckHomography(mvKeys1[lFtype], mvKeys2[lFtype], mvMatches12[lFtype], H[Ftype], H[Ftype].inv(), vbMatchesInliersH[lFtype], mSigma);
+            int nGoods = CheckRT(R21, t21, mvKeys1[lFtype], mvKeys2[lFtype], mvMatches12[lFtype], vbMatchesInliersH[lFtype], mK, vP3D[lFtype], 4.0 * mSigma2, vbTriangulated[lFtype], parallaxtemp);
+
+            // cout << vbTriangulated[Ftype].size() << endl;
+            // cout << vbTriangulated[lFtype].size() << endl;
+
+          } else {
+
+            vbMatchesInliersF[lFtype].clear();
+            vP3D[lFtype].clear();
+            vbTriangulated[lFtype].clear();
+            
+            cout << vbTriangulated[lFtype].size() << endl;
+
+            float parallaxtemp;
+
+            float score = CheckFundamental(mvKeys1[lFtype], mvKeys2[lFtype], mvMatches12[lFtype], F[Ftype], vbMatchesInliersF[lFtype], mSigma);
+            int nGoods = CheckRT(R21, t21, mvKeys1[lFtype], mvKeys2[lFtype], mvMatches12[lFtype], vbMatchesInliersF[lFtype], mK, vP3D[lFtype], 4.0 * mSigma2, vbTriangulated[lFtype], parallaxtemp);
+
+            // cout << vbTriangulated[Ftype].size() << endl;
+            // cout << vbTriangulated[lFtype].size() << endl;
+
+          }
+        }
+      }
+
+      return true;
+    
+    }
   }
 
   return false;
 }
+
+//能够直接用同一个channel算出来的INliers ?吗 似乎不能
 
 void Initializer::FindHomography(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
                                  std::vector<bool> &vbMatchesInliers, float &score, cv::Mat &H21, std::vector<std::vector<std::size_t>> vSets) {

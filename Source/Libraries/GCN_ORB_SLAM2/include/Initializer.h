@@ -38,8 +38,7 @@ public:
   Initializer(const Frame &ReferenceFrame, float sigma = 1.0, int iterations = 200);
 
   // Computes in parallel a fundamental matrix and a homography. Selects a model and tries to recover the motion and the structure from motion
-  bool Initialize(const Frame &CurrentFrame, const std::vector<std::vector<int>> &vMatches12, cv::Mat &R21, cv::Mat &t21, std::vector<cv::Point3f> &vP3D,
-                  std::vector<bool> &vbTriangulated);
+  bool Initialize(const Frame &CurrentFrame, const std::vector<std::vector<int>> &vMatches12, cv::Mat &R21, cv::Mat &t21, std::vector<std::vector<cv::Point3f>> &vP3D, std::vector<std::vector<bool>> &vbTriangulated);
 
 private:
   void FindHomography(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
