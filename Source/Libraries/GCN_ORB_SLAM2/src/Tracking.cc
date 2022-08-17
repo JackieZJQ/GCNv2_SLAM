@@ -921,7 +921,7 @@ void Tracking::MonocularInitializationMultiChannels() {
       nKeysSum += mCurrentFrame.Channels[Ftype].mvKeys.size();
 
     // Set Reference Frame
-    if (mCurrentFrame.Channels[0].mvKeys.size() > 100) {
+    if (nKeysSum > 100) {
       mInitialFrame = Frame(mCurrentFrame);
       mLastFrame = Frame(mCurrentFrame);
 
@@ -949,7 +949,7 @@ void Tracking::MonocularInitializationMultiChannels() {
     for (int Ftype = 0; Ftype < Ntype; Ftype++)
       nKeysSum += mCurrentFrame.Channels[Ftype].mvKeys.size();
 
-    if ((int)mCurrentFrame.Channels[0].mvKeys.size() <= 100) {
+    if (nKeysSum <= 100) {
         delete mpInitializer;
         mpInitializer = static_cast<Initializer *>(NULL);
         for (int Ftype = 0; Ftype < Ntype; Ftype++)
@@ -969,7 +969,7 @@ void Tracking::MonocularInitializationMultiChannels() {
       nmatchesSum += nmatches[Ftype];
     
     // Check if there are enough correspondences
-    if (nmatches[0] < 100) {
+    if (nmatchesSum < 100) {
       delete mpInitializer;
       mpInitializer = static_cast<Initializer *>(NULL);
       return;
@@ -1005,6 +1005,7 @@ void Tracking::MonocularInitializationMultiChannels() {
     }
   }
 }
+
 
 void Tracking::CreateInitialMapMonocularMultiChannels() {
   // Create KeyFrames
