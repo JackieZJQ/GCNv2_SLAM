@@ -195,7 +195,135 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const std::vector<std::v
   return false;
 }
 
-//能够直接用同一个channel算出来的INliers ?吗 似乎不能
+bool Initializer::Initialize2(const Frame &CurrentFrame, const std::vector<std::vector<int>> &vMatches12, cv::Mat &R21,
+                             cv::Mat &t21, std::vector<std::vector<cv::Point3f>> &vP3D, std::vector<std::vector<bool>> &vbTriangulated) {
+  // Fill structures with current keypoints and matches with reference frame
+  // Reference Frame: 1, Current Frame: 2
+
+  std::vector<cv::KeyPoint> vKeys1all;
+  std::vector<cv::KeyPoint> vKeys2all;
+  
+  // std::vector<int> vMatches12all; // May useless ?
+  // std::vector<cv::Point3f> vP3Dall;
+  // std::vector<bool> vbTriangulatedall;
+
+  std::vector<Match> vMatches12all;
+  std::vector<bool> vbMatched1all;
+
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    mvKeys2[Ftype] = CurrentFrame.Channels[Ftype].mvKeysUn;
+  
+  int nKeys1 = 0, nKeys2 = 0;
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    nKeys1 += mvKeys1[Ftype].size();
+    nKeys2 += mvKeys2[Ftype].size();
+  }
+
+  vKeys1all.reserve(nKeys1);
+  vKeys2all.reserve(nKeys2);
+
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    vKeys1all.insert(vKeys1all.end(), mvKeys1[Ftype].begin(), mvKeys1[Ftype].end());
+    vKeys2all.insert(vKeys2all.end(), mvKeys2[Ftype].begin(), mvKeys2[Ftype].end());
+  }
+
+  vMatches12all.reserve(vKeys2all.size());
+  vbMatched1all.resize(vKeys1all.size());
+
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    for (size_t i = 0, iend = vMatches12[Ftype].size(); i < iend; i++) {
+      
+      int miusidx1 = 0;
+      int miusidx2 = 0;
+      for (int lFtype = 0; lFtype < Ftype; lFtype++) {
+        miusidx1 += mvKeys1[lFtype].size();
+        miusidx2 += mvKeys2[lFtype].size();
+      }
+
+      if (vMatches12[Ftype][i] >= 0) {
+        vMatches12all.push_back(make_pair(i + miusidx1, vMatches12[Ftype][i] + miusidx2));
+        vbMatched1all[i + miusidx1] = true;
+      } else {
+        vbMatched1all[i + miusidx1] = false;
+      }
+    }
+  }
+  
+  const int N = vMatches12all.size();
+
+  std::vector<size_t> vAllIndices;
+  vAllIndices.reserve(N);
+  for (int i = 0; i < N; i++)
+    vAllIndices.push_back(i);
+
+  vector<size_t> vAvailableIndices;
+  
+  std::vector<std::vector<std::size_t>> vSetsall = std::vector<std::vector<std::size_t>>(mMaxIterations, std::vector<std::size_t>(8,0));
+
+  DUtils::Random::SeedRandOnce(0);
+
+  for (int it = 0; it < mMaxIterations; it++) {
+    vAvailableIndices = vAllIndices;
+
+    // Select a minimum set
+    for (std::size_t j = 0; j < 8; j++) {
+      int randi = DUtils::Random::RandomInt(0, vAvailableIndices.size() - 1);
+      int idx = vAvailableIndices[randi];
+
+      vSetsall[it][j] = idx;
+
+      vAvailableIndices[randi] = vAvailableIndices.back();
+      vAvailableIndices.pop_back();
+    }
+  }
+
+  std::vector<bool> vbMatchesInliersH, vbMatchesInliersF;
+  float SH, SF;
+  cv::Mat H, F;
+  
+  std::vector<cv::Point3f> vP3Dall;
+  std::vector<bool> vbTriangulatedall;
+  bool flag;
+  
+  thread threadH(&Initializer::FindHomography, this, vKeys1all, vKeys2all, vMatches12all, ref(vbMatchesInliersH), ref(SH), ref(H), vSetsall);
+  thread threadF(&Initializer::FindFundamental, this, vKeys1all, vKeys2all, vMatches12all, ref(vbMatchesInliersF), ref(SF), ref(F), vSetsall);
+
+  threadH.join();
+  threadF.join();
+  
+  float RH = SH / (SH + SF);
+
+  if (RH > 0.40) {
+    flag = ReconstructH(vKeys1all, vKeys2all, vMatches12all, vbMatchesInliersH, H, mK, R21, t21, vP3Dall, vbTriangulatedall, 1.0, 50);
+  } else {
+    flag = ReconstructF(vKeys1all, vKeys2all, vMatches12all, vbMatchesInliersF, F, mK, R21, t21, vP3Dall, vbTriangulatedall, 1.0, 50);
+  }
+
+  if(flag) {
+    for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+      
+      int firstidx = 0;
+      for (int lFtype = 0; lFtype < Ftype; lFtype++)
+        firstidx += mvKeys1[lFtype].size();
+      
+      int lastidx = 0;
+      for (int lFtype = 0; lFtype <= Ftype; lFtype++)
+        lastidx += mvKeys1[lFtype].size();
+
+      std::vector<cv::Point3f>::const_iterator firstvP3D = vP3Dall.begin() + firstidx;
+      std::vector<cv::Point3f>::const_iterator lastvP3D = vP3Dall.begin() + lastidx;
+      vP3D[Ftype] = std::vector<cv::Point3f> (firstvP3D, lastvP3D);
+
+      std::vector<bool>::const_iterator firstvbTri = vbTriangulatedall.begin() + firstidx;
+      std::vector<bool>::const_iterator lastvbTri = vbTriangulatedall.begin() + lastidx;
+      vbTriangulated[Ftype] = std::vector<bool> (firstvbTri, lastvbTri);
+    }
+
+    return true;
+  }  
+
+  return false;
+}
 
 void Initializer::FindHomography(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
                                  std::vector<bool> &vbMatchesInliers, float &score, cv::Mat &H21, std::vector<std::vector<std::size_t>> vSets) {

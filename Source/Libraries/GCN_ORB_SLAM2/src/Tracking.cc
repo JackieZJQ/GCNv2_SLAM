@@ -983,7 +983,7 @@ void Tracking::MonocularInitializationMultiChannels() {
     // vector<bool> tryInit;
     // tryInit.resize(Ntype);
 
-    if (mpInitializer->Initialize(mCurrentFrame, mvIniMatches, Rcw, tcw, mvIniP3D, vbTriangulated)) {
+    if (mpInitializer->Initialize2(mCurrentFrame, mvIniMatches, Rcw, tcw, mvIniP3D, vbTriangulated)) {
       for (int Ftype = 0; Ftype < Ntype; Ftype++) {
         for (size_t i = 0, iend = mvIniMatches[Ftype].size(); i < iend; i++) {
           if (mvIniMatches[Ftype][i] >= 0 && !vbTriangulated[Ftype][i]) {
