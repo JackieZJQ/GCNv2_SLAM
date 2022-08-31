@@ -114,6 +114,9 @@ public:
 
   void Reset();
 
+  // THe Initlized frame ID
+  long unsigned int mInitlizedID;
+
 protected:
   // Main tracking function. It is independent of the input sensor.
   void Track();
@@ -167,6 +170,10 @@ protected:
   // BoW
   std::vector<ORBVocabulary *> mpVocabulary;
   std::vector<KeyFrameDatabase *> mpKeyFrameDB;
+
+  // Time used to record initlize starting time
+  clock_t mtStart;
+
 
   
   // Initalization (only for monocular)

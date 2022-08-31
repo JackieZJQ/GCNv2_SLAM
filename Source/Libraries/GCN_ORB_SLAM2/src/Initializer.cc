@@ -147,7 +147,9 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const std::vector<std::v
 
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
     if (flag[Ftype] == true) {
-      
+
+      cout << Ftype << endl;
+
       R21 = R[Ftype];
       t21 = t[Ftype];
       
@@ -173,7 +175,7 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const std::vector<std::v
             vP3D[lFtype].clear();
             vbTriangulated[lFtype].clear();
             
-            cout << vbTriangulated[lFtype].size() << endl;
+            //cout << vbTriangulated[lFtype].size() << endl;
 
             float parallaxtemp;
 

@@ -1,0 +1,1560 @@
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.42s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.44s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 131 points for 0 Feature Type 
+New map created with 373 points for 1 Feature Type 
+Tracking Initlized in 2.61s
+The initlized frame ID: 6
+The stoped frame ID 26
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.0037736
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.021986
+      mean	0.007099
+    median	0.004767
+       min	0.001643
+      rmse	0.009291
+       sse	0.001727
+       std	0.005995
+
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.43s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.45s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 113 points for 0 Feature Type 
+New map created with 341 points for 1 Feature Type 
+Tracking Initlized in 2.49s
+The initlized frame ID: 6
+The stoped frame ID 26
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.00354967
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.008748
+      mean	0.004740
+    median	0.004526
+       min	0.002365
+      rmse	0.004997
+       sse	0.000499
+       std	0.001582
+
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.47s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.46s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 101 points for 0 Feature Type 
+New map created with 309 points for 1 Feature Type 
+Tracking Initlized in 2.34s
+The initlized frame ID: 5
+The stoped frame ID 25
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.00351312
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.010738
+      mean	0.004309
+    median	0.004196
+       min	0.001373
+      rmse	0.004789
+       sse	0.000459
+       std	0.002089
+
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.44s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.45s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 107 points for 0 Feature Type 
+New map created with 318 points for 1 Feature Type 
+Tracking Initlized in 0.98s
+The initlized frame ID: 2
+The stoped frame ID 22
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.00300796
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.013908
+      mean	0.006087
+    median	0.005169
+       min	0.001455
+      rmse	0.007085
+       sse	0.001004
+       std	0.003626
+
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.43s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.46s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 83 points for 0 Feature Type 
+New map created with 267 points for 1 Feature Type 
+Tracking Initlized in 4.86s
+The initlized frame ID: 12
+The stoped frame ID 32
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.00423424
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.008446
+      mean	0.004484
+    median	0.004546
+       min	0.000961
+      rmse	0.004755
+       sse	0.000452
+       std	0.001582
+
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.42s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.42s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 84 points for 0 Feature Type 
+New map created with 296 points for 1 Feature Type 
+Tracking Initlized in 3.29s
+The initlized frame ID: 8
+The stoped frame ID 28
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.00371887
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.009061
+      mean	0.004939
+    median	0.004313
+       min	0.002615
+      rmse	0.005285
+       sse	0.000559
+       std	0.001879
+
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.45s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.42s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 127 points for 0 Feature Type 
+New map created with 360 points for 1 Feature Type 
+Tracking Initlized in 3.05s
+The initlized frame ID: 7
+The stoped frame ID 27
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.00375329
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.024307
+      mean	0.006266
+    median	0.004260
+       min	0.002339
+      rmse	0.008500
+       sse	0.001445
+       std	0.005743
+
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.43s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.44s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 85 points for 0 Feature Type 
+New map created with 286 points for 1 Feature Type 
+Tracking Initlized in 3.44s
+The initlized frame ID: 8
+The stoped frame ID 28
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.00378266
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.027921
+      mean	0.006936
+    median	0.005580
+       min	0.002138
+      rmse	0.009128
+       sse	0.001666
+       std	0.005934
+
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.41s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.44s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 127 points for 0 Feature Type 
+New map created with 349 points for 1 Feature Type 
+Tracking Initlized in 3.06s
+The initlized frame ID: 7
+The stoped frame ID 27
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.00365303
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.030519
+      mean	0.007310
+    median	0.004991
+       min	0.001155
+      rmse	0.010404
+       sse	0.002165
+       std	0.007403
+
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.43s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.42s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 127 points for 0 Feature Type 
+New map created with 360 points for 1 Feature Type 
+Tracking Initlized in 3.07s
+The initlized frame ID: 7
+The stoped frame ID 27
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.00372499
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.025646
+      mean	0.006968
+    median	0.004787
+       min	0.001161
+      rmse	0.009355
+       sse	0.001750
+       std	0.006242
+
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.41s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.42s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 113 points for 0 Feature Type 
+New map created with 341 points for 1 Feature Type 
+Tracking Initlized in 2.58s
+The initlized frame ID: 6
+The stoped frame ID 26
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.00347494
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.008752
+      mean	0.004892
+    median	0.004475
+       min	0.002682
+      rmse	0.005130
+       sse	0.000526
+       std	0.001543
+
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.41s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.41s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 96 points for 0 Feature Type 
+New map created with 285 points for 1 Feature Type 
+Tracking Initlized in 0.86s
+The initlized frame ID: 2
+The stoped frame ID 22
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.00308893
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.012772
+      mean	0.005849
+    median	0.005432
+       min	0.002049
+      rmse	0.006381
+       sse	0.000814
+       std	0.002551
+
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.41s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.42s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 109 points for 0 Feature Type 
+New map created with 328 points for 1 Feature Type 
+Tracking Initlized in 0.95s
+The initlized frame ID: 2
+The stoped frame ID 22
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.00306813
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.016361
+      mean	0.007729
+    median	0.006433
+       min	0.001359
+      rmse	0.008945
+       sse	0.001600
+       std	0.004504
+
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.41s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.42s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 131 points for 0 Feature Type 
+New map created with 373 points for 1 Feature Type 
+Tracking Initlized in 2.56s
+The initlized frame ID: 6
+The stoped frame ID 26
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.00355157
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.021847
+      mean	0.007076
+    median	0.004769
+       min	0.002019
+      rmse	0.009249
+       sse	0.001711
+       std	0.005957
+
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.42s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.43s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 127 points for 0 Feature Type 
+New map created with 360 points for 1 Feature Type 
+Tracking Initlized in 3.00s
+The initlized frame ID: 7
+The stoped frame ID 27
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.00371775
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.024795
+      mean	0.006976
+    median	0.004760
+       min	0.002541
+      rmse	0.009166
+       sse	0.001680
+       std	0.005946
+
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.43s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.45s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 107 points for 0 Feature Type 
+New map created with 318 points for 1 Feature Type 
+Tracking Initlized in 0.99s
+The initlized frame ID: 2
+The stoped frame ID 22
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.00304398
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.015576
+      mean	0.007009
+    median	0.005072
+       min	0.001766
+      rmse	0.008233
+       sse	0.001356
+       std	0.004320
+
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.44s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.44s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 127 points for 0 Feature Type 
+New map created with 349 points for 1 Feature Type 
+Tracking Initlized in 3.06s
+The initlized frame ID: 7
+The stoped frame ID 27
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.00370168
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.030477
+      mean	0.007323
+    median	0.004992
+       min	0.001004
+      rmse	0.010385
+       sse	0.002157
+       std	0.007363
+
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.41s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.41s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 127 points for 0 Feature Type 
+New map created with 360 points for 1 Feature Type 
+Tracking Initlized in 2.99s
+The initlized frame ID: 7
+The stoped frame ID 27
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.00372192
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.024219
+      mean	0.007124
+    median	0.005769
+       min	0.003083
+      rmse	0.008960
+       sse	0.001606
+       std	0.005434
+
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.43s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.42s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 88 points for 0 Feature Type 
+New map created with 281 points for 1 Feature Type 
+Tracking Initlized in 3.79s
+The initlized frame ID: 9
+The stoped frame ID 29
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.00379509
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.023191
+      mean	0.007902
+    median	0.005174
+       min	0.002258
+      rmse	0.009992
+       sse	0.001997
+       std	0.006115
+
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.41s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.41s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 798
+
+New map created with 107 points for 0 Feature Type 
+New map created with 318 points for 1 Feature Type 
+Tracking Initlized in 1.03s
+The initlized frame ID: 2
+The stoped frame ID 22
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0
+mean tracking time: 0.00295913
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+RPE w.r.t. translation part (m)
+for delta = 1 (frames) using consecutive pairs
+(with Sim(3) Umeyama alignment)
+
+       max	0.025485
+      mean	0.007302
+    median	0.005220
+       min	0.001266
+      rmse	0.009664
+       sse	0.001868
+       std	0.006329
+

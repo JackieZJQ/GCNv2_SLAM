@@ -288,16 +288,40 @@ void Tracking::Track() {
     mState = NOT_INITIALIZED;
   }
 
+  if (mState == LOST) 
+    cout << "The lost frame ID: " << mCurrentFrame.mnId << endl;
+
   mLastProcessedState = mState;
 
   // Get Map Mutex -> Map cannot be changed
   unique_lock<mutex> lock(mpMap->mMutexMapUpdate);
 
   if (mState == NOT_INITIALIZED) {
-    if (mSensor == System::STEREO || mSensor == System::RGBD) 
+    if (mSensor == System::STEREO || mSensor == System::RGBD) {
+      if (mCurrentFrame.mnId == 0) {
+        mtStart = clock();
+      }
+
       StereoInitializationMultiChannels();
-    else
+
+      if (mState == OK) {
+        printf("Tracking Initlized in %.2fs\n", (double)(clock() - mtStart) / CLOCKS_PER_SEC);
+        cout << "The initlized frame ID: " << mCurrentFrame.mnId << endl;
+        mInitlizedID = mCurrentFrame.mnId;
+      }
+    } else {
+      if (mCurrentFrame.mnId == 0) {
+        mtStart = clock();
+      }
+
       MonocularInitializationMultiChannels();
+
+      if (mState == OK) {
+        printf("Tracking Initlized in %.2fs\n", (double)(clock() - mtStart) / CLOCKS_PER_SEC);
+        cout << "The initlized frame ID: " << mCurrentFrame.mnId << endl;
+        mInitlizedID = mCurrentFrame.mnId;
+      }
+    }
 
     for (int Ftype = 0; Ftype < Ntype; Ftype++)
       mpFrameDrawer[Ftype]->Update(this);
@@ -982,8 +1006,9 @@ void Tracking::MonocularInitializationMultiChannels() {
 
     // vector<bool> tryInit;
     // tryInit.resize(Ntype);
-
+  
     if (mpInitializer->Initialize(mCurrentFrame, mvIniMatches, Rcw, tcw, mvIniP3D, vbTriangulated)) {
+      
       for (int Ftype = 0; Ftype < Ntype; Ftype++) {
         for (size_t i = 0, iend = mvIniMatches[Ftype].size(); i < iend; i++) {
           if (mvIniMatches[Ftype][i] >= 0 && !vbTriangulated[Ftype][i]) {
@@ -992,6 +1017,7 @@ void Tracking::MonocularInitializationMultiChannels() {
           }
         }
       }
+
 
 
       // Set Frame Poses

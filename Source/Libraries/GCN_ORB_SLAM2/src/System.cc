@@ -146,6 +146,9 @@ System::System(const string (&strVocFile)[Ntype], const string &strSettingsFile,
 
   mpLoopCloser->SetTracker(mpTracker);
   mpLoopCloser->SetLocalMapper(mpLocalMapper);
+
+  tempStop = false;
+
 }
 
 cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp) {
@@ -286,6 +289,11 @@ cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp) {
   mTrackingState = mpTracker->mState;
   mTrackedMapPoints = mpTracker->mCurrentFrame.Channels[0].mvpMapPoints; //TO-DO Multi Channels
   mTrackedKeyPointsUn = mpTracker->mCurrentFrame.Channels[0].mvKeysUn;
+
+  if (mpTracker->mCurrentFrame.mnId == (mpTracker->mInitlizedID + 20)) {
+    tempStop = true;
+    cout << "The stoped frame ID " << mpTracker->mCurrentFrame.mnId << endl; 
+  }
 
   return Tcw;
 }

@@ -1,0 +1,3327 @@
+-1
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.41s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.42s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 40 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 0.88s
+The initlized frame ID: 2
+The lost frame ID: 697
+The lost frame ID: 701
+The lost frame ID: 705
+The lost frame ID: 706
+The lost frame ID: 709
+The lost frame ID: 712
+The lost frame ID: 715
+The lost frame ID: 716
+The lost frame ID: 717
+The lost frame ID: 719
+The lost frame ID: 722
+The lost frame ID: 723
+The lost frame ID: 729
+The lost frame ID: 730
+The lost frame ID: 733
+The lost frame ID: 734
+The lost frame ID: 735
+The lost frame ID: 741
+The lost frame ID: 742
+The lost frame ID: 743
+The lost frame ID: 745
+The lost frame ID: 746
+The lost frame ID: 747
+The lost frame ID: 748
+The lost frame ID: 749
+The lost frame ID: 750
+The lost frame ID: 752
+The lost frame ID: 876
+The lost frame ID: 877
+The lost frame ID: 878
+The lost frame ID: 879
+The lost frame ID: 880
+The lost frame ID: 881
+The lost frame ID: 883
+The lost frame ID: 884
+The lost frame ID: 885
+The lost frame ID: 886
+The lost frame ID: 887
+The lost frame ID: 888
+The lost frame ID: 889
+The lost frame ID: 890
+The lost frame ID: 891
+The lost frame ID: 892
+The lost frame ID: 893
+The lost frame ID: 894
+The lost frame ID: 895
+The lost frame ID: 896
+The lost frame ID: 897
+The lost frame ID: 898
+The lost frame ID: 900
+The lost frame ID: 902
+The lost frame ID: 903
+The lost frame ID: 904
+The lost frame ID: 905
+The lost frame ID: 906
+The lost frame ID: 907
+The lost frame ID: 908
+The lost frame ID: 909
+The lost frame ID: 910
+The lost frame ID: 911
+The lost frame ID: 912
+The lost frame ID: 913
+The lost frame ID: 914
+The lost frame ID: 915
+The lost frame ID: 916
+The lost frame ID: 917
+The lost frame ID: 918
+The lost frame ID: 919
+The lost frame ID: 920
+The lost frame ID: 921
+The lost frame ID: 922
+The lost frame ID: 923
+The lost frame ID: 997
+The lost frame ID: 1001
+The lost frame ID: 1018
+The lost frame ID: 1122
+The lost frame ID: 1123
+The lost frame ID: 1131
+The lost frame ID: 1168
+The lost frame ID: 1225
+The lost frame ID: 1226
+The lost frame ID: 1227
+The lost frame ID: 1228
+The lost frame ID: 1229
+The lost frame ID: 1230
+The lost frame ID: 1231
+The lost frame ID: 1232
+The lost frame ID: 1233
+The lost frame ID: 1234
+The lost frame ID: 1235
+The lost frame ID: 1236
+The lost frame ID: 1237
+The lost frame ID: 1238
+The lost frame ID: 1239
+The lost frame ID: 1240
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0393933
+mean tracking time: 0.0410499
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+
+-2
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.42s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.43s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 40 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 0.97s
+The initlized frame ID: 2
+The lost frame ID: 701
+The lost frame ID: 707
+The lost frame ID: 709
+The lost frame ID: 711
+The lost frame ID: 712
+The lost frame ID: 713
+The lost frame ID: 714
+The lost frame ID: 715
+The lost frame ID: 716
+The lost frame ID: 717
+The lost frame ID: 718
+The lost frame ID: 719
+The lost frame ID: 720
+The lost frame ID: 721
+The lost frame ID: 722
+The lost frame ID: 723
+The lost frame ID: 724
+The lost frame ID: 725
+The lost frame ID: 726
+The lost frame ID: 727
+The lost frame ID: 728
+The lost frame ID: 729
+The lost frame ID: 730
+The lost frame ID: 731
+The lost frame ID: 732
+The lost frame ID: 733
+The lost frame ID: 734
+The lost frame ID: 735
+The lost frame ID: 736
+The lost frame ID: 738
+The lost frame ID: 739
+The lost frame ID: 740
+The lost frame ID: 741
+The lost frame ID: 742
+The lost frame ID: 743
+The lost frame ID: 744
+The lost frame ID: 745
+The lost frame ID: 746
+The lost frame ID: 747
+The lost frame ID: 748
+The lost frame ID: 749
+The lost frame ID: 750
+The lost frame ID: 751
+The lost frame ID: 752
+The lost frame ID: 753
+The lost frame ID: 754
+The lost frame ID: 755
+The lost frame ID: 997
+The lost frame ID: 1004
+The lost frame ID: 1005
+The lost frame ID: 1006
+The lost frame ID: 1008
+The lost frame ID: 1012
+The lost frame ID: 1013
+The lost frame ID: 1016
+The lost frame ID: 1017
+The lost frame ID: 1018
+The lost frame ID: 1020
+The lost frame ID: 1023
+The lost frame ID: 1026
+The lost frame ID: 1027
+The lost frame ID: 1030
+The lost frame ID: 1033
+The lost frame ID: 1035
+The lost frame ID: 1041
+The lost frame ID: 1055
+The lost frame ID: 1070
+The lost frame ID: 1075
+The lost frame ID: 1080
+The lost frame ID: 1081
+The lost frame ID: 1082
+The lost frame ID: 1083
+The lost frame ID: 1084
+The lost frame ID: 1085
+The lost frame ID: 1087
+The lost frame ID: 1090
+The lost frame ID: 1091
+The lost frame ID: 1094
+The lost frame ID: 1096
+The lost frame ID: 1097
+The lost frame ID: 1100
+The lost frame ID: 1101
+The lost frame ID: 1102
+The lost frame ID: 1103
+The lost frame ID: 1104
+The lost frame ID: 1105
+The lost frame ID: 1106
+The lost frame ID: 1108
+The lost frame ID: 1109
+The lost frame ID: 1110
+The lost frame ID: 1114
+The lost frame ID: 1116
+The lost frame ID: 1117
+The lost frame ID: 1118
+The lost frame ID: 1220
+The lost frame ID: 1221
+The lost frame ID: 1222
+The lost frame ID: 1224
+The lost frame ID: 1225
+The lost frame ID: 1226
+The lost frame ID: 1227
+The lost frame ID: 1228
+The lost frame ID: 1229
+The lost frame ID: 1230
+The lost frame ID: 1231
+The lost frame ID: 1232
+The lost frame ID: 1233
+The lost frame ID: 1235
+The lost frame ID: 1236
+The lost frame ID: 1237
+The lost frame ID: 1238
+The lost frame ID: 1239
+The lost frame ID: 1240
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0382684
+mean tracking time: 0.0398152
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+
+-3
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.41s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.42s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 41 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 1.00s
+The initlized frame ID: 2
+The lost frame ID: 870
+The lost frame ID: 874
+The lost frame ID: 875
+The lost frame ID: 876
+The lost frame ID: 877
+The lost frame ID: 878
+The lost frame ID: 880
+The lost frame ID: 881
+The lost frame ID: 882
+The lost frame ID: 883
+The lost frame ID: 884
+The lost frame ID: 885
+The lost frame ID: 886
+The lost frame ID: 887
+The lost frame ID: 888
+The lost frame ID: 889
+The lost frame ID: 890
+The lost frame ID: 891
+The lost frame ID: 892
+The lost frame ID: 893
+The lost frame ID: 894
+The lost frame ID: 895
+The lost frame ID: 896
+The lost frame ID: 897
+The lost frame ID: 898
+The lost frame ID: 899
+The lost frame ID: 900
+The lost frame ID: 901
+The lost frame ID: 902
+The lost frame ID: 903
+The lost frame ID: 904
+The lost frame ID: 905
+The lost frame ID: 906
+The lost frame ID: 908
+The lost frame ID: 909
+The lost frame ID: 910
+The lost frame ID: 911
+The lost frame ID: 912
+The lost frame ID: 913
+The lost frame ID: 914
+The lost frame ID: 915
+The lost frame ID: 916
+The lost frame ID: 917
+The lost frame ID: 919
+The lost frame ID: 920
+The lost frame ID: 998
+The lost frame ID: 1005
+The lost frame ID: 1009
+The lost frame ID: 1011
+The lost frame ID: 1016
+The lost frame ID: 1019
+The lost frame ID: 1024
+The lost frame ID: 1077
+The lost frame ID: 1079
+The lost frame ID: 1085
+The lost frame ID: 1094
+The lost frame ID: 1096
+The lost frame ID: 1099
+The lost frame ID: 1101
+The lost frame ID: 1105
+The lost frame ID: 1110
+The lost frame ID: 1112
+The lost frame ID: 1116
+The lost frame ID: 1119
+The lost frame ID: 1223
+The lost frame ID: 1224
+The lost frame ID: 1225
+The lost frame ID: 1226
+The lost frame ID: 1227
+The lost frame ID: 1228
+The lost frame ID: 1229
+The lost frame ID: 1230
+The lost frame ID: 1231
+The lost frame ID: 1232
+The lost frame ID: 1233
+The lost frame ID: 1234
+The lost frame ID: 1235
+The lost frame ID: 1236
+The lost frame ID: 1237
+The lost frame ID: 1238
+The lost frame ID: 1239
+The lost frame ID: 1240
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0395165
+mean tracking time: 0.0411111
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+
+-4
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.41s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.42s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 40 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 1.01s
+The initlized frame ID: 2
+The lost frame ID: 876
+The lost frame ID: 878
+The lost frame ID: 879
+The lost frame ID: 880
+The lost frame ID: 881
+The lost frame ID: 882
+The lost frame ID: 884
+The lost frame ID: 886
+The lost frame ID: 887
+The lost frame ID: 888
+The lost frame ID: 889
+The lost frame ID: 890
+The lost frame ID: 891
+The lost frame ID: 892
+The lost frame ID: 893
+The lost frame ID: 894
+The lost frame ID: 895
+The lost frame ID: 896
+The lost frame ID: 897
+The lost frame ID: 898
+The lost frame ID: 899
+The lost frame ID: 900
+The lost frame ID: 901
+The lost frame ID: 902
+The lost frame ID: 903
+The lost frame ID: 904
+The lost frame ID: 905
+The lost frame ID: 906
+The lost frame ID: 907
+The lost frame ID: 908
+The lost frame ID: 909
+The lost frame ID: 910
+The lost frame ID: 911
+The lost frame ID: 912
+The lost frame ID: 914
+The lost frame ID: 915
+The lost frame ID: 917
+The lost frame ID: 918
+The lost frame ID: 919
+The lost frame ID: 920
+The lost frame ID: 921
+The lost frame ID: 1002
+The lost frame ID: 1006
+The lost frame ID: 1007
+The lost frame ID: 1010
+The lost frame ID: 1011
+The lost frame ID: 1014
+The lost frame ID: 1015
+The lost frame ID: 1016
+The lost frame ID: 1018
+The lost frame ID: 1019
+The lost frame ID: 1023
+The lost frame ID: 1113
+The lost frame ID: 1140
+The lost frame ID: 1165
+The lost frame ID: 1167
+The lost frame ID: 1170
+The lost frame ID: 1178
+The lost frame ID: 1183
+The lost frame ID: 1185
+The lost frame ID: 1187
+The lost frame ID: 1188
+The lost frame ID: 1190
+The lost frame ID: 1221
+The lost frame ID: 1223
+The lost frame ID: 1224
+The lost frame ID: 1225
+The lost frame ID: 1227
+The lost frame ID: 1228
+The lost frame ID: 1229
+The lost frame ID: 1231
+The lost frame ID: 1233
+The lost frame ID: 1234
+The lost frame ID: 1235
+The lost frame ID: 1236
+The lost frame ID: 1239
+The lost frame ID: 1240
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0392304
+mean tracking time: 0.0408387
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+
+-5
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.41s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.43s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 39 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 0.93s
+The initlized frame ID: 2
+The lost frame ID: 876
+The lost frame ID: 877
+The lost frame ID: 878
+The lost frame ID: 879
+The lost frame ID: 880
+The lost frame ID: 881
+The lost frame ID: 882
+The lost frame ID: 884
+The lost frame ID: 885
+The lost frame ID: 886
+The lost frame ID: 887
+The lost frame ID: 888
+The lost frame ID: 889
+The lost frame ID: 890
+The lost frame ID: 891
+The lost frame ID: 892
+The lost frame ID: 894
+The lost frame ID: 896
+The lost frame ID: 897
+The lost frame ID: 898
+The lost frame ID: 900
+The lost frame ID: 901
+The lost frame ID: 905
+The lost frame ID: 906
+The lost frame ID: 907
+The lost frame ID: 908
+The lost frame ID: 911
+The lost frame ID: 912
+The lost frame ID: 916
+The lost frame ID: 917
+The lost frame ID: 919
+The lost frame ID: 922
+The lost frame ID: 1005
+The lost frame ID: 1008
+The lost frame ID: 1009
+The lost frame ID: 1010
+The lost frame ID: 1014
+The lost frame ID: 1016
+The lost frame ID: 1020
+The lost frame ID: 1024
+The lost frame ID: 1036
+The lost frame ID: 1112
+The lost frame ID: 1125
+The lost frame ID: 1126
+The lost frame ID: 1132
+The lost frame ID: 1133
+The lost frame ID: 1224
+The lost frame ID: 1225
+The lost frame ID: 1226
+The lost frame ID: 1227
+The lost frame ID: 1228
+The lost frame ID: 1229
+The lost frame ID: 1230
+The lost frame ID: 1231
+The lost frame ID: 1232
+The lost frame ID: 1233
+The lost frame ID: 1234
+The lost frame ID: 1235
+The lost frame ID: 1236
+The lost frame ID: 1237
+The lost frame ID: 1238
+The lost frame ID: 1239
+The lost frame ID: 1240
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0392032
+mean tracking time: 0.0405712
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+
+-6
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.41s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.42s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 41 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 0.95s
+The initlized frame ID: 2
+The lost frame ID: 702
+The lost frame ID: 704
+The lost frame ID: 708
+The lost frame ID: 712
+The lost frame ID: 714
+The lost frame ID: 716
+The lost frame ID: 718
+The lost frame ID: 720
+The lost frame ID: 723
+The lost frame ID: 724
+The lost frame ID: 725
+The lost frame ID: 727
+The lost frame ID: 729
+The lost frame ID: 730
+The lost frame ID: 731
+The lost frame ID: 732
+The lost frame ID: 733
+The lost frame ID: 734
+The lost frame ID: 735
+The lost frame ID: 736
+The lost frame ID: 738
+The lost frame ID: 740
+The lost frame ID: 741
+The lost frame ID: 742
+The lost frame ID: 743
+The lost frame ID: 744
+The lost frame ID: 746
+The lost frame ID: 747
+The lost frame ID: 750
+The lost frame ID: 1009
+The lost frame ID: 1013
+The lost frame ID: 1018
+The lost frame ID: 1025
+The lost frame ID: 1031
+The lost frame ID: 1080
+The lost frame ID: 1085
+The lost frame ID: 1087
+The lost frame ID: 1112
+The lost frame ID: 1115
+The lost frame ID: 1124
+The lost frame ID: 1125
+The lost frame ID: 1127
+The lost frame ID: 1221
+The lost frame ID: 1222
+The lost frame ID: 1223
+The lost frame ID: 1224
+The lost frame ID: 1225
+The lost frame ID: 1226
+The lost frame ID: 1227
+The lost frame ID: 1228
+The lost frame ID: 1229
+The lost frame ID: 1230
+The lost frame ID: 1231
+The lost frame ID: 1232
+The lost frame ID: 1233
+The lost frame ID: 1234
+The lost frame ID: 1235
+The lost frame ID: 1236
+The lost frame ID: 1238
+The lost frame ID: 1239
+The lost frame ID: 1240
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0390086
+mean tracking time: 0.0408848
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+
+-7
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.47s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.46s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 40 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 0.95s
+The initlized frame ID: 2
+The lost frame ID: 698
+The lost frame ID: 700
+The lost frame ID: 702
+The lost frame ID: 704
+The lost frame ID: 705
+The lost frame ID: 707
+The lost frame ID: 708
+The lost frame ID: 709
+The lost frame ID: 710
+The lost frame ID: 711
+The lost frame ID: 712
+The lost frame ID: 713
+The lost frame ID: 715
+The lost frame ID: 716
+The lost frame ID: 719
+The lost frame ID: 720
+The lost frame ID: 721
+The lost frame ID: 722
+The lost frame ID: 723
+The lost frame ID: 724
+The lost frame ID: 728
+The lost frame ID: 729
+The lost frame ID: 730
+The lost frame ID: 731
+The lost frame ID: 732
+The lost frame ID: 733
+The lost frame ID: 736
+The lost frame ID: 739
+The lost frame ID: 740
+The lost frame ID: 741
+The lost frame ID: 742
+The lost frame ID: 743
+The lost frame ID: 744
+The lost frame ID: 746
+The lost frame ID: 747
+The lost frame ID: 749
+The lost frame ID: 750
+The lost frame ID: 751
+The lost frame ID: 752
+The lost frame ID: 753
+The lost frame ID: 754
+The lost frame ID: 755
+The lost frame ID: 756
+The lost frame ID: 757
+The lost frame ID: 758
+The lost frame ID: 759
+The lost frame ID: 760
+The lost frame ID: 876
+The lost frame ID: 877
+The lost frame ID: 878
+The lost frame ID: 879
+The lost frame ID: 880
+The lost frame ID: 881
+The lost frame ID: 882
+The lost frame ID: 883
+The lost frame ID: 884
+The lost frame ID: 885
+The lost frame ID: 886
+The lost frame ID: 887
+The lost frame ID: 888
+The lost frame ID: 890
+The lost frame ID: 891
+The lost frame ID: 892
+The lost frame ID: 893
+The lost frame ID: 894
+The lost frame ID: 895
+The lost frame ID: 896
+The lost frame ID: 897
+The lost frame ID: 898
+The lost frame ID: 899
+The lost frame ID: 900
+The lost frame ID: 901
+The lost frame ID: 902
+The lost frame ID: 903
+The lost frame ID: 904
+The lost frame ID: 905
+The lost frame ID: 906
+The lost frame ID: 907
+The lost frame ID: 908
+The lost frame ID: 909
+The lost frame ID: 910
+The lost frame ID: 911
+The lost frame ID: 998
+The lost frame ID: 1000
+The lost frame ID: 1001
+The lost frame ID: 1003
+The lost frame ID: 1006
+The lost frame ID: 1011
+The lost frame ID: 1012
+The lost frame ID: 1013
+The lost frame ID: 1014
+The lost frame ID: 1015
+The lost frame ID: 1017
+The lost frame ID: 1019
+The lost frame ID: 1020
+The lost frame ID: 1023
+The lost frame ID: 1024
+The lost frame ID: 1027
+The lost frame ID: 1067
+The lost frame ID: 1071
+The lost frame ID: 1077
+The lost frame ID: 1078
+The lost frame ID: 1086
+The lost frame ID: 1089
+The lost frame ID: 1090
+The lost frame ID: 1091
+The lost frame ID: 1094
+The lost frame ID: 1101
+The lost frame ID: 1102
+The lost frame ID: 1105
+The lost frame ID: 1109
+The lost frame ID: 1111
+The lost frame ID: 1116
+The lost frame ID: 1118
+The lost frame ID: 1120
+The lost frame ID: 1121
+The lost frame ID: 1122
+The lost frame ID: 1124
+The lost frame ID: 1222
+The lost frame ID: 1223
+The lost frame ID: 1224
+The lost frame ID: 1225
+The lost frame ID: 1226
+The lost frame ID: 1227
+The lost frame ID: 1228
+The lost frame ID: 1229
+The lost frame ID: 1230
+The lost frame ID: 1231
+The lost frame ID: 1232
+The lost frame ID: 1233
+The lost frame ID: 1234
+The lost frame ID: 1235
+The lost frame ID: 1236
+The lost frame ID: 1237
+The lost frame ID: 1238
+The lost frame ID: 1239
+The lost frame ID: 1240
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0393634
+mean tracking time: 0.0410006
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+
+-8
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.42s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.43s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 38 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 0.98s
+The initlized frame ID: 2
+The lost frame ID: 1003
+The lost frame ID: 1006
+The lost frame ID: 1008
+The lost frame ID: 1014
+The lost frame ID: 1016
+The lost frame ID: 1017
+The lost frame ID: 1019
+The lost frame ID: 1020
+The lost frame ID: 1022
+The lost frame ID: 1031
+The lost frame ID: 1120
+The lost frame ID: 1223
+The lost frame ID: 1224
+The lost frame ID: 1225
+The lost frame ID: 1226
+The lost frame ID: 1227
+The lost frame ID: 1228
+The lost frame ID: 1229
+The lost frame ID: 1230
+The lost frame ID: 1231
+The lost frame ID: 1232
+The lost frame ID: 1233
+The lost frame ID: 1234
+The lost frame ID: 1235
+The lost frame ID: 1236
+The lost frame ID: 1237
+The lost frame ID: 1238
+The lost frame ID: 1239
+The lost frame ID: 1240
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0399653
+mean tracking time: 0.0414899
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+
+-9
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.42s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.47s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 39 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 0.91s
+The initlized frame ID: 2
+The lost frame ID: 701
+The lost frame ID: 703
+The lost frame ID: 704
+The lost frame ID: 705
+The lost frame ID: 706
+The lost frame ID: 707
+The lost frame ID: 708
+The lost frame ID: 709
+The lost frame ID: 710
+The lost frame ID: 712
+The lost frame ID: 713
+The lost frame ID: 714
+The lost frame ID: 715
+The lost frame ID: 716
+The lost frame ID: 717
+The lost frame ID: 718
+The lost frame ID: 719
+The lost frame ID: 720
+The lost frame ID: 721
+The lost frame ID: 722
+The lost frame ID: 723
+The lost frame ID: 724
+The lost frame ID: 725
+The lost frame ID: 726
+The lost frame ID: 727
+The lost frame ID: 728
+The lost frame ID: 729
+The lost frame ID: 730
+The lost frame ID: 732
+The lost frame ID: 733
+The lost frame ID: 734
+The lost frame ID: 736
+The lost frame ID: 737
+The lost frame ID: 738
+The lost frame ID: 739
+The lost frame ID: 740
+The lost frame ID: 742
+The lost frame ID: 743
+The lost frame ID: 744
+The lost frame ID: 745
+The lost frame ID: 746
+The lost frame ID: 747
+The lost frame ID: 748
+The lost frame ID: 749
+The lost frame ID: 750
+The lost frame ID: 751
+The lost frame ID: 752
+The lost frame ID: 1031
+The lost frame ID: 1082
+The lost frame ID: 1111
+The lost frame ID: 1127
+The lost frame ID: 1133
+The lost frame ID: 1224
+The lost frame ID: 1225
+The lost frame ID: 1226
+The lost frame ID: 1227
+The lost frame ID: 1228
+The lost frame ID: 1229
+The lost frame ID: 1230
+The lost frame ID: 1231
+The lost frame ID: 1232
+The lost frame ID: 1233
+The lost frame ID: 1234
+The lost frame ID: 1235
+The lost frame ID: 1236
+The lost frame ID: 1237
+The lost frame ID: 1238
+The lost frame ID: 1239
+The lost frame ID: 1240
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0395025
+mean tracking time: 0.0411196
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+
+-10
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.41s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.43s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 39 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 0.94s
+The initlized frame ID: 2
+The lost frame ID: 709
+The lost frame ID: 710
+The lost frame ID: 711
+The lost frame ID: 712
+The lost frame ID: 713
+The lost frame ID: 714
+The lost frame ID: 715
+The lost frame ID: 716
+The lost frame ID: 717
+The lost frame ID: 718
+The lost frame ID: 719
+The lost frame ID: 720
+The lost frame ID: 721
+The lost frame ID: 722
+The lost frame ID: 723
+The lost frame ID: 724
+The lost frame ID: 725
+The lost frame ID: 726
+The lost frame ID: 727
+The lost frame ID: 728
+The lost frame ID: 729
+The lost frame ID: 730
+The lost frame ID: 731
+The lost frame ID: 732
+The lost frame ID: 733
+The lost frame ID: 735
+The lost frame ID: 736
+The lost frame ID: 737
+The lost frame ID: 738
+The lost frame ID: 739
+The lost frame ID: 740
+The lost frame ID: 741
+The lost frame ID: 742
+The lost frame ID: 743
+The lost frame ID: 744
+The lost frame ID: 745
+The lost frame ID: 746
+The lost frame ID: 747
+The lost frame ID: 748
+The lost frame ID: 750
+The lost frame ID: 751
+The lost frame ID: 752
+The lost frame ID: 753
+The lost frame ID: 754
+The lost frame ID: 755
+The lost frame ID: 756
+The lost frame ID: 935
+The lost frame ID: 937
+The lost frame ID: 1011
+The lost frame ID: 1013
+The lost frame ID: 1015
+The lost frame ID: 1018
+The lost frame ID: 1024
+The lost frame ID: 1111
+The lost frame ID: 1124
+The lost frame ID: 1131
+The lost frame ID: 1132
+The lost frame ID: 1135
+The lost frame ID: 1136
+The lost frame ID: 1137
+The lost frame ID: 1138
+The lost frame ID: 1226
+The lost frame ID: 1227
+The lost frame ID: 1228
+The lost frame ID: 1229
+The lost frame ID: 1230
+The lost frame ID: 1231
+The lost frame ID: 1232
+The lost frame ID: 1233
+The lost frame ID: 1234
+The lost frame ID: 1235
+The lost frame ID: 1236
+The lost frame ID: 1237
+The lost frame ID: 1238
+The lost frame ID: 1239
+The lost frame ID: 1240
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0378963
+mean tracking time: 0.0396832
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+
+-11
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.46s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.44s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 40 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 1.02s
+The initlized frame ID: 2
+The lost frame ID: 713
+The lost frame ID: 714
+The lost frame ID: 716
+The lost frame ID: 717
+The lost frame ID: 720
+The lost frame ID: 721
+The lost frame ID: 723
+The lost frame ID: 728
+The lost frame ID: 730
+The lost frame ID: 732
+The lost frame ID: 733
+The lost frame ID: 735
+The lost frame ID: 737
+The lost frame ID: 739
+The lost frame ID: 740
+The lost frame ID: 741
+The lost frame ID: 742
+The lost frame ID: 744
+The lost frame ID: 747
+The lost frame ID: 748
+The lost frame ID: 749
+The lost frame ID: 753
+The lost frame ID: 997
+The lost frame ID: 1005
+The lost frame ID: 1008
+The lost frame ID: 1010
+The lost frame ID: 1014
+The lost frame ID: 1015
+The lost frame ID: 1031
+The lost frame ID: 1078
+The lost frame ID: 1089
+The lost frame ID: 1121
+The lost frame ID: 1131
+The lost frame ID: 1132
+The lost frame ID: 1134
+The lost frame ID: 1135
+The lost frame ID: 1138
+The lost frame ID: 1140
+The lost frame ID: 1141
+The lost frame ID: 1142
+The lost frame ID: 1144
+The lost frame ID: 1147
+The lost frame ID: 1148
+The lost frame ID: 1153
+The lost frame ID: 1156
+The lost frame ID: 1157
+The lost frame ID: 1158
+The lost frame ID: 1159
+The lost frame ID: 1160
+The lost frame ID: 1161
+The lost frame ID: 1162
+The lost frame ID: 1163
+The lost frame ID: 1167
+The lost frame ID: 1226
+The lost frame ID: 1227
+The lost frame ID: 1228
+The lost frame ID: 1229
+The lost frame ID: 1230
+The lost frame ID: 1231
+The lost frame ID: 1232
+The lost frame ID: 1233
+The lost frame ID: 1234
+The lost frame ID: 1235
+The lost frame ID: 1236
+The lost frame ID: 1237
+The lost frame ID: 1238
+The lost frame ID: 1239
+The lost frame ID: 1240
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0396588
+mean tracking time: 0.0412618
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+
+-12
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.42s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.42s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 39 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 0.93s
+The initlized frame ID: 2
+The lost frame ID: 700
+The lost frame ID: 701
+The lost frame ID: 702
+The lost frame ID: 703
+The lost frame ID: 704
+The lost frame ID: 706
+The lost frame ID: 707
+The lost frame ID: 709
+The lost frame ID: 711
+The lost frame ID: 713
+The lost frame ID: 714
+The lost frame ID: 715
+The lost frame ID: 716
+The lost frame ID: 717
+The lost frame ID: 718
+The lost frame ID: 719
+The lost frame ID: 720
+The lost frame ID: 721
+The lost frame ID: 722
+The lost frame ID: 723
+The lost frame ID: 724
+The lost frame ID: 725
+The lost frame ID: 726
+The lost frame ID: 727
+The lost frame ID: 728
+The lost frame ID: 729
+The lost frame ID: 730
+The lost frame ID: 731
+The lost frame ID: 732
+The lost frame ID: 733
+The lost frame ID: 734
+The lost frame ID: 737
+The lost frame ID: 739
+The lost frame ID: 741
+The lost frame ID: 742
+The lost frame ID: 744
+The lost frame ID: 746
+The lost frame ID: 747
+The lost frame ID: 748
+The lost frame ID: 749
+The lost frame ID: 750
+The lost frame ID: 751
+The lost frame ID: 1121
+The lost frame ID: 1226
+The lost frame ID: 1228
+The lost frame ID: 1229
+The lost frame ID: 1230
+The lost frame ID: 1231
+The lost frame ID: 1232
+The lost frame ID: 1233
+The lost frame ID: 1234
+The lost frame ID: 1235
+The lost frame ID: 1236
+The lost frame ID: 1238
+The lost frame ID: 1239
+The lost frame ID: 1240
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0381265
+mean tracking time: 0.0399947
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+
+-13
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.42s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.46s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 39 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 0.94s
+The initlized frame ID: 2
+The lost frame ID: 695
+The lost frame ID: 697
+The lost frame ID: 703
+The lost frame ID: 704
+The lost frame ID: 707
+The lost frame ID: 712
+The lost frame ID: 713
+The lost frame ID: 714
+The lost frame ID: 715
+The lost frame ID: 716
+The lost frame ID: 717
+The lost frame ID: 718
+The lost frame ID: 719
+The lost frame ID: 720
+The lost frame ID: 721
+The lost frame ID: 722
+The lost frame ID: 723
+The lost frame ID: 724
+The lost frame ID: 725
+The lost frame ID: 726
+The lost frame ID: 727
+The lost frame ID: 729
+The lost frame ID: 732
+The lost frame ID: 733
+The lost frame ID: 734
+The lost frame ID: 735
+The lost frame ID: 736
+The lost frame ID: 737
+The lost frame ID: 739
+The lost frame ID: 740
+The lost frame ID: 741
+The lost frame ID: 742
+The lost frame ID: 743
+The lost frame ID: 744
+The lost frame ID: 745
+The lost frame ID: 746
+The lost frame ID: 747
+The lost frame ID: 748
+The lost frame ID: 749
+The lost frame ID: 750
+The lost frame ID: 751
+The lost frame ID: 752
+The lost frame ID: 753
+The lost frame ID: 754
+The lost frame ID: 755
+The lost frame ID: 756
+The lost frame ID: 757
+The lost frame ID: 758
+The lost frame ID: 759
+The lost frame ID: 760
+The lost frame ID: 761
+The lost frame ID: 762
+The lost frame ID: 763
+The lost frame ID: 764
+The lost frame ID: 765
+The lost frame ID: 766
+The lost frame ID: 767
+The lost frame ID: 768
+The lost frame ID: 769
+The lost frame ID: 770
+The lost frame ID: 771
+The lost frame ID: 772
+The lost frame ID: 773
+The lost frame ID: 774
+The lost frame ID: 775
+The lost frame ID: 776
+The lost frame ID: 876
+The lost frame ID: 878
+The lost frame ID: 879
+The lost frame ID: 880
+The lost frame ID: 881
+The lost frame ID: 883
+The lost frame ID: 884
+The lost frame ID: 885
+The lost frame ID: 886
+The lost frame ID: 887
+The lost frame ID: 888
+The lost frame ID: 889
+The lost frame ID: 890
+The lost frame ID: 891
+The lost frame ID: 892
+The lost frame ID: 893
+The lost frame ID: 894
+The lost frame ID: 895
+The lost frame ID: 896
+The lost frame ID: 897
+The lost frame ID: 898
+The lost frame ID: 899
+The lost frame ID: 900
+The lost frame ID: 901
+The lost frame ID: 902
+The lost frame ID: 903
+The lost frame ID: 905
+The lost frame ID: 906
+The lost frame ID: 907
+The lost frame ID: 909
+The lost frame ID: 910
+The lost frame ID: 911
+The lost frame ID: 912
+The lost frame ID: 913
+The lost frame ID: 914
+The lost frame ID: 915
+The lost frame ID: 1000
+The lost frame ID: 1005
+The lost frame ID: 1008
+The lost frame ID: 1009
+The lost frame ID: 1011
+The lost frame ID: 1018
+The lost frame ID: 1019
+The lost frame ID: 1031
+The lost frame ID: 1073
+The lost frame ID: 1075
+The lost frame ID: 1076
+The lost frame ID: 1100
+The lost frame ID: 1104
+The lost frame ID: 1111
+The lost frame ID: 1122
+The lost frame ID: 1129
+The lost frame ID: 1130
+The lost frame ID: 1131
+The lost frame ID: 1132
+The lost frame ID: 1133
+The lost frame ID: 1134
+The lost frame ID: 1135
+The lost frame ID: 1136
+The lost frame ID: 1137
+The lost frame ID: 1138
+The lost frame ID: 1225
+The lost frame ID: 1226
+The lost frame ID: 1227
+The lost frame ID: 1228
+The lost frame ID: 1229
+The lost frame ID: 1230
+The lost frame ID: 1231
+The lost frame ID: 1232
+The lost frame ID: 1233
+The lost frame ID: 1234
+The lost frame ID: 1235
+The lost frame ID: 1236
+The lost frame ID: 1237
+The lost frame ID: 1238
+The lost frame ID: 1239
+The lost frame ID: 1240
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0391208
+mean tracking time: 0.0410591
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+
+-14
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.41s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.41s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 39 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 0.91s
+The initlized frame ID: 2
+The lost frame ID: 698
+The lost frame ID: 700
+The lost frame ID: 702
+The lost frame ID: 704
+The lost frame ID: 707
+The lost frame ID: 709
+The lost frame ID: 710
+The lost frame ID: 711
+The lost frame ID: 712
+The lost frame ID: 715
+The lost frame ID: 717
+The lost frame ID: 718
+The lost frame ID: 719
+The lost frame ID: 720
+The lost frame ID: 721
+The lost frame ID: 722
+The lost frame ID: 724
+The lost frame ID: 725
+The lost frame ID: 726
+The lost frame ID: 731
+The lost frame ID: 733
+The lost frame ID: 734
+The lost frame ID: 735
+The lost frame ID: 738
+The lost frame ID: 740
+The lost frame ID: 743
+The lost frame ID: 744
+The lost frame ID: 746
+The lost frame ID: 748
+The lost frame ID: 751
+The lost frame ID: 753
+The lost frame ID: 1002
+The lost frame ID: 1005
+The lost frame ID: 1006
+The lost frame ID: 1011
+The lost frame ID: 1013
+The lost frame ID: 1014
+The lost frame ID: 1016
+The lost frame ID: 1020
+The lost frame ID: 1052
+The lost frame ID: 1093
+The lost frame ID: 1121
+The lost frame ID: 1222
+The lost frame ID: 1223
+The lost frame ID: 1224
+The lost frame ID: 1225
+The lost frame ID: 1226
+The lost frame ID: 1227
+The lost frame ID: 1228
+The lost frame ID: 1229
+The lost frame ID: 1230
+The lost frame ID: 1231
+The lost frame ID: 1232
+The lost frame ID: 1233
+The lost frame ID: 1234
+The lost frame ID: 1235
+The lost frame ID: 1236
+The lost frame ID: 1237
+The lost frame ID: 1238
+The lost frame ID: 1239
+The lost frame ID: 1240
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0397935
+mean tracking time: 0.0420244
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+
+-15
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.42s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.42s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 41 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 0.96s
+The initlized frame ID: 2
+The lost frame ID: 702
+The lost frame ID: 704
+The lost frame ID: 707
+The lost frame ID: 708
+The lost frame ID: 710
+The lost frame ID: 711
+The lost frame ID: 712
+The lost frame ID: 713
+The lost frame ID: 716
+The lost frame ID: 717
+The lost frame ID: 719
+The lost frame ID: 720
+The lost frame ID: 721
+The lost frame ID: 723
+The lost frame ID: 724
+The lost frame ID: 725
+The lost frame ID: 726
+The lost frame ID: 727
+The lost frame ID: 729
+The lost frame ID: 730
+The lost frame ID: 734
+The lost frame ID: 736
+The lost frame ID: 739
+The lost frame ID: 740
+The lost frame ID: 743
+The lost frame ID: 746
+The lost frame ID: 748
+The lost frame ID: 751
+The lost frame ID: 752
+The lost frame ID: 754
+The lost frame ID: 756
+The lost frame ID: 757
+The lost frame ID: 879
+The lost frame ID: 881
+The lost frame ID: 882
+The lost frame ID: 883
+The lost frame ID: 885
+The lost frame ID: 886
+The lost frame ID: 887
+The lost frame ID: 888
+The lost frame ID: 889
+The lost frame ID: 890
+The lost frame ID: 891
+The lost frame ID: 892
+The lost frame ID: 893
+The lost frame ID: 894
+The lost frame ID: 895
+The lost frame ID: 896
+The lost frame ID: 897
+The lost frame ID: 898
+The lost frame ID: 900
+The lost frame ID: 901
+The lost frame ID: 902
+The lost frame ID: 903
+The lost frame ID: 905
+The lost frame ID: 906
+The lost frame ID: 908
+The lost frame ID: 909
+The lost frame ID: 910
+The lost frame ID: 1001
+The lost frame ID: 1002
+The lost frame ID: 1007
+The lost frame ID: 1010
+The lost frame ID: 1012
+The lost frame ID: 1013
+The lost frame ID: 1014
+The lost frame ID: 1015
+The lost frame ID: 1032
+The lost frame ID: 1039
+The lost frame ID: 1067
+The lost frame ID: 1068
+The lost frame ID: 1069
+The lost frame ID: 1074
+The lost frame ID: 1076
+The lost frame ID: 1078
+The lost frame ID: 1079
+The lost frame ID: 1080
+The lost frame ID: 1084
+The lost frame ID: 1086
+The lost frame ID: 1087
+The lost frame ID: 1088
+The lost frame ID: 1091
+The lost frame ID: 1093
+The lost frame ID: 1094
+The lost frame ID: 1096
+The lost frame ID: 1098
+The lost frame ID: 1100
+The lost frame ID: 1101
+The lost frame ID: 1105
+The lost frame ID: 1110
+The lost frame ID: 1113
+The lost frame ID: 1119
+The lost frame ID: 1221
+The lost frame ID: 1222
+The lost frame ID: 1223
+The lost frame ID: 1224
+The lost frame ID: 1225
+The lost frame ID: 1226
+The lost frame ID: 1227
+The lost frame ID: 1228
+The lost frame ID: 1229
+The lost frame ID: 1230
+The lost frame ID: 1231
+The lost frame ID: 1232
+The lost frame ID: 1233
+The lost frame ID: 1235
+The lost frame ID: 1236
+The lost frame ID: 1237
+The lost frame ID: 1238
+The lost frame ID: 1239
+The lost frame ID: 1240
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0394512
+mean tracking time: 0.0413306
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+
+-16
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.43s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.44s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 41 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 0.93s
+The initlized frame ID: 2
+The lost frame ID: 697
+The lost frame ID: 698
+The lost frame ID: 699
+The lost frame ID: 700
+The lost frame ID: 702
+The lost frame ID: 703
+The lost frame ID: 704
+The lost frame ID: 705
+The lost frame ID: 706
+The lost frame ID: 707
+The lost frame ID: 708
+The lost frame ID: 709
+The lost frame ID: 710
+The lost frame ID: 712
+The lost frame ID: 715
+The lost frame ID: 717
+The lost frame ID: 718
+The lost frame ID: 719
+The lost frame ID: 720
+The lost frame ID: 721
+The lost frame ID: 722
+The lost frame ID: 723
+The lost frame ID: 724
+The lost frame ID: 725
+The lost frame ID: 726
+The lost frame ID: 728
+The lost frame ID: 729
+The lost frame ID: 730
+The lost frame ID: 733
+The lost frame ID: 734
+The lost frame ID: 735
+The lost frame ID: 736
+The lost frame ID: 737
+The lost frame ID: 738
+The lost frame ID: 739
+The lost frame ID: 740
+The lost frame ID: 741
+The lost frame ID: 742
+The lost frame ID: 743
+The lost frame ID: 744
+The lost frame ID: 745
+The lost frame ID: 746
+The lost frame ID: 747
+The lost frame ID: 748
+The lost frame ID: 749
+The lost frame ID: 750
+The lost frame ID: 751
+The lost frame ID: 1000
+The lost frame ID: 1008
+The lost frame ID: 1010
+The lost frame ID: 1011
+The lost frame ID: 1012
+The lost frame ID: 1014
+The lost frame ID: 1018
+The lost frame ID: 1019
+The lost frame ID: 1021
+The lost frame ID: 1024
+The lost frame ID: 1035
+The lost frame ID: 1036
+The lost frame ID: 1037
+The lost frame ID: 1042
+The lost frame ID: 1084
+The lost frame ID: 1103
+The lost frame ID: 1106
+The lost frame ID: 1121
+The lost frame ID: 1225
+The lost frame ID: 1226
+The lost frame ID: 1227
+The lost frame ID: 1228
+The lost frame ID: 1229
+The lost frame ID: 1230
+The lost frame ID: 1231
+The lost frame ID: 1232
+The lost frame ID: 1233
+The lost frame ID: 1234
+The lost frame ID: 1235
+The lost frame ID: 1236
+The lost frame ID: 1237
+The lost frame ID: 1238
+The lost frame ID: 1239
+The lost frame ID: 1240
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0395214
+mean tracking time: 0.0413738
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+
+-17
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.41s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.41s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 41 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 0.97s
+The initlized frame ID: 2
+The lost frame ID: 700
+The lost frame ID: 701
+The lost frame ID: 702
+The lost frame ID: 704
+The lost frame ID: 705
+The lost frame ID: 706
+The lost frame ID: 709
+The lost frame ID: 710
+The lost frame ID: 712
+The lost frame ID: 713
+The lost frame ID: 714
+The lost frame ID: 715
+The lost frame ID: 716
+The lost frame ID: 717
+The lost frame ID: 718
+The lost frame ID: 719
+The lost frame ID: 720
+The lost frame ID: 721
+The lost frame ID: 722
+The lost frame ID: 723
+The lost frame ID: 724
+The lost frame ID: 725
+The lost frame ID: 727
+The lost frame ID: 728
+The lost frame ID: 729
+The lost frame ID: 730
+The lost frame ID: 732
+The lost frame ID: 733
+The lost frame ID: 734
+The lost frame ID: 735
+The lost frame ID: 736
+The lost frame ID: 737
+The lost frame ID: 739
+The lost frame ID: 741
+The lost frame ID: 743
+The lost frame ID: 744
+The lost frame ID: 745
+The lost frame ID: 747
+The lost frame ID: 749
+The lost frame ID: 750
+The lost frame ID: 751
+The lost frame ID: 752
+The lost frame ID: 1002
+The lost frame ID: 1013
+The lost frame ID: 1014
+The lost frame ID: 1016
+The lost frame ID: 1018
+The lost frame ID: 1085
+The lost frame ID: 1096
+The lost frame ID: 1124
+The lost frame ID: 1126
+The lost frame ID: 1127
+The lost frame ID: 1223
+The lost frame ID: 1224
+The lost frame ID: 1225
+The lost frame ID: 1226
+The lost frame ID: 1227
+The lost frame ID: 1228
+The lost frame ID: 1229
+The lost frame ID: 1230
+The lost frame ID: 1231
+The lost frame ID: 1232
+The lost frame ID: 1233
+The lost frame ID: 1234
+The lost frame ID: 1235
+The lost frame ID: 1236
+The lost frame ID: 1237
+The lost frame ID: 1238
+The lost frame ID: 1239
+The lost frame ID: 1240
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0388295
+mean tracking time: 0.0406587
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+
+-18
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.41s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.43s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 39 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 0.94s
+The initlized frame ID: 2
+The lost frame ID: 696
+The lost frame ID: 697
+The lost frame ID: 699
+The lost frame ID: 702
+The lost frame ID: 703
+The lost frame ID: 705
+The lost frame ID: 706
+The lost frame ID: 708
+The lost frame ID: 709
+The lost frame ID: 713
+The lost frame ID: 714
+The lost frame ID: 715
+The lost frame ID: 716
+The lost frame ID: 717
+The lost frame ID: 718
+The lost frame ID: 719
+The lost frame ID: 720
+The lost frame ID: 721
+The lost frame ID: 723
+The lost frame ID: 724
+The lost frame ID: 725
+The lost frame ID: 726
+The lost frame ID: 727
+The lost frame ID: 728
+The lost frame ID: 729
+The lost frame ID: 731
+The lost frame ID: 732
+The lost frame ID: 733
+The lost frame ID: 734
+The lost frame ID: 735
+The lost frame ID: 736
+The lost frame ID: 737
+The lost frame ID: 738
+The lost frame ID: 739
+The lost frame ID: 740
+The lost frame ID: 741
+The lost frame ID: 742
+The lost frame ID: 743
+The lost frame ID: 744
+The lost frame ID: 745
+The lost frame ID: 746
+The lost frame ID: 747
+The lost frame ID: 748
+The lost frame ID: 749
+The lost frame ID: 750
+The lost frame ID: 751
+The lost frame ID: 752
+The lost frame ID: 753
+The lost frame ID: 754
+The lost frame ID: 755
+The lost frame ID: 756
+The lost frame ID: 757
+The lost frame ID: 758
+The lost frame ID: 759
+The lost frame ID: 760
+The lost frame ID: 761
+The lost frame ID: 762
+The lost frame ID: 763
+The lost frame ID: 764
+The lost frame ID: 876
+The lost frame ID: 880
+The lost frame ID: 881
+The lost frame ID: 883
+The lost frame ID: 884
+The lost frame ID: 885
+The lost frame ID: 886
+The lost frame ID: 887
+The lost frame ID: 888
+The lost frame ID: 889
+The lost frame ID: 890
+The lost frame ID: 891
+The lost frame ID: 892
+The lost frame ID: 894
+The lost frame ID: 895
+The lost frame ID: 896
+The lost frame ID: 897
+The lost frame ID: 898
+The lost frame ID: 899
+The lost frame ID: 900
+The lost frame ID: 901
+The lost frame ID: 902
+The lost frame ID: 904
+The lost frame ID: 905
+The lost frame ID: 907
+The lost frame ID: 908
+The lost frame ID: 910
+The lost frame ID: 911
+The lost frame ID: 912
+The lost frame ID: 913
+The lost frame ID: 914
+The lost frame ID: 915
+The lost frame ID: 917
+The lost frame ID: 920
+The lost frame ID: 921
+The lost frame ID: 932
+The lost frame ID: 934
+The lost frame ID: 935
+The lost frame ID: 936
+The lost frame ID: 937
+The lost frame ID: 938
+The lost frame ID: 997
+The lost frame ID: 1008
+The lost frame ID: 1013
+The lost frame ID: 1017
+The lost frame ID: 1018
+The lost frame ID: 1020
+The lost frame ID: 1021
+The lost frame ID: 1023
+The lost frame ID: 1031
+The lost frame ID: 1075
+The lost frame ID: 1078
+The lost frame ID: 1080
+The lost frame ID: 1082
+The lost frame ID: 1084
+The lost frame ID: 1085
+The lost frame ID: 1093
+The lost frame ID: 1105
+The lost frame ID: 1111
+The lost frame ID: 1118
+The lost frame ID: 1222
+The lost frame ID: 1223
+The lost frame ID: 1224
+The lost frame ID: 1226
+The lost frame ID: 1227
+The lost frame ID: 1228
+The lost frame ID: 1229
+The lost frame ID: 1230
+The lost frame ID: 1231
+The lost frame ID: 1233
+The lost frame ID: 1234
+The lost frame ID: 1235
+The lost frame ID: 1236
+The lost frame ID: 1237
+The lost frame ID: 1238
+The lost frame ID: 1239
+The lost frame ID: 1240
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0397093
+mean tracking time: 0.0412567
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+
+-19
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.41s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.42s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 40 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 0.95s
+The initlized frame ID: 2
+The lost frame ID: 697
+The lost frame ID: 704
+The lost frame ID: 707
+The lost frame ID: 708
+The lost frame ID: 709
+The lost frame ID: 712
+The lost frame ID: 715
+The lost frame ID: 716
+The lost frame ID: 717
+The lost frame ID: 718
+The lost frame ID: 719
+The lost frame ID: 721
+The lost frame ID: 722
+The lost frame ID: 723
+The lost frame ID: 725
+The lost frame ID: 727
+The lost frame ID: 728
+The lost frame ID: 729
+The lost frame ID: 731
+The lost frame ID: 732
+The lost frame ID: 736
+The lost frame ID: 738
+The lost frame ID: 739
+The lost frame ID: 740
+The lost frame ID: 741
+The lost frame ID: 742
+The lost frame ID: 743
+The lost frame ID: 744
+The lost frame ID: 745
+The lost frame ID: 746
+The lost frame ID: 747
+The lost frame ID: 748
+The lost frame ID: 749
+The lost frame ID: 750
+The lost frame ID: 751
+The lost frame ID: 752
+The lost frame ID: 753
+The lost frame ID: 754
+The lost frame ID: 755
+The lost frame ID: 756
+The lost frame ID: 757
+The lost frame ID: 1005
+The lost frame ID: 1009
+The lost frame ID: 1011
+The lost frame ID: 1013
+The lost frame ID: 1017
+The lost frame ID: 1020
+The lost frame ID: 1022
+The lost frame ID: 1023
+The lost frame ID: 1026
+The lost frame ID: 1035
+The lost frame ID: 1065
+The lost frame ID: 1072
+The lost frame ID: 1077
+The lost frame ID: 1083
+The lost frame ID: 1085
+The lost frame ID: 1111
+The lost frame ID: 1113
+The lost frame ID: 1116
+The lost frame ID: 1120
+The lost frame ID: 1121
+The lost frame ID: 1122
+The lost frame ID: 1123
+The lost frame ID: 1124
+The lost frame ID: 1125
+The lost frame ID: 1126
+The lost frame ID: 1127
+The lost frame ID: 1128
+The lost frame ID: 1129
+The lost frame ID: 1130
+The lost frame ID: 1131
+The lost frame ID: 1132
+The lost frame ID: 1133
+The lost frame ID: 1134
+The lost frame ID: 1135
+The lost frame ID: 1136
+The lost frame ID: 1137
+The lost frame ID: 1138
+The lost frame ID: 1139
+The lost frame ID: 1140
+The lost frame ID: 1141
+The lost frame ID: 1142
+The lost frame ID: 1143
+The lost frame ID: 1144
+The lost frame ID: 1145
+The lost frame ID: 1146
+The lost frame ID: 1147
+The lost frame ID: 1148
+The lost frame ID: 1149
+The lost frame ID: 1150
+The lost frame ID: 1151
+The lost frame ID: 1152
+The lost frame ID: 1153
+The lost frame ID: 1154
+The lost frame ID: 1155
+The lost frame ID: 1156
+The lost frame ID: 1157
+The lost frame ID: 1158
+The lost frame ID: 1159
+The lost frame ID: 1160
+The lost frame ID: 1161
+The lost frame ID: 1162
+The lost frame ID: 1163
+The lost frame ID: 1164
+The lost frame ID: 1165
+The lost frame ID: 1166
+The lost frame ID: 1167
+The lost frame ID: 1168
+The lost frame ID: 1169
+The lost frame ID: 1170
+The lost frame ID: 1171
+The lost frame ID: 1172
+The lost frame ID: 1173
+The lost frame ID: 1174
+The lost frame ID: 1175
+The lost frame ID: 1176
+The lost frame ID: 1177
+The lost frame ID: 1178
+The lost frame ID: 1179
+The lost frame ID: 1180
+The lost frame ID: 1181
+The lost frame ID: 1182
+The lost frame ID: 1183
+The lost frame ID: 1184
+The lost frame ID: 1185
+The lost frame ID: 1186
+The lost frame ID: 1187
+The lost frame ID: 1188
+The lost frame ID: 1189
+The lost frame ID: 1190
+The lost frame ID: 1191
+The lost frame ID: 1192
+The lost frame ID: 1193
+The lost frame ID: 1194
+The lost frame ID: 1195
+The lost frame ID: 1196
+The lost frame ID: 1197
+The lost frame ID: 1198
+The lost frame ID: 1199
+The lost frame ID: 1200
+The lost frame ID: 1201
+The lost frame ID: 1202
+The lost frame ID: 1203
+The lost frame ID: 1204
+The lost frame ID: 1205
+The lost frame ID: 1206
+The lost frame ID: 1207
+The lost frame ID: 1208
+The lost frame ID: 1209
+The lost frame ID: 1210
+The lost frame ID: 1211
+The lost frame ID: 1212
+The lost frame ID: 1213
+The lost frame ID: 1214
+The lost frame ID: 1215
+The lost frame ID: 1216
+The lost frame ID: 1217
+The lost frame ID: 1218
+The lost frame ID: 1219
+The lost frame ID: 1220
+The lost frame ID: 1221
+The lost frame ID: 1222
+The lost frame ID: 1223
+The lost frame ID: 1224
+The lost frame ID: 1225
+The lost frame ID: 1226
+The lost frame ID: 1227
+The lost frame ID: 1228
+The lost frame ID: 1229
+The lost frame ID: 1230
+The lost frame ID: 1231
+The lost frame ID: 1232
+The lost frame ID: 1233
+The lost frame ID: 1234
+The lost frame ID: 1235
+The lost frame ID: 1236
+The lost frame ID: 1237
+The lost frame ID: 1238
+The lost frame ID: 1239
+The lost frame ID: 1240
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0390927
+mean tracking time: 0.0407153
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+
+-20
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Monocular
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/orb/ORBvoc.bin
+This could take a while...
+Loading ORB Vocabulary in binary mode.
+ORB Vocabulary loaded in 0.42s
+
+
+Loading Vocabulary : /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/GCNvoc.bin
+This could take a while...
+Loading GCN Vocabulary in binary mode.
+GCN Vocabulary loaded in 0.42s
+
+
+Camera Parameters: 
+- fx: 517.306
+- fy: 516.469
+- cx: 318.643
+- cy: 255.314
+- k1: 0.262383
+- k2: -0.953104
+- k3: 1.16331
+- p1: -0.005358
+- p2: 0.002628
+- fps: 30
+- color order: RGB (ignored if grayscale)
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+Loading /home/nanshan/Softwares/GCNv2_SLAM/Source/../Install/var/lib/gcnv2_slam/gcn/gcn2_640x480.pt
+Loaded
+
+ORB Extractor Parameters: 
+- Number of Features: 1000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+-------
+Start processing sequence ...
+Images in the sequence: 1242
+
+1
+New map created with 39 points for 0 Feature Type 
+New map created with 289 points for 1 Feature Type 
+Tracking Initlized in 0.99s
+The initlized frame ID: 2
+The lost frame ID: 696
+The lost frame ID: 698
+The lost frame ID: 700
+The lost frame ID: 702
+The lost frame ID: 704
+The lost frame ID: 706
+The lost frame ID: 708
+The lost frame ID: 709
+The lost frame ID: 711
+The lost frame ID: 712
+The lost frame ID: 714
+The lost frame ID: 715
+The lost frame ID: 716
+The lost frame ID: 718
+The lost frame ID: 719
+The lost frame ID: 720
+The lost frame ID: 721
+The lost frame ID: 722
+The lost frame ID: 723
+The lost frame ID: 724
+The lost frame ID: 725
+The lost frame ID: 726
+The lost frame ID: 727
+The lost frame ID: 728
+The lost frame ID: 730
+The lost frame ID: 732
+The lost frame ID: 733
+The lost frame ID: 735
+The lost frame ID: 737
+The lost frame ID: 739
+The lost frame ID: 740
+The lost frame ID: 741
+The lost frame ID: 742
+The lost frame ID: 743
+The lost frame ID: 745
+The lost frame ID: 746
+The lost frame ID: 747
+The lost frame ID: 749
+The lost frame ID: 751
+The lost frame ID: 753
+The lost frame ID: 754
+The lost frame ID: 755
+The lost frame ID: 1002
+The lost frame ID: 1004
+The lost frame ID: 1006
+The lost frame ID: 1011
+The lost frame ID: 1013
+The lost frame ID: 1031
+The lost frame ID: 1211
+The lost frame ID: 1218
+The lost frame ID: 1221
+The lost frame ID: 1223
+The lost frame ID: 1224
+The lost frame ID: 1225
+The lost frame ID: 1227
+The lost frame ID: 1229
+The lost frame ID: 1230
+The lost frame ID: 1232
+The lost frame ID: 1233
+The lost frame ID: 1241
+System::StopViewer()
+System::StopViewer() done
+Viewer thread finished.
+System Shutdown
+-------
+
+median tracking time: 0.0380715
+mean tracking time: 0.0397569
+
+Saving camera trajectory to result.txt ...
+
+trajectory saved!
+All done
+APE w.r.t. translation part (m)
+(with Sim(3) Umeyama alignment)
+
+       max	0.596690
+      mean	0.191453
+    median	0.135460
+       min	0.055688
+      rmse	0.231340
+       sse	62.401996
+       std	0.129860
+

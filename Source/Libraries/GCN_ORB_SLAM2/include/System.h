@@ -130,6 +130,9 @@ public:
 
   bool isFinished();
 
+  // temp stop value
+  bool tempStop;
+
 private:
   // Input sensor
   eSensor mSensor;

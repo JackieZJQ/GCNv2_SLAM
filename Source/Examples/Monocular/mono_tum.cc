@@ -49,6 +49,7 @@ int main(int argc, char **argv) {
   LoadImages(strFile, vstrImageFilenames, vTimestamps);
 
   int nImages = vstrImageFilenames.size();
+  //int nImages = 20;
 
   // Create SLAM system. It initializes all system threads and gets ready to
   // process frames.
@@ -96,6 +97,9 @@ int main(int argc, char **argv) {
       if (SLAM.isFinished() == true) {
         break;
       }
+
+      if (SLAM.tempStop == true) 
+        break;
 
       chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
 

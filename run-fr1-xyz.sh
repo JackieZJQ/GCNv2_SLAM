@@ -1,0 +1,1 @@
+FULL_RESOLUTION=1 ./Build/Release/Source/Examples/Monocular/mono_tum TUM1.yaml ../Datasets/TUM/rgbd_dataset_freiburg1_xyz result.txt
