@@ -290,10 +290,10 @@ cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp) {
   mTrackedMapPoints = mpTracker->mCurrentFrame.Channels[0].mvpMapPoints; //TO-DO Multi Channels
   mTrackedKeyPointsUn = mpTracker->mCurrentFrame.Channels[0].mvKeysUn;
 
-  if (mpTracker->mCurrentFrame.mnId == (mpTracker->mInitlizedID + 20)) {
-    tempStop = true;
-    cout << "The stoped frame ID " << mpTracker->mCurrentFrame.mnId << endl; 
-  }
+  // if (mpTracker->mCurrentFrame.mnId == (mpTracker->mInitlizedID + 20)) {
+  //   tempStop = true;
+  //   cout << "The stoped frame ID " << mpTracker->mCurrentFrame.mnId << endl; 
+  // }
 
   return Tcw;
 }
